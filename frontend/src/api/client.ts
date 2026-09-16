@@ -1,7 +1,7 @@
 import axios, { type AxiosError } from "axios";
 
 const client = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
   timeout: 10_000,
   headers: {
     "Content-Type": "application/json",
@@ -10,7 +10,7 @@ const client = axios.create({
 
 client.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
-  if (token) {
+  if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
@@ -56,4 +56,6 @@ client.interceptors.response.use(
   }
 );
 
+// We keep both export formats to satisfy imports from both branches until we refactor
+export const apiClient = client;
 export default client;

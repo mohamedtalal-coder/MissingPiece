@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -50,7 +51,7 @@
     --text-label-md--line-height: 1rem;
     --text-label-lg: 1rem;
     --text-label-lg--line-height: 1.25rem;
-    
+
     --color-surface-container-highest: #e3d9d7;
     --color-inverse-surface: #362f2d;
     --color-inverse-on-surface: #fbf2f0;
@@ -73,4 +74,50 @@
 @keyframes pulse-slow {
     0%, 100% { opacity: 1; }
     50% { opacity: .5; }
+}
+
+/* Styles from Frontend branch */
+:root {
+  --bg-main: #090614;
+  --bg-card: rgba(26, 18, 51, 0.4);
+  --border-glow: rgba(147, 51, 234, 0.3);
+  --purple-glow: rgba(168, 85, 247, 0.15);
+}
+
+h1, h2, h3, .font-serif {
+  font-family: 'Cinzel', serif;
+}
+
+.purple-glow-card {
+  background: linear-gradient(135deg, rgba(35, 20, 68, 0.6) 0%, rgba(15, 11, 30, 0.8) 100%);
+  border: 1px solid rgba(147, 51, 234, 0.25);
+  box-shadow: 0 10px 30px -10px rgba(124, 58, 237, 0.2);
+  backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+}
+
+.purple-glow-card:hover {
+  border-color: rgba(168, 85, 247, 0.6);
+  box-shadow: 0 15px 40px -10px rgba(147, 51, 234, 0.4);
+  transform: translateY(-3px);
+}
+
+.text-gradient-purple {
+  background: linear-gradient(135deg, #ffffff 0%, #e9d5ff 50%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #090614;
+}
+::-webkit-scrollbar-thumb {
+  background: #2e1065;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6b21a8;
 }
