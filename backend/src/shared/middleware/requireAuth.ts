@@ -6,6 +6,7 @@ declare global {
   namespace Express {
     interface Request {
       userId?: string;
+      userRole?: string;
     }
   }
 }
@@ -25,8 +26,11 @@ export function requireAuth(req: Request, _res: Response, next: NextFunction) {
     const secret = process.env["JWT_SECRET"];
     if (!secret) throw new Error("JWT_SECRET is not configured");
 
-    const payload = jwt.verify(token, secret, { algorithms: ["HS256"] }) as { userId: string };
+    const payload = jwt.verify(token, secret, { algorithms: ["HS256"] }) as { userId: string; role?: string };
     req.userId = payload.userId;
+    if (payload.role !== undefined) {
+      req.userRole = payload.role;
+    }
     next();
   } catch {
     const err: AppError = new Error("Invalid or expired token");
