@@ -1,142 +1,70 @@
-import { createContext, useState, useEffect, useCallback, useContext, type ReactNode } from "react";
-import * as cartAPI from "./cartApi";
-import type { CartItem } from "./cartApi";
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-const GUEST_CART_KEY = "guest_cart";
-
-function isAuthenticated(): boolean {
-    return !!localStorage.getItem("token");
+interface CartContextType {
+  cart: any[];
+  addToCart: (product: any) => void;
+  removeFromCart: (productId: any) => void;
+  updateQty: (productId: any, qty: number) => void;
+  clearCart: () => void;
 }
 
-function readGuestCart(): CartItem[] {
+const CartContext = createContext<CartContextType | undefined>(undefined);
+
+export function CartProvider({ children }: { children: React.ReactNode }) {
+  const [cart, setCart] = useState<any[]>(() => {
     try {
-        return JSON.parse(localStorage.getItem(GUEST_CART_KEY) ?? "[]");
+      const saved = localStorage.getItem('cart');
+      return saved ? JSON.parse(saved) : [];
     } catch {
-        return [];
+      return [];
     }
-}
+  });
 
-function writeGuestCart(items: CartItem[]): void {
-    localStorage.setItem(GUEST_CART_KEY, JSON.stringify(items));
-}
-export interface CartContextValue {
-    items: CartItem[];
-    loading: boolean;
-    error: string | null;
-    addItem: (productId: string, quantity?: number) => Promise<void>;
-    updateQuantity: (productId: string, quantity: number) => Promise<void>;
-    removeItem: (productId: string) => Promise<void>;
-    clearCart: () => Promise<void>;
-    mergeGuestCartOnLogin: () => Promise<void>;
-}
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }, [cart]);
 
-export const CartContext = createContext<CartContextValue | undefined>(undefined);
+  const addToCart = (product: any) => {
+    const id = product.id || product._id || product.productId || product.title;
+    setCart(prevCart => {
+      const existingIndex = prevCart.findIndex((item: any) => (item.id || item._id || item.productId || item.title) === id);
+      if (existingIndex > -1) {
+        const updated = [...prevCart];
+        updated[existingIndex].qty = (updated[existingIndex].qty || 1) + 1;
+        return updated;
+      } else {
+        return [...prevCart, { ...product, id, qty: 1 }];
+      }
+    });
+    alert(`Added "${product.title || 'Product'}" to cart!`);
+  };
 
-export function CartProvider({ children }: { children: ReactNode }) {
-    const [items, setItems] = useState<CartItem[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const removeFromCart = (productId: any) => {
+    setCart(prev => prev.filter((item: any) => (item.id || item._id || item.productId || item.title) !== productId));
+  };
 
-    useEffect(() => {
-        (async () => {
-            try {
-                if (isAuthenticated()) {
-                    setItems(await cartAPI.getCart());
-                } else {
-                    setItems(readGuestCart());
-                }
-            } catch {
-                setError("Could not load cart");
-            } finally {
-                setLoading(false);
-            }
-        })();
-    }, []);
+  const updateQty = (productId: any, qty: number) => {
+    if (qty < 1) return;
+    setCart(prev => prev.map((item: any) => {
+      const id = item.id || item._id || item.productId || item.title;
+      return id === productId ? { ...item, qty } : item;
+    }));
+  };
 
-    const addItem = useCallback(async (productId: string, quantity = 1) => {
-        setError(null);
-        try {
-            if (isAuthenticated()) {
-                setItems(await cartAPI.addItem(productId, quantity));
-            } else {
-                const current = readGuestCart();
-                const existing = current.find((i) => i.productId === productId);
-                const next = existing
-                    ? current.map((i) => (i.productId === productId ? { ...i, quantity: i.quantity + quantity } : i))
-                    : [...current, { productId, quantity }];
-                writeGuestCart(next);
-                setItems(next);
-            }
-        } catch {
-            setError("Could not add item");
-        }
-    }, []);
+  const clearCart = () => {
+    setCart([]);
+    localStorage.removeItem('cart');
+  };
 
-    const updateQuantity = useCallback(async (productId: string, quantity: number) => {
-        setError(null);
-        try {
-            if (isAuthenticated()) {
-                setItems(await cartAPI.updateItemQuantity(productId, quantity));
-            } else {
-                const next = readGuestCart().map((i) => (i.productId === productId ? { ...i, quantity } : i));
-                writeGuestCart(next);
-                setItems(next);
-            }
-        } catch {
-            setError("Could not update quantity");
-        }
-    }, []);
-
-    const removeItem = useCallback(async (productId: string) => {
-        setError(null);
-        try {
-            if (isAuthenticated()) {
-                setItems(await cartAPI.removeItem(productId));
-            } else {
-                const next = readGuestCart().filter((i) => i.productId !== productId);
-                writeGuestCart(next);
-                setItems(next);
-            }
-        } catch {
-            setError("Could not remove item");
-        }
-    }, []);
-
-    // Call this once, right after a successful login.
-    const mergeGuestCartOnLogin = useCallback(async () => {
-        const guestItems = readGuestCart();
-        if (guestItems.length === 0) return;
-        const merged = await cartAPI.mergeGuestCart(guestItems);
-        localStorage.removeItem(GUEST_CART_KEY);
-        setItems(merged);
-    }, []);
-
-    const clearCart = useCallback(async () => {
-        setError(null);
-        try {
-            if (isAuthenticated()) {
-                await Promise.all(items.map((i) => cartAPI.removeItem(i.productId)));
-                setItems([]);
-            } else {
-                writeGuestCart([]);
-                setItems([]);
-            }
-        } catch {
-            setError("Could not clear cart");
-        }
-    }, [items]);
-
-    return (
-        <CartContext.Provider value={{ items, loading, error, addItem, updateQuantity, removeItem, mergeGuestCartOnLogin, clearCart }}>
-            {children}
-        </CartContext.Provider>
-    );
+  return (
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQty, clearCart }}>
+      {children}
+    </CartContext.Provider>
+  );
 }
 
 export function useCart() {
-    const context = useContext(CartContext);
-    if (!context) {
-        throw new Error("useCart must be used within a CartProvider");
-    }
-    return context;
+  const context = useContext(CartContext);
+  if (!context) throw new Error('useCart must be used within a CartProvider');
+  return context;
 }

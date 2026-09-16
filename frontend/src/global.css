@@ -1,87 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-@import "tailwindcss";
 
-@theme {
-    --color-primary: #9a4111;
-    --color-on-primary: #ffffff;
-    --color-surface: #fff8f6;
-    --color-surface-container-lowest: #ffffff;
-    --color-surface-container-low: #fbf2f0;
-    --color-surface-container: #f5ecea;
-    --color-surface-container-high: #efe6e4;
-    --color-on-surface: #1e1b1a;
-    --color-on-surface-variant: #56423b;
-    --color-outline-variant: #ddc1b6;
-    --color-secondary: #45664e;
-    --color-error: #ba1a1a;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-    --font-headline: "Playfair Display", serif;
-    --font-body: "Plus Jakarta Sans", sans-serif;
-
-    --spacing-xs: 0.25rem;
-    --spacing-sm: 0.5rem;
-    --spacing-md: 1rem;
-    --spacing-lg: 1.5rem;
-    --spacing-xl: 2.5rem;
-    --spacing-space-xs: 0.25rem;
-    --spacing-space-sm: 0.5rem;
-    --spacing-space-md: 1rem;
-    --spacing-space-lg: 1.5rem;
-    --spacing-space-xl: 2.5rem;
-    --spacing-space-2xl: 4rem;
-    --spacing-gutter: 1rem;
-    --spacing-gutter-lg: 2rem;
-    --spacing-margin: 1.5rem;
-    --spacing-margin-lg: 3rem;
-
-    --font-headline-sm: "Playfair Display", serif;
-    --font-body-sm: "Plus Jakarta Sans", sans-serif;
-    --font-label-md: "Plus Jakarta Sans", sans-serif;
-    --font-label-lg: "Plus Jakarta Sans", sans-serif;
-
-    --text-headline-sm: 1.5rem;
-    --text-headline-sm--line-height: 2rem;
-    --text-body-sm: 0.875rem;
-    --text-body-sm--line-height: 1.25rem;
-    --text-body-md: 1rem;
-    --text-body-md--line-height: 1.5rem;
-    --text-body-lg: 1.125rem;
-    --text-body-lg--line-height: 1.75rem;
-    --text-label-md: 0.875rem;
-    --text-label-md--line-height: 1rem;
-    --text-label-lg: 1rem;
-    --text-label-lg--line-height: 1.25rem;
-
-    --color-surface-container-highest: #e3d9d7;
-    --color-inverse-surface: #362f2d;
-    --color-inverse-on-surface: #fbf2f0;
-
-    --animate-fade-in: fade-in 0.6s ease-out forwards;
-    --animate-slide-up: slide-up 0.6s ease-out forwards;
-    --animate-pulse-slow: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slide-up {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes pulse-slow {
-    0%, 100% { opacity: 1; }
-    50% { opacity: .5; }
-}
-
-/* Styles from Frontend branch */
 :root {
   --bg-main: #090614;
   --bg-card: rgba(26, 18, 51, 0.4);
   --border-glow: rgba(147, 51, 234, 0.3);
   --purple-glow: rgba(168, 85, 247, 0.15);
+}
+
+body {
+  background-color: var(--bg-main);
+  color: #f3e8ff;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow-x: hidden;
 }
 
 h1, h2, h3, .font-serif {

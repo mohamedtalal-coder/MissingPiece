@@ -2,10 +2,9 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface AuthContextType {
   user: any;
-  login: (token: string, userData: any) => void;
+  login: (userData: any) => void;
   logout: () => void;
   isAuthenticated: boolean;
-  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -14,6 +13,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
+    // قراءة اليوزر من الـ LocalStorage عند فتح الموقع
     const savedUser = localStorage.getItem('mp_user');
     if (savedUser) {
       try {
@@ -24,22 +24,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const login = (token: string, userData: any) => {
+  const login = (userData: any) => {
     setUser(userData);
     localStorage.setItem('mp_user', JSON.stringify(userData));
-    localStorage.setItem('token', token);
+    localStorage.setItem('mp_token', 'mock_token_123');
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('mp_user');
-    localStorage.removeItem('token');
+    localStorage.removeItem('mp_token');
   };
 
-  const isAdmin = user?.role === 'admin';
-
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, isAdmin }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );

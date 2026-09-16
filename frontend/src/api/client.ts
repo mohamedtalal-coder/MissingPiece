@@ -1,61 +1,48 @@
-import axios, { type AxiosError } from "axios";
+import axios from 'axios';
+import type { AxiosInstance, InternalAxiosRequestConfig, AxiosError } from 'axios';
 
-const client = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
-  timeout: 10_000,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+class ApiClient {
+  private client: AxiosInstance;
 
-client.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+  constructor() {
+    this.client = axios.create({
+      baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      timeout: 10000,
+    });
 
-interface ApiErrorPayload {
-  success: false;
-  message: string;
-  errors?: { path: string; message: string }[];
-}
-
-export class ApiError extends Error {
-  readonly statusCode: number;
-  readonly fieldErrors?: { path: string; message: string }[];
-
-  constructor(statusCode: number, message: string, fieldErrors?: { path: string; message: string }[]) {
-    super(message);
-    this.statusCode = statusCode;
-    this.fieldErrors = fieldErrors;
+    this.setupInterceptors();
   }
 
-  get isAuthError() {
-    return this.statusCode === 401;
-  }
+  private setupInterceptors(): void {
+    this.client.interceptors.request.use(
+      (config: InternalAxiosRequestConfig) => {
+        const token = localStorage.getItem('token');
+        if (token && config.headers) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error: AxiosError) => Promise.reject(error)
+    );
 
-  get isRateLimited() {
-    return this.statusCode === 429;
-  }
-}
-
-client.interceptors.response.use(
-  (response) => response,
-  (error: AxiosError<ApiErrorPayload>) => {
-    if (error.response) {
-      const { status, data } = error.response;
-      if (status === 401) {
-        localStorage.removeItem("token");
-        window.location.href = "/login";
+    this.client.interceptors.response.use(
+      (response) => response,
+      (error: AxiosError) => {
+        if (error.response?.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        }
+        return Promise.reject(error);
       }
-      throw new ApiError(status, data?.message ?? "Something went wrong", data?.errors);
-    }
-    throw new ApiError(0, "Network error");
+    );
   }
-);
 
-// We keep both export formats to satisfy imports from both branches until we refactor
-export const apiClient = client;
-export default client;
+  public getInstance(): AxiosInstance {
+    return this.client;
+  }
+}
+
+export const apiClient = new ApiClient().getInstance();

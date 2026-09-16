@@ -1,5 +1,5 @@
 import { apiClient } from '../../api/client';
-import type { CartItem } from '../cart/cartApi';
+import type { CartItemDto } from '../cart/cartApi'; // أو استيرادها كـ type
 
 export interface OrderItem {
   productId: string;
@@ -29,7 +29,7 @@ export interface Order {
 
 export const ordersApi = {
   createOrder: async (orderData: {
-    items: CartItem[] | OrderItem[];
+    items: CartItemDto[] | OrderItem[];
     shippingAddress: ShippingAddress;
     paymentMethod: string;
     total: number;

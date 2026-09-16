@@ -1,343 +1,189 @@
-import { useEffect, useState, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
-import { listProducts, listCategories, type Product } from "./productsApi";
-import { Input } from "../../shared/components/ui/Input";
-import { useDebounce } from "../../shared/hooks/useDebounce";
-import { ProductCard } from "./components/ProductCard";
-import { Icon } from "../../shared/components/ui/Icon";
-import { Select } from "../../shared/components/ui/Select";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Search, Filter, Heart, ShoppingBag, ArrowUpDown } from 'lucide-react';
 
-export default function ProductListPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [items, setItems] = useState<Product[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+export function ProductListPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All Categories');
+  const [maxPrice, setMaxPrice] = useState(120);
+  const [sortBy, setSortBy] = useState('default');
+  const [wishlist, setWishlist] = useState<number[]>([]);
 
-  const page = Number(searchParams.get("page") ?? "1");
-  const category = searchParams.get("category") ?? "";
-  const minPrice = searchParams.get("minPrice") ?? "";
-  const maxPrice = searchParams.get("maxPrice") ?? "";
-  const sort = searchParams.get("sort") ?? "newest";
-  const searchParamValue = searchParams.get("search") ?? "";
+  // 20 منتج (5 لكل كاتجوري)
+  const products = [
+    { id: 1, name: 'Mystic Nebula 1000pcs', category: 'Jigsaw Puzzles', price: 45, image: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?w=400&auto=format&fit=crop&q=80', inStock: true },
+    { id: 2, name: 'Emerald Forest Panorama', category: 'Jigsaw Puzzles', price: 50, image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&auto=format&fit=crop&q=80', inStock: false },
+    { id: 3, name: 'Sunset Meadow Jigsaw', category: 'Jigsaw Puzzles', price: 35, image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&auto=format&fit=crop&q=80', inStock: true },
+    { id: 4, name: 'Starry Night Galaxy', category: 'Jigsaw Puzzles', price: 55, image: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&auto=format&fit=crop&q=80', inStock: true },
+    { id: 5, name: 'Ocean Deep Secrets', category: 'Jigsaw Puzzles', price: 40, image: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&auto=format&fit=crop&q=80', inStock: true },
 
-  const [searchInput, setSearchInput] = useState(searchParamValue);
-  const debouncedSearch = useDebounce(searchInput, 500);
+    { id: 6, name: 'Cyberpunk Tokyo 3D', category: '3D Puzzles', price: 85, image: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&auto=format&fit=crop&q=80', inStock: true },
+    { id: 7, name: 'Medieval Castle Fortress', category: '3D Puzzles', price: 95, image: 'https://images.unsplash.com/photo-1533158307587-828f0a76ef46?w=400&auto=format&fit=crop&q=80', inStock: true },
+    { id: 8, name: 'Eiffel Tower Masterpiece', category: '3D Puzzles', price: 75, image: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=400&auto=format&fit=crop&q=80', inStock: false },
+    { id: 9, name: 'Space Shuttle Explorer', category: '3D Puzzles', price: 90, image: 'https://images.unsplash.com/photo-1517976487492-5750f3195933?w=400&auto=format&fit=crop&q=80', inStock: true },
+    { id: 10, name: 'Ancient Pyramids of Giza', category: '3D Puzzles', price: 80, image: 'https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?w=400&auto=format&fit=crop&q=80', inStock: true },
 
-  useEffect(() => {
-    if (debouncedSearch !== searchParamValue) {
-      updateParam("search", debouncedSearch);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch]);
+    { id: 11, name: 'Vintage World Map', category: 'Wooden Puzzles', price: 65, image: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?w=400&auto=format&fit=crop&q=80', inStock: true },
+    { id: 12, name: 'Mechanical Clockwork Gear', category: 'Wooden Puzzles', price: 70, image: 'https://images.unsplash.com/photo-1563089145-599997674d42?w=400&auto=format&fit=crop&q=80', inStock: true },
+    { id: 13, name: 'Wildlife Safari Wooden', category: 'Wooden Puzzles', price: 60, image: 'https://images.unsplash.com/photo-1534567153574-2b12153a87f0?w=400&auto=format&fit=crop&q=80', inStock: true },
+    { id: 14, name: 'Mandala Art Wooden Puzzle', category: 'Wooden Puzzles', price: 55, image: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=400&auto=format&fit=crop&q=80', inStock: false },
+    { id: 15, name: 'Antique Pirate Ship', category: 'Wooden Puzzles', price: 80, image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&auto=format&fit=crop&q=80', inStock: true },
 
-  useEffect(() => {
-    setSearchInput(searchParamValue);
-  }, [searchParamValue]);
+    { id: 16, name: 'Detective Holmes Case #1', category: 'Mystery Puzzles', price: 50, image: 'https://images.unsplash.com/photo-1453928582365-b6ad33cbcf64?w=400&auto=format&fit=crop&q=80', inStock: true },
+    { id: 17, name: 'Escape Room Manor', category: 'Mystery Puzzles', price: 65, image: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&auto=format&fit=crop&q=80', inStock: true },
+    { id: 18, name: 'Crime Scene Investigation', category: 'Mystery Puzzles', price: 55, image: 'https://images.unsplash.com/photo-1505664194779-8beaceb93744?w=400&auto=format&fit=crop&q=80', inStock: true },
+    { id: 19, name: 'Secret Agent Cipher', category: 'Mystery Puzzles', price: 45, image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&auto=format&fit=crop&q=80', inStock: false },
+    { id: 20, name: 'Pharaoh’s Secret Vault', category: 'Mystery Puzzles', price: 70, image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&auto=format&fit=crop&q=80', inStock: true },
+  ];
 
-  useEffect(() => {
-    listCategories()
-      .then((res) => setCategories(res))
-      .catch((err) => console.error("Failed to load categories", err));
-  }, []);
-
-  useEffect(() => {
-    setLoading(true);
-    setError(null);
-    listProducts({
-      page,
-      category: category || undefined,
-      minPrice: minPrice ? Number(minPrice) : undefined,
-      maxPrice: maxPrice ? Number(maxPrice) : undefined,
-      sort: sort as "price_asc" | "price_desc" | "newest",
-      search: searchParamValue || undefined,
-    })
-      .then((res) => {
-        setItems(res.items);
-        setTotalPages(res.totalPages);
-        setTotalItems(res.total);
-      })
-      .catch(() => setError("Could not load products. Please try again later."))
-      .finally(() => setLoading(false));
-  }, [page, category, minPrice, maxPrice, sort, searchParamValue]);
-
-  function updateParam(key: string, value: string) {
-    const next = new URLSearchParams(searchParams);
-    if (value) {
-      next.set(key, value);
+  const toggleWishlist = (id: number) => {
+    if (wishlist.includes(id)) {
+      setWishlist(wishlist.filter(item => item !== id));
     } else {
-      next.delete(key);
+      setWishlist([...wishlist, id]);
     }
-    next.set("page", "1"); // reset pagination on filter change
-    setSearchParams(next);
-  }
+  };
 
-  function goToPage(nextPage: number) {
-    const next = new URLSearchParams(searchParams);
-    next.set("page", String(nextPage));
-    setSearchParams(next);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  function clearAllFilters() {
-    setSearchInput("");
-    setSearchParams(new URLSearchParams());
-  }
-
-  const hasActiveFilters = useMemo(() => {
-    return Boolean(category || minPrice || maxPrice || searchParamValue || sort !== "newest");
-  }, [category, minPrice, maxPrice, searchParamValue, sort]);
+  // فلترة وسورت من غير Reload تماماً باستخدام الـ State
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCat = selectedCategory === 'All Categories' || p.category === selectedCategory;
+    const matchesPrice = p.price <= maxPrice;
+    return matchesSearch && matchesCat && matchesPrice;
+  }).sort((a, b) => {
+    if (sortBy === 'low-high') return a.price - b.price;
+    if (sortBy === 'high-low') return b.price - a.price;
+    return 0;
+  });
 
   return (
-    <div className="w-full bg-surface min-h-screen pb-xl">
-      {/* Hero Section */}
-      <div className="w-full bg-surface-container-low border-b border-outline-variant/30 py-xl px-gutter relative overflow-hidden animate-fade-in">
-        <div className="absolute top-0 right-0 w-1/3 h-full opacity-40 pointer-events-none bg-gradient-to-l from-primary/10 to-transparent"></div>
-        <div className="max-w-7xl mx-auto relative z-10">
-          <h1 className="font-headline text-5xl md:text-6xl text-on-surface mb-space-sm">Catalog</h1>
-          <p className="font-body text-body-lg text-on-surface-variant max-w-2xl leading-relaxed">
-            Discover our curated collection of premium wooden puzzles and engaging escapes, designed to challenge the mind.
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#0b0914] text-white px-8 py-10 font-sans space-y-8">
+      
+      <div className="max-w-7xl mx-auto space-y-2">
+        <h1 className="text-3xl md:text-4xl font-serif font-bold text-white tracking-wide">Explore Puzzles Collection</h1>
+        <p className="text-xs md:text-sm text-[#cbd5e1]">Discover master-crafted puzzles designed to challenge and inspire. ({filteredProducts.length} Items)</p>
       </div>
 
-      <div className="max-w-7xl mx-auto px-margin lg:px-margin-lg pt-xl flex flex-col lg:flex-row gap-xl">
+      {/* Search & Filters Bar (من غير Reload) */}
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 bg-[#130e21] border border-[#7e22ce]/40 p-5 rounded-2xl shadow-xl">
         
-        {/* Mobile Filter Toggle */}
-        <button 
-          className="lg:hidden flex items-center justify-center gap-space-sm w-full py-space-sm bg-surface-container border border-outline-variant rounded-lg font-label-lg text-on-surface mb-space-sm"
-          onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
-        >
-          <Icon name="tune" />
-          {isMobileFiltersOpen ? "Hide Filters" : "Show Filters"}
-        </button>
-
-        {/* Filters Sidebar */}
-        <aside className={`lg:w-64 shrink-0 flex flex-col gap-xl ${isMobileFiltersOpen ? 'block' : 'hidden lg:flex'} animate-slide-up`}>
-          <div className="flex items-center justify-between pb-space-sm border-b border-outline-variant/50">
-            <h2 className="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
-              <Icon name="filter_list" className="text-xl" /> Filters
-            </h2>
-            {hasActiveFilters && (
-              <button 
-                onClick={clearAllFilters}
-                className="text-primary hover:text-primary/80 font-label-md text-sm underline transition-colors"
-              >
-                Clear all
-              </button>
-            )}
-          </div>
-
-          {/* Search */}
-          <div className="flex flex-col gap-space-sm">
-            <div className="relative">
-              <Icon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg" />
-              <Input
-                placeholder="Search products..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="pl-10 bg-surface-container-lowest"
-              />
-            </div>
-          </div>
-
-          {/* Categories */}
-          <div className="flex flex-col gap-space-sm">
-            <h3 className="font-label-lg text-label-lg text-on-surface flex items-center justify-between">
-              Category
-              <Icon name="expand_less" className="text-on-surface-variant" />
-            </h3>
-            <div className="flex flex-col gap-1 mt-2">
-              <button
-                onClick={() => updateParam("category", "")}
-                className={`text-left px-3 py-2 rounded-md font-body-sm transition-colors ${!category ? 'bg-primary text-on-primary font-medium shadow-sm' : 'text-on-surface-variant hover:bg-surface-container-high'}`}
-              >
-                All
-              </button>
-              {categories.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => updateParam("category", c)}
-                  className={`text-left px-3 py-2 rounded-md font-body-sm transition-colors flex items-center gap-2 ${category === c ? 'bg-primary text-on-primary font-medium shadow-sm' : 'text-on-surface-variant hover:bg-surface-container-high'}`}
-                >
-                  <Icon name="chevron_right" className={`text-sm ${category === c ? 'text-on-primary' : 'text-on-surface-variant/50'}`} />
-                  <span className="capitalize">{c.replace('-', ' ')}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Price Range */}
-          <div className="flex flex-col gap-space-sm">
-            <h3 className="font-label-lg text-label-lg text-on-surface flex items-center justify-between">
-              Price range
-              <Icon name="expand_less" className="text-on-surface-variant" />
-            </h3>
-            <div className="flex items-center gap-space-sm mt-2 relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm z-10">$</span>
-              <Input
-                type="number"
-                placeholder="10"
-                defaultValue={minPrice}
-                onBlur={(e) => updateParam("minPrice", e.target.value)}
-                className="pl-7 bg-surface-container-lowest text-sm"
-              />
-              <span className="text-on-surface-variant">-</span>
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm z-10">$</span>
-              <Input
-                type="number"
-                placeholder="200"
-                defaultValue={maxPrice}
-                onBlur={(e) => updateParam("maxPrice", e.target.value)}
-                className="pl-3 pr-7 bg-surface-container-lowest text-sm text-right"
-              />
-            </div>
-          </div>
-
-        </aside>
-
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-h-[500px]">
-          
-          {/* Toolbar */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md mb-xl animate-fade-in">
-            <p className="text-body-md text-on-surface-variant">
-              {loading ? (
-                <span className="animate-pulse bg-surface-container-high h-5 w-32 rounded inline-block"></span>
-              ) : (
-                <span className="font-medium text-on-surface">{totalItems} products found</span>
-              )}
-            </p>
-
-            <div className="flex items-center gap-space-md">
-              <div className="flex items-center gap-space-sm text-on-surface-variant bg-surface-container-lowest px-3 py-2 rounded-lg border border-outline-variant/50">
-                <span className="text-sm font-medium">Sort by:</span>
-              <Select
-                value={sort}
-                onChange={(v) => updateParam("sort", v)}
-                options={[
-                  { value: "newest", label: "Newest" },
-                  { value: "price_asc", label: "Price: Low to High" },
-                  { value: "price_desc", label: "Price: High to Low" },
-                ]}
-                className="w-48"
-              />
-              </div>
-            </div>
-          </div>
-
-          {/* Error State */}
-          {error && (
-            <div className="flex flex-col items-center justify-center flex-1 bg-surface-container-lowest rounded-2xl border border-error/20 p-xl text-center">
-              <Icon name="error_outline" className="text-5xl text-error mb-space-md" />
-              <h3 className="font-headline-sm text-xl text-on-surface mb-space-sm">Oops! Something went wrong</h3>
-              <p className="text-on-surface-variant mb-space-lg max-w-md">{error}</p>
-              <button 
-                onClick={() => window.location.reload()}
-                className="bg-primary text-on-primary px-space-lg py-2 rounded-md font-label-md hover:bg-primary/90 transition-colors"
-              >
-                Try Again
-              </button>
-            </div>
-          )}
-
-          {/* Empty State */}
-          {!loading && !error && items.length === 0 && (
-            <div className="flex flex-col items-center justify-center flex-1 bg-surface-container-lowest/50 rounded-2xl border border-outline-variant/30 p-xl text-center">
-              <Icon name="inventory_2" className="text-6xl text-outline-variant mb-space-md" />
-              <h3 className="font-headline-sm text-2xl text-on-surface mb-space-sm">No products found</h3>
-              <p className="text-on-surface-variant mb-space-lg max-w-md">
-                We couldn't find any products matching your current filters. Try adjusting your search or category.
-              </p>
-              {hasActiveFilters && (
-                <button 
-                  onClick={clearAllFilters}
-                  className="bg-surface-container-high text-on-surface px-space-lg py-2 rounded-md font-label-md hover:bg-surface-container-highest transition-colors border border-outline-variant"
-                >
-                  Clear Filters
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Product Grid / Loading Skeletons */}
-          {(!error && (loading || items.length > 0)) && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-space-lg gap-y-xl animate-slide-up">
-              {loading ? (
-                // Skeletons
-                Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="flex flex-col gap-space-sm animate-pulse-slow">
-                    <div className="aspect-[4/5] bg-surface-container-high rounded-xl"></div>
-                    <div className="h-6 bg-surface-container-high rounded w-3/4 mt-2"></div>
-                    <div className="h-4 bg-surface-container-high rounded w-1/2"></div>
-                    <div className="flex justify-between items-center mt-2">
-                      <div className="h-6 bg-surface-container-high rounded w-1/4"></div>
-                      <div className="h-8 bg-surface-container-high rounded w-1/3"></div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                // Actual Products
-                items.map((product) => (
-                  <ProductCard key={product._id} product={product} />
-                ))
-              )}
-            </div>
-          )}
-
-          {/* Pagination */}
-          {!loading && !error && totalPages > 1 && (
-            <div className="flex items-center justify-center gap-space-md mt-24 mb-xl border-t border-outline-variant/30 pt-xl">
-              <button
-                className="w-10 h-10 rounded-full flex items-center justify-center border border-outline-variant text-on-surface-variant hover:bg-surface-container-high disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                disabled={page <= 1}
-                onClick={() => goToPage(page - 1)}
-                aria-label="Previous Page"
-              >
-                <Icon name="chevron_left" />
-              </button>
-              
-              <div className="flex items-center gap-2">
-                {Array.from({ length: totalPages }).map((_, i) => {
-                  const p = i + 1;
-                  // Show current page, first, last, and neighbors
-                  if (p === 1 || p === totalPages || Math.abs(page - p) <= 1) {
-                    return (
-                      <button
-                        key={p}
-                        onClick={() => goToPage(p)}
-                        className={`w-10 h-10 rounded-full flex items-center justify-center font-label-md transition-colors ${
-                          page === p 
-                            ? 'bg-primary text-on-primary shadow-md' 
-                            : 'text-on-surface-variant hover:bg-surface-container-high'
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    );
-                  }
-                  if (Math.abs(page - p) === 2) {
-                    return <span key={p} className="text-on-surface-variant">...</span>;
-                  }
-                  return null;
-                })}
-              </div>
-
-              <button
-                className="w-10 h-10 rounded-full flex items-center justify-center border border-outline-variant text-on-surface-variant hover:bg-surface-container-high disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                disabled={page >= totalPages}
-                onClick={() => goToPage(page + 1)}
-                aria-label="Next Page"
-              >
-                <Icon name="chevron_right" />
-              </button>
-            </div>
-          )}
+        <div className="relative w-full md:w-80">
+          <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-[#c084fc]" />
+          <input 
+            type="text" 
+            placeholder="Search puzzles..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-[#18112c] border border-[#7e22ce]/40 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-[#94a3b8] focus:outline-none focus:border-[#a855f7]"
+          />
         </div>
+
+        <div className="flex flex-wrap items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+          {/* Category Filter */}
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-[#c084fc]" />
+            <select 
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="bg-[#18112c] border border-[#7e22ce]/40 rounded-xl px-3 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-[#a855f7]"
+            >
+              <option value="All Categories">All Categories</option>
+              <option value="Jigsaw Puzzles">Jigsaw Puzzles</option>
+              <option value="3D Puzzles">3D Puzzles</option>
+              <option value="Wooden Puzzles">Wooden Puzzles</option>
+              <option value="Mystery Puzzles">Mystery Puzzles</option>
+            </select>
+          </div>
+
+          {/* Sort By Price */}
+          <div className="flex items-center gap-2">
+            <ArrowUpDown className="w-4 h-4 text-[#c084fc]" />
+            <select 
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="bg-[#18112c] border border-[#7e22ce]/40 rounded-xl px-3 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-[#a855f7]"
+            >
+              <option value="default">Sort by Price</option>
+              <option value="low-high">Price: Low to High</option>
+              <option value="high-low">Price: High to Low</option>
+            </select>
+          </div>
+
+          {/* Price Range Slider */}
+          <div className="flex items-center gap-3 bg-[#18112c] border border-[#7e22ce]/40 px-4 py-2 rounded-xl">
+            <span className="text-xs text-[#cbd5e1]">Max: ${maxPrice}</span>
+            <input 
+              type="range" 
+              min="30" 
+              max="120" 
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(Number(e.target.value))}
+              className="accent-[#a855f7] cursor-pointer w-20"
+            />
+          </div>
+        </div>
+
       </div>
+
+      {/* Products Grid */}
+      <div className="max-w-7xl mx-auto">
+        {filteredProducts.length === 0 ? (
+          <div className="text-center py-20 bg-[#130e21] border border-[#7e22ce]/30 rounded-3xl space-y-2">
+            <p className="text-sm font-medium text-[#cbd5e1]">No products found matching your criteria.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {filteredProducts.map(product => {
+              const isWishlisted = wishlist.includes(product.id);
+              return (
+                <div key={product.id} className="bg-[#130e21] border border-[#7e22ce]/40 rounded-2xl p-4 space-y-4 shadow-xl hover:border-[#a855f7] transition-all relative group overflow-hidden">
+                  
+                  {/* زرار القلب (Wishlist) */}
+                  <button 
+                    onClick={() => toggleWishlist(product.id)}
+                    className={`absolute top-6 right-6 w-8 h-8 rounded-full border flex items-center justify-center transition-colors z-10 ${isWishlisted ? 'bg-pink-950/80 border-pink-500 text-pink-400' : 'bg-[#18112c]/80 border-[#7e22ce]/40 text-[#e9d5ff] hover:text-pink-400'}`}
+                  >
+                    <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
+                  </button>
+
+                  <Link to={`/products/${product.id}`} className="block">
+                    <div className="w-full h-48 bg-[#18112c] rounded-xl overflow-hidden border border-[#7e22ce]/30 relative">
+                      <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      {!product.inStock && (
+                        <div className="absolute bottom-2 left-2 bg-red-950/90 border border-red-600/50 text-red-300 text-[10px] font-bold px-2 py-0.5 rounded">
+                          Out of Stock
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+
+                  <div className="space-y-1">
+                    <Link to={`/products/${product.id}`}>
+                      <h3 className="text-xs font-bold text-white truncate hover:text-[#c084fc] transition-colors">{product.name}</h3>
+                    </Link>
+                    <p className="text-[11px] text-[#cbd5e1] font-sans">{product.category}</p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-[#7e22ce]/30">
+                    <span className="text-sm font-bold text-[#e9d5ff]">${product.price}.00</span>
+                    <button 
+                      disabled={!product.inStock}
+                      className="bg-[#7e22ce]/30 border border-[#a855f7]/60 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-[#7e22ce]/50 transition-colors disabled:opacity-40 flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <ShoppingBag className="w-3.5 h-3.5" />
+                      <span>Add</span>
+                    </button>
+                  </div>
+
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }
+
+export default ProductListPage;
