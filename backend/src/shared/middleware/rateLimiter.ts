@@ -68,3 +68,31 @@ export const productReadLimiter = rateLimit({
   limit: 100,
   keyGenerator: keyByIp,
 });
+
+export const contactSubmitLimiter = rateLimit({
+  ...sharedOpts,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 5,
+  keyGenerator: keyByIp,
+});
+
+export const accountWriteLimiter = rateLimit({
+  ...sharedOpts,
+  windowMs: 60 * 1000,
+  limit: 30,
+  keyGenerator: keyByUser,
+});
+
+export const wishlistWriteLimiter = rateLimit({
+  ...sharedOpts,
+  windowMs: 60 * 1000,
+  limit: 30,
+  keyGenerator: keyByUser,
+});
+
+export const orderWriteLimiter = rateLimit({
+  ...sharedOpts,
+  windowMs: 60 * 1000,
+  limit: 10,
+  keyGenerator: keyByUser,
+});
