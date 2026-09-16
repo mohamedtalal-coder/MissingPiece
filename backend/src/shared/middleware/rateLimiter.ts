@@ -68,3 +68,16 @@ export const productReadLimiter = rateLimit({
   limit: 100,
   keyGenerator: keyByIp,
 });
+export const registerLimiter = rateLimit({
+  ...sharedOpts,
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  keyGenerator: keyByIp,
+});
+
+export const loginLimiter = rateLimit({
+  ...sharedOpts,
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  keyGenerator: keyByIp,
+});
