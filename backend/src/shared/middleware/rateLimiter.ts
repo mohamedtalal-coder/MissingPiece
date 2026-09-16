@@ -96,3 +96,17 @@ export const orderWriteLimiter = rateLimit({
   limit: 10,
   keyGenerator: keyByUser,
 });
+
+export const registerLimiter = rateLimit({
+  ...sharedOpts,
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  keyGenerator: keyByIp,
+});
+
+export const loginLimiter = rateLimit({
+  ...sharedOpts,
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  keyGenerator: keyByIp,
+});
