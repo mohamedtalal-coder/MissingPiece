@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #0b0914 !important;
+    color: #f3f4f6 !important;
+    font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  }
+}
