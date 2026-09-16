@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Navbar } from '../shared/components/Navbar';
 import HomePage from '../features/static/HomePage';
-import { ProductListPage } from '../features/products/ProductListPage';
-import { ProductDetailPage } from '../features/products/ProductDetailPage';
-import { CartPage } from '../features/cart/CartPage';
+import ProductListPage from '../features/products/ProductListPage';
+import ProductDetailPage from '../features/products/ProductDetailPage';
+import CartPage from '../features/cart/CartPage';
 import { AboutPage } from '../features/static/AboutPage';
 import { ContactPage } from '../features/static/ContactPage';
 import { LoginPage } from '../features/auth/LoginPage';

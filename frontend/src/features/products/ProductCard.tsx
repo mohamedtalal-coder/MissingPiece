@@ -4,7 +4,7 @@ import { Heart, ShoppingBag } from 'lucide-react';
 import { useCart } from '../../features/cart/CartContext'; // استدعاء الـ Context الصحيح
 
 export function ProductCard({ product }: { product: any }) {
-  const { addToCart } = useCart();
+  const { addItem } = useCart();
   const productId = product.id || product._id || product.productId || product.title;
   const [isWishlisted, setIsWishlisted] = useState(false);
 
@@ -65,7 +65,7 @@ export function ProductCard({ product }: { product: any }) {
 
       <div className="pt-2 border-t border-[#7e22ce]/20">
         <button 
-          onClick={(e) => { e.preventDefault(); addToCart(product); }}
+          onClick={(e) => { e.preventDefault(); addItem(productId, 1); }}
           className="w-full bg-gradient-to-r from-[#7e22ce] to-[#a855f7] text-white text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5 hover:opacity-90 transition-opacity cursor-pointer shadow-[0_0_15px_rgba(168,85,247,0.3)]"
         >
           <ShoppingBag className="w-3.5 h-3.5" />

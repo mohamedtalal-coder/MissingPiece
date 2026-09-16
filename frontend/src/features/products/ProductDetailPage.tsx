@@ -55,7 +55,7 @@ export default function ProductDetailPage() {
   }
 
   async function handleAddToCart() {
-    if (adding || product.stock === 0) return;
+    if (!product || adding || product.stock === 0) return;
     setAdding(true);
     try {
       await addItem(product._id, 1);
