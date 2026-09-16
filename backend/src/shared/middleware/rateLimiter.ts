@@ -8,12 +8,24 @@ function rateLimitHandler(_req: Request, res: Response) {
   });
 }
 
+function getIpBucket(ip: string): string {
+  if (ip.includes(".")) {
+    return ip;
+  }
+  if (ip.includes(":")) {
+    return ip.split(":").slice(0, 4).join(":");
+  }
+  return ip;
+}
+
 function keyByUser(req: Request): string {
-  return req.userId ?? ipKeyGenerator(req.ip ?? "unknown");
+  const ip = req.ip ?? "unknown";
+  return req.userId ?? ipKeyGenerator(getIpBucket(ip));
 }
 
 function keyByIp(req: Request): string {
-  return ipKeyGenerator(req.ip ?? "unknown");
+  const ip = req.ip ?? "unknown";
+  return ipKeyGenerator(getIpBucket(ip));
 }
 
 const sharedOpts = {
@@ -47,5 +59,12 @@ export const validateLimiter = rateLimit({
   ...sharedOpts,
   windowMs: 60 * 1000,
   limit: 30,
+  keyGenerator: keyByIp,
+});
+
+export const productReadLimiter = rateLimit({
+  ...sharedOpts,
+  windowMs: 60 * 1000,
+  limit: 100,
   keyGenerator: keyByIp,
 });

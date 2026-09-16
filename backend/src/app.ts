@@ -3,8 +3,11 @@ import cors from "cors";
 import morgan from "morgan";
 
 import { errorHandler, notFound } from "./shared/middleware/errorHandler.js";
+import productRoutes from "./features/products/product.routes.js";
 
 const app: Application = express();
+
+app.set("trust proxy", 1);
 
 app.use(
   cors({
@@ -20,8 +23,7 @@ app.get("/api/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-// Feature routes get mounted here as each one is built, e.g.:
-// app.use("/api/auth", authRoutes);
+app.use("/api/products", productRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
