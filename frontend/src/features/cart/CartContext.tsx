@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import { createContext, useState, useEffect, useCallback, useContext, type ReactNode } from "react";
 import * as cartAPI from "./cartApi";
 import type { CartItem } from "./cartApi";
 
@@ -131,4 +131,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
             {children}
         </CartContext.Provider>
     );
+}
+
+export function useCart() {
+    const context = useContext(CartContext);
+    if (!context) {
+        throw new Error("useCart must be used within a CartProvider");
+    }
+    return context;
 }
