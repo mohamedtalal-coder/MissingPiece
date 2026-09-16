@@ -28,6 +28,8 @@ const userSchema = new Schema(
         country: { type: String, required: true, trim: true },
       },
     ],
+
+    wishlist: [{ type: Schema.Types.ObjectId, ref: "Product", default: [] }],
   },
   { timestamps: true }
 );
