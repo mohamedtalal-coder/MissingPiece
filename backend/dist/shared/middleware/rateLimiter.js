@@ -1,0 +1,96 @@
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
+function rateLimitHandler(_req, res) {
+    res.status(429).json({
+        success: false,
+        message: "Too many requests — please try again later",
+    });
+}
+function getIpBucket(ip) {
+    if (ip.includes(".")) {
+        return ip;
+    }
+    if (ip.includes(":")) {
+        return ip.split(":").slice(0, 4).join(":");
+    }
+    return ip;
+}
+function keyByUser(req) {
+    const ip = req.ip ?? "unknown";
+    return req.userId ?? ipKeyGenerator(getIpBucket(ip));
+}
+function keyByIp(req) {
+    const ip = req.ip ?? "unknown";
+    return ipKeyGenerator(getIpBucket(ip));
+}
+const sharedOpts = {
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    handler: rateLimitHandler,
+};
+export const cartReadLimiter = rateLimit({
+    ...sharedOpts,
+    windowMs: 60 * 1000,
+    limit: 120,
+    keyGenerator: keyByUser,
+});
+export const cartWriteLimiter = rateLimit({
+    ...sharedOpts,
+    windowMs: 60 * 1000,
+    limit: 60,
+    keyGenerator: keyByUser,
+});
+export const mergeLimiter = rateLimit({
+    ...sharedOpts,
+    windowMs: 60 * 1000,
+    limit: 5,
+    keyGenerator: keyByUser,
+});
+export const validateLimiter = rateLimit({
+    ...sharedOpts,
+    windowMs: 60 * 1000,
+    limit: 30,
+    keyGenerator: keyByIp,
+});
+export const productReadLimiter = rateLimit({
+    ...sharedOpts,
+    windowMs: 60 * 1000,
+    limit: 100,
+    keyGenerator: keyByIp,
+});
+export const contactSubmitLimiter = rateLimit({
+    ...sharedOpts,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit: 5,
+    keyGenerator: keyByIp,
+});
+export const accountWriteLimiter = rateLimit({
+    ...sharedOpts,
+    windowMs: 60 * 1000,
+    limit: 30,
+    keyGenerator: keyByUser,
+});
+export const wishlistWriteLimiter = rateLimit({
+    ...sharedOpts,
+    windowMs: 60 * 1000,
+    limit: 30,
+    keyGenerator: keyByUser,
+});
+export const orderWriteLimiter = rateLimit({
+    ...sharedOpts,
+    windowMs: 60 * 1000,
+    limit: 10,
+    keyGenerator: keyByUser,
+});
+export const registerLimiter = rateLimit({
+    ...sharedOpts,
+    windowMs: 15 * 60 * 1000,
+    limit: 10,
+    keyGenerator: keyByIp,
+});
+export const loginLimiter = rateLimit({
+    ...sharedOpts,
+    windowMs: 15 * 60 * 1000,
+    limit: 10,
+    keyGenerator: keyByIp,
+});
+//# sourceMappingURL=rateLimiter.js.map
