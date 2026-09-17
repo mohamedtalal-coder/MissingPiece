@@ -12,7 +12,7 @@ const userSchema = new Schema(
       trim: true,
     },
 
-    passwordHash: { type: String, required: true },
+    passwordHash: { type: String, required: true, select: false },
 
     role: {
       type: String,

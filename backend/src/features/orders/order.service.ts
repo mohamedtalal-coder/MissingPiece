@@ -3,10 +3,12 @@ import { Order } from "./order.model.js";
 import type { ShippingAddress } from "./order.model.js";
 import { Product } from "../products/product.model.js";
 import type { AppError } from "../../shared/middleware/errorHandler.js";
+import { findValidDiscountByCode, calculateDiscount, incrementDiscountUsage } from "../discounts/discount.service.js";
 
 export interface CreateOrderInput {
   items: { product: string; quantity: number }[];
   shippingAddress: ShippingAddress;
+  discountCode?: string | undefined;
 }
 
 export async function createOrder(userId: string, input: CreateOrderInput) {
@@ -53,13 +55,36 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
       await product.save({ session });
     }
 
+    let finalTotalAmount = totalAmount;
+    let appliedDiscountAmount = 0;
+    let appliedDiscountCode: string | undefined;
+
+    if (input.discountCode) {
+      const discount = await findValidDiscountByCode(input.discountCode, session);
+      if (!discount) {
+        const err: AppError = new Error("Invalid or expired code");
+        err.statusCode = 400;
+        throw err;
+      }
+      
+      const { discountAmount } = calculateDiscount(discount, orderItems);
+      appliedDiscountAmount = discountAmount;
+      
+      await incrementDiscountUsage(discount._id.toString(), session);
+      
+      finalTotalAmount = Math.max(0, totalAmount - appliedDiscountAmount);
+      appliedDiscountCode = discount.code;
+    }
+
     // Create the order
     const order = new Order({
       user: userId,
       items: orderItems,
-      totalAmount,
+      totalAmount: finalTotalAmount,
       shippingAddress: input.shippingAddress,
       status: "pending",
+      discountCode: appliedDiscountCode,
+      discountAmount: appliedDiscountAmount,
     });
 
     await order.save({ session });

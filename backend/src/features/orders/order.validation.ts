@@ -9,6 +9,7 @@ export const orderItemSchema = z.object({
 export const createOrderSchema = z.object({
   items: z.array(orderItemSchema).min(1, "Order must contain at least one item").max(50),
   shippingAddress: addressSchema,
+  discountCode: z.string().trim().optional(),
 });
 
 export const orderStatusSchema = z.object({

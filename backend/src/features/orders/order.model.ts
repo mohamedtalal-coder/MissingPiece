@@ -20,7 +20,10 @@ export interface IOrder extends Document {
   totalAmount: number;
   shippingAddress: ShippingAddress;
   status: "pending" | "paid" | "shipped" | "delivered" | "cancelled";
+  stripeSessionId?: string;
   paymentIntentId?: string; // For Stripe or other payment processors
+  discountCode?: string;
+  discountAmount?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -49,8 +52,12 @@ const OrderSchema = new Schema<IOrder>(
       type: String,
       enum: ["pending", "paid", "shipped", "delivered", "cancelled"],
       default: "pending",
+      // TODO: pending orders hold stock indefinitely; a TTL or cron cleanup is needed
     },
+    stripeSessionId: { type: String },
     paymentIntentId: { type: String },
+    discountCode: { type: String },
+    discountAmount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

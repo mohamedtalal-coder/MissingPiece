@@ -58,43 +58,4 @@ export const updateProfile = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-/**
- * Get the current user's wishlist
- * GET /api/account/wishlist
- */
-export const getWishlist = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const wishlist = await accountService.getUserWishlist(getUserId(req));
-    res.status(200).json({ success: true, data: wishlist });
-  } catch (error) {
-    next(error);
-  }
-};
 
-/**
- * Add a product to the wishlist
- * POST /api/account/wishlist/:productId
- */
-export const addToWishlist = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const productId = getProductIdParam(req);
-    const wishlist = await accountService.addProductToWishlist(getUserId(req), productId);
-    res.status(200).json({ success: true, data: wishlist });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * Remove a product from the wishlist
- * DELETE /api/account/wishlist/:productId
- */
-export const removeFromWishlist = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const productId = getProductIdParam(req);
-    const wishlist = await accountService.removeProductFromWishlist(getUserId(req), productId);
-    res.status(200).json({ success: true, data: wishlist });
-  } catch (error) {
-    next(error);
-  }
-};

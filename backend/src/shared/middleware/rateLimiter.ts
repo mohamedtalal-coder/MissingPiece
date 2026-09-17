@@ -110,3 +110,24 @@ export const loginLimiter = rateLimit({
   limit: 10,
   keyGenerator: keyByIp,
 });
+
+export const discountValidateLimiter = rateLimit({
+  ...sharedOpts,
+  windowMs: 60 * 1000,
+  limit: 20,
+  keyGenerator: keyByIp,
+});
+
+export const reviewWriteLimiter = rateLimit({
+  ...sharedOpts,
+  windowMs: 60 * 1000,
+  limit: 10,
+  keyGenerator: keyByUser,
+});
+
+export const paymentLimiter = rateLimit({
+  ...sharedOpts,
+  windowMs: 60 * 1000,
+  limit: 10,
+  keyGenerator: keyByUser,
+});

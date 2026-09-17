@@ -1,6 +1,8 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { User } from "./user.model.js";
+import { ApiError } from "../../shared/middleware/errorHandler.js";
+import { redis } from "../../shared/utils/redis.js";
 
 function generateToken(userId: string, role: string): string {
 const secret = process.env["JWT_SECRET"];
@@ -24,17 +26,6 @@ export async function registerUser(
   email: string,
   password: string
 ) {
-  const existingUser = await User.findOne({ email });
-
-  if (existingUser) {
-    const error = new Error("Email is already registered") as Error & {
-      statusCode?: number;
-    };
-
-    error.statusCode = 409;
-    throw error;
-  }
-
   const passwordHash = await bcrypt.hash(password, 12);
 
   const user = await User.create({
@@ -44,6 +35,13 @@ export async function registerUser(
   });
 
   const token = generateToken(user._id.toString(), user.role);
+
+  await redis.set(
+    `user:${user._id}`,
+    JSON.stringify({ role: user.role }),
+    "EX",
+    7 * 24 * 60 * 60
+  );
 
   return {
     user: {
@@ -57,15 +55,10 @@ export async function registerUser(
 }
 
 export async function loginUser(email: string, password: string) {
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).select("+passwordHash");
 
   if (!user) {
-    const error = new Error("Invalid email or password") as Error & {
-      statusCode?: number;
-    };
-
-    error.statusCode = 401;
-    throw error;
+    throw new ApiError(401, "Invalid email or password");
   }
 
   const isPasswordCorrect = await bcrypt.compare(
@@ -74,15 +67,17 @@ export async function loginUser(email: string, password: string) {
   );
 
   if (!isPasswordCorrect) {
-    const error = new Error("Invalid email or password") as Error & {
-      statusCode?: number;
-    };
-
-    error.statusCode = 401;
-    throw error;
+    throw new ApiError(401, "Invalid email or password");
   }
 
   const token = generateToken(user._id.toString(), user.role);
+
+  await redis.set(
+    `user:${user._id}`,
+    JSON.stringify({ role: user.role }),
+    "EX",
+    7 * 24 * 60 * 60
+  );
 
   return {
     user: {
