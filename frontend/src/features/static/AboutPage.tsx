@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { ShieldCheck, Sparkles, HeartHandshake } from 'lucide-react';
 
 export function AboutPage() {

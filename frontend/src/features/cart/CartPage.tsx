@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from './CartContext';
@@ -18,7 +18,7 @@ export function CartPage() {
     }
     setLoading(true);
     cartApi
-      .validateCart(cart.map(item => ({ productId: item.productId, quantity: item.qty })))
+      .validateCart(cart.map(item => ({ productId: item.productId, quantity: item.quantity })))
       .then(setValidated)
       .catch(() => setValidated([]))
       .finally(() => setLoading(false));

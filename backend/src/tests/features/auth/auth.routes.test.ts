@@ -66,7 +66,7 @@ describe("Auth Routes", () => {
   it("Rate Limiter correctly uses RedisStore instead of MemoryStore", async () => {
     // Make enough requests to trigger the register rate limit
     // registerLimiter allows 10 requests per 15 minutes.
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 15; i++) {
       await request(app).post("/api/auth/register").send({
         name: `User ${i}`,
         email: `user${i}@example.com`,

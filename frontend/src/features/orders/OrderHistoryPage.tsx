@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Package, Clock, CheckCircle2, XCircle } from 'lucide-react';
 
 export function OrderHistoryPage() {

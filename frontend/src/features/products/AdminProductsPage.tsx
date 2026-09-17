@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, AlertCircle, Edit2 } from 'lucide-react';
 import { productsApi, type Product, type CreateProductInput } from './productsApi';
 
 export const AdminProductsPage: React.FC = () => {
