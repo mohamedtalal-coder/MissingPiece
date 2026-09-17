@@ -1,17 +1,25 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+export interface CartItem {
+  productId: string;
+  title: string;
+  price: number;
+  imageUrl: string;
+  qty: number;
+}
+
 interface CartContextType {
-  cart: any[];
-  addToCart: (product: any) => void;
-  removeFromCart: (productId: any) => void;
-  updateQty: (productId: any, qty: number) => void;
+  cart: CartItem[];
+  addToCart: (product: { productId: string; title: string; price: number; imageUrl: string }) => void;
+  removeFromCart: (productId: string) => void;
+  updateQty: (productId: string, qty: number) => void;
   clearCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [cart, setCart] = useState<any[]>(() => {
+  const [cart, setCart] = useState<CartItem[]>(() => {
     try {
       const saved = localStorage.getItem('cart');
       return saved ? JSON.parse(saved) : [];
@@ -24,31 +32,25 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product: any) => {
-    const id = product.id || product._id || product.productId || product.title;
+  const addToCart = (product: { productId: string; title: string; price: number; imageUrl: string }) => {
     setCart(prevCart => {
-      const existingIndex = prevCart.findIndex((item: any) => (item.id || item._id || item.productId || item.title) === id);
+      const existingIndex = prevCart.findIndex(item => item.productId === product.productId);
       if (existingIndex > -1) {
         const updated = [...prevCart];
-        updated[existingIndex].qty = (updated[existingIndex].qty || 1) + 1;
+        updated[existingIndex].qty += 1;
         return updated;
-      } else {
-        return [...prevCart, { ...product, id, qty: 1 }];
       }
+      return [...prevCart, { ...product, qty: 1 }];
     });
-    alert(`Added "${product.title || 'Product'}" to cart!`);
   };
 
-  const removeFromCart = (productId: any) => {
-    setCart(prev => prev.filter((item: any) => (item.id || item._id || item.productId || item.title) !== productId));
+  const removeFromCart = (productId: string) => {
+    setCart(prev => prev.filter(item => item.productId !== productId));
   };
 
-  const updateQty = (productId: any, qty: number) => {
+  const updateQty = (productId: string, qty: number) => {
     if (qty < 1) return;
-    setCart(prev => prev.map((item: any) => {
-      const id = item.id || item._id || item.productId || item.title;
-      return id === productId ? { ...item, qty } : item;
-    }));
+    setCart(prev => prev.map(item => (item.productId === productId ? { ...item, qty } : item)));
   };
 
   const clearCart = () => {
