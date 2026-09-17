@@ -15,12 +15,23 @@ export async function addItem(
     throw new Error("addItem: exceeded retry limit — possible persistent conflict");
   }
 
-  const incremented = await Cart.findOneAndUpdate(
+  let incremented = await Cart.findOneAndUpdate(
     { userId, "items.productId": productId },
     { $inc: { "items.$.quantity": quantity } },
     { new: true, lean: true }
   );
-  if (incremented) return incremented.items;
+
+  if (incremented) {
+    const item = incremented.items.find((i: any) => String(i.productId) === String(productId));
+    if (item && item.quantity > 1000) {
+      incremented = await Cart.findOneAndUpdate(
+        { userId, "items.productId": productId },
+        { $set: { "items.$.quantity": 1000 } },
+        { new: true, lean: true }
+      );
+    }
+    return incremented?.items ?? [];
+  }
 
   try {
     const pushed = await Cart.findOneAndUpdate(

@@ -1,4 +1,6 @@
 import { User } from "../auth/user.model.js";
+import { Product } from "../products/product.model.js";
+import type { AppError } from "../../shared/middleware/errorHandler.js";
 
 export async function getUserWishlist(userId: string) {
   const user = await User.findById(userId).populate("wishlist").select("wishlist").lean();
@@ -6,6 +8,13 @@ export async function getUserWishlist(userId: string) {
 }
 
 export async function addProductToWishlist(userId: string, productId: string) {
+  const productExists = await Product.exists({ _id: productId });
+  if (!productExists) {
+    const err: AppError = new Error("Product not found");
+    err.statusCode = 404;
+    throw err;
+  }
+
   const user = await User.findByIdAndUpdate(
     userId,
     { $addToSet: { wishlist: productId } },

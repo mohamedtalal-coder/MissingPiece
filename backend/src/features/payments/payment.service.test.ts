@@ -113,6 +113,33 @@ describe("Payment Service", () => {
         })
       );
     });
+
+    it("correctly converts totalAmount to cents with rounding", async () => {
+      // Change order total to something that could cause precision issues if not rounded
+      await Order.findByIdAndUpdate(orderId, { totalAmount: 47.999 });
+
+      // @ts-ignore
+      stripe.checkout.sessions.create = jest.fn().mockResolvedValue({
+        id: "cs_test_123", url: "https://checkout.stripe.com/test",
+      });
+
+      await createCheckoutSessionForOrder(orderId.toString(), userIdA.toString());
+
+      expect(stripe.checkout.sessions.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          line_items: [
+            {
+              price_data: {
+                currency: "usd",
+                product_data: { name: expect.stringContaining("Order") },
+                unit_amount: 4800, // 47.999 * 100 rounded
+              },
+              quantity: 1,
+            }
+          ]
+        })
+      );
+    });
   });
 
   describe("handleStripeWebhook", () => {
@@ -198,6 +225,47 @@ describe("Payment Service", () => {
       // The status should still be "shipped", not changed back to "paid" or errored
       order = await Order.findById(orderId);
       expect(order?.status).toBe("shipped");
+    });
+
+    it("event for already 'paid' order is no-op even without WebhookEvent guard", async () => {
+      await Order.findByIdAndUpdate(orderId, { status: "paid" });
+      
+      const mockEvent = {
+        id: "evt_no_guard",
+        type: "checkout.session.completed",
+        data: {
+          object: {
+            metadata: { orderId: orderId.toString() },
+            payment_intent: "pi_123",
+          },
+        },
+      } as unknown as Stripe.Event;
+
+      // @ts-ignore
+      stripe.webhooks.constructEvent = jest.fn().mockReturnValue(mockEvent);
+      await handleStripeWebhook(Buffer.from("raw"), "valid_sig");
+
+      const order = await Order.findById(orderId);
+      expect(order?.status).toBe("paid"); // still paid
+    });
+
+    it("event referencing nonexistent orderId logs/no-ops and returns 200", async () => {
+      const mockEvent = {
+        id: "evt_nonexistent",
+        type: "checkout.session.completed",
+        data: {
+          object: {
+            metadata: { orderId: new mongoose.Types.ObjectId().toString() },
+            payment_intent: "pi_123",
+          },
+        },
+      } as unknown as Stripe.Event;
+
+      // @ts-ignore
+      stripe.webhooks.constructEvent = jest.fn().mockReturnValue(mockEvent);
+      
+      // Should not throw
+      await expect(handleStripeWebhook(Buffer.from("raw"), "valid_sig")).resolves.not.toThrow();
     });
   });
 });

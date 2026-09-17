@@ -4,9 +4,11 @@ import {
   createReview,
   updateReview,
   deleteReview,
+  listReviewsForProduct,
 } from "./review.service.js";
 import { Review } from "./review.model.js";
 import { Product } from "../products/product.model.js";
+import { User } from "../auth/user.model.js";
 import { createReviewSchema, updateReviewSchema } from "./review.validation.js";
 
 let mongoServer: MongoMemoryServer;
@@ -63,6 +65,11 @@ describe("Review Service", () => {
       });
       expect(result.success).toBe(true);
     });
+
+    it("accepts boundary ratings 1 and 5", () => {
+      expect(createReviewSchema.safeParse({ product: productId, rating: 1, comment: "C" }).success).toBe(true);
+      expect(createReviewSchema.safeParse({ product: productId, rating: 5, comment: "C" }).success).toBe(true);
+    });
   });
 
   describe("createReview", () => {
@@ -86,6 +93,13 @@ describe("Review Service", () => {
       await expect(
         createReview(userId1, { product: productId, rating: 5, comment: "Second" })
       ).rejects.toThrow(/E11000/); // MongoDB duplicate key error
+    });
+
+    it("creating review for nonexistent product rejected with 404", async () => {
+      const fakeId = new mongoose.Types.ObjectId().toString();
+      await expect(
+        createReview(userId1, { product: fakeId, rating: 5, comment: "C" })
+      ).rejects.toThrow("Product not found");
     });
   });
 
@@ -175,6 +189,23 @@ describe("Review Service", () => {
       product = await Product.findById(productId);
       expect(product?.averageRating).toBe(0);
       expect(product?.reviewCount).toBe(0);
+    });
+  });
+
+  describe("listReviewsForProduct", () => {
+    it("paginates and populates reviewer name only (no email/passwordHash)", async () => {
+      // create a user to populate
+      const u = await User.create({ name: "Rev User", email: "rev@e.com", passwordHash: "secret" });
+
+      await createReview(u._id.toString(), { product: productId, rating: 4, comment: "C1" });
+      
+      const result = await listReviewsForProduct({ product: productId, page: 1, limit: 10 });
+      expect(result.reviews.length).toBe(1);
+      
+      const reviewUser = result.reviews[0]!.user as any;
+      expect(reviewUser.name).toBe("Rev User");
+      expect(reviewUser.email).toBeUndefined();
+      expect(reviewUser.passwordHash).toBeUndefined();
     });
   });
 });

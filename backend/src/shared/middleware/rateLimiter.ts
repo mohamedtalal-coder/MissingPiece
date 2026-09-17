@@ -1,4 +1,4 @@
-import rateLimit, { ipKeyGenerator } from "express-rate-limit";
+import rateLimit from "express-rate-limit";
 import type { Request, Response } from "express";
 
 function rateLimitHandler(_req: Request, res: Response) {
@@ -19,19 +19,20 @@ function getIpBucket(ip: string): string {
 }
 
 function keyByUser(req: Request): string {
-  const ip = req.ip ?? "unknown";
-  return req.userId ?? ipKeyGenerator(getIpBucket(ip));
+  const ip = req.ip ?? req.headers["x-forwarded-for"]?.toString() ?? "unknown";
+  return req.userId ?? getIpBucket(ip);
 }
 
 function keyByIp(req: Request): string {
-  const ip = req.ip ?? "unknown";
-  return ipKeyGenerator(getIpBucket(ip));
+  const ip = req.ip ?? req.headers["x-forwarded-for"]?.toString() ?? "unknown";
+  return getIpBucket(ip);
 }
 
 const sharedOpts = {
   standardHeaders: "draft-8" as const,
   legacyHeaders: false,
   handler: rateLimitHandler,
+  validate: false,
 };
 
 export const cartReadLimiter = rateLimit({
@@ -115,6 +116,13 @@ export const discountValidateLimiter = rateLimit({
   ...sharedOpts,
   windowMs: 60 * 1000,
   limit: 20,
+  keyGenerator: keyByIp,
+});
+
+export const reviewReadLimiter = rateLimit({
+  ...sharedOpts,
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
   keyGenerator: keyByIp,
 });
 

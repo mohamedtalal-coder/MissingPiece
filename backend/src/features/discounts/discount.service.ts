@@ -1,6 +1,8 @@
 import mongoose, { type ClientSession } from "mongoose";
 import { Discount, type IDiscount } from "./discount.model.js";
 import type { AppError } from "../../shared/middleware/errorHandler.js";
+import { createDiscountSchema } from "./discount.validation.js";
+import { Product } from "../products/product.model.js";
 
 export interface CreateDiscountInput {
   code: string;
@@ -13,6 +15,15 @@ export interface CreateDiscountInput {
 }
 
 export async function createDiscount(input: CreateDiscountInput) {
+  if (input.applicableProducts && input.applicableProducts.length > 0) {
+    const count = await Product.countDocuments({ _id: { $in: input.applicableProducts } });
+    if (count !== input.applicableProducts.length) {
+      const err: AppError = new Error("One or more applicable products do not exist");
+      err.statusCode = 400;
+      throw err;
+    }
+  }
+
   // Input code should be uppercased per model schema, but we ensure it here too
   const discount = new Discount({
     ...input,
@@ -22,19 +33,49 @@ export async function createDiscount(input: CreateDiscountInput) {
 }
 
 export async function updateDiscount(id: string, input: Partial<CreateDiscountInput>) {
-  const updateData = { ...input };
-  if (updateData.code) {
-    updateData.code = updateData.code.toUpperCase();
-  }
-  const discount = await Discount.findByIdAndUpdate(id, updateData, {
-    new: true,
-    runValidators: true,
-  });
-  if (!discount) {
+  const existingDiscount = await Discount.findById(id);
+  if (!existingDiscount) {
     const err: AppError = new Error("Discount not found");
     err.statusCode = 404;
     throw err;
   }
+
+  const mergedData = {
+    code: existingDiscount.code,
+    type: existingDiscount.type,
+    value: existingDiscount.value,
+    validFrom: existingDiscount.validFrom,
+    validTo: existingDiscount.validTo,
+    maxUses: existingDiscount.maxUses,
+    applicableProducts: existingDiscount.applicableProducts,
+    ...input
+  };
+
+  if (mergedData.code) {
+    mergedData.code = mergedData.code.toUpperCase();
+  }
+
+  if (mergedData.applicableProducts && mergedData.applicableProducts.length > 0) {
+    const count = await Product.countDocuments({ _id: { $in: mergedData.applicableProducts } });
+    if (count !== mergedData.applicableProducts.length) {
+      const err: AppError = new Error("One or more applicable products do not exist");
+      err.statusCode = 400;
+      throw err;
+    }
+  }
+
+  const parseResult = createDiscountSchema.safeParse(mergedData);
+  if (!parseResult.success) {
+    const err: AppError = new Error(parseResult.error.issues[0]?.message || "Validation Error");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const discount = await Discount.findByIdAndUpdate(id, mergedData, {
+    new: true,
+    runValidators: true,
+  });
+
   return discount;
 }
 

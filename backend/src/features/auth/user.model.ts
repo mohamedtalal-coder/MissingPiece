@@ -24,7 +24,8 @@ const userSchema = new Schema(
       {
         street: { type: String, required: true, trim: true },
         city: { type: String, required: true, trim: true },
-        postalCode: { type: String, required: true, trim: true },
+        state: { type: String, required: true, trim: true },
+        zipCode: { type: String, required: true, trim: true },
         country: { type: String, required: true, trim: true },
       },
     ],

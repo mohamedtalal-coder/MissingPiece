@@ -4,7 +4,9 @@ import {
   calculateDiscount,
   findValidDiscountByCode,
   incrementDiscountUsage,
-  createDiscount
+  createDiscount,
+  updateDiscount,
+  softDeleteDiscount
 } from "./discount.service.js";
 import { Discount } from "./discount.model.js";
 
@@ -154,6 +156,51 @@ describe("Discount Service", () => {
 
       session1.endSession();
       session2.endSession();
+    });
+  });
+
+  describe("createDiscount & updateDiscount", () => {
+    it("PATCH with only validFrom succeeds", async () => {
+      const validFrom = new Date(Date.now() - 10000);
+      const validTo = new Date(Date.now() + 10000);
+      const d = await createDiscount({ code: "PCT1", type: "percentage", value: 10, validFrom, validTo });
+      
+      const newValidFrom = new Date(Date.now());
+      const updated = await updateDiscount(d._id.toString(), { validFrom: newValidFrom });
+      expect(updated!.validFrom).toEqual(newValidFrom);
+    });
+
+    it("PATCH with only value on percentage rejected if > 100", async () => {
+      const validFrom = new Date(Date.now() - 10000);
+      const validTo = new Date(Date.now() + 10000);
+      const d = await createDiscount({ code: "PCT2", type: "percentage", value: 10, validFrom, validTo });
+      
+      await expect(updateDiscount(d._id.toString(), { value: 150 })).rejects.toThrow("Percentage discount value cannot exceed 100");
+    });
+
+    it("createDiscount with nonexistent product is rejected", async () => {
+      const validFrom = new Date(Date.now() - 10000);
+      const validTo = new Date(Date.now() + 10000);
+      const fakeId = new mongoose.Types.ObjectId().toString();
+      
+      await expect(createDiscount({ code: "PCT3", type: "percentage", value: 10, validFrom, validTo, applicableProducts: [fakeId] }))
+        .rejects.toThrow("One or more applicable products do not exist");
+    });
+  });
+
+  describe("softDeleteDiscount", () => {
+    it("sets isActive false and fails findValidDiscountByCode", async () => {
+      const validFrom = new Date(Date.now() - 10000);
+      const validTo = new Date(Date.now() + 10000);
+      const d = await createDiscount({ code: "SOFT", type: "percentage", value: 10, validFrom, validTo });
+      
+      await softDeleteDiscount(d._id.toString());
+      
+      const inDb = await Discount.findById(d._id);
+      expect(inDb?.isActive).toBe(false);
+
+      const found = await findValidDiscountByCode("SOFT");
+      expect(found).toBeNull();
     });
   });
 });

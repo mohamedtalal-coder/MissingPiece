@@ -1,6 +1,7 @@
 import express, { type Application } from "express";
 import cors from "cors";
 import morgan from "morgan";
+import helmet from "helmet";
 import authRoutes from "./features/auth/auth.routes.js";
 import { errorHandler, notFound } from "./shared/middleware/errorHandler.js";
 import productRoutes from "./features/products/product.routes.js";
@@ -12,6 +13,7 @@ import discountRoutes from "./features/discounts/discount.routes.js";
 import reviewRoutes from "./features/reviews/review.routes.js";
 import { webhookHandler } from "./features/payments/payment.controller.js";
 import paymentRoutes from "./features/payments/payment.routes.js";
+import cartRoutes from "./features/cart/cart.routes.js";
 
 const app: Application = express();
 
@@ -34,6 +36,7 @@ app.post(
   webhookHandler
 );
 
+app.use(helmet());
 app.use(express.json({ limit: "100kb" }));
 app.use(morgan("dev"));
 
@@ -50,6 +53,7 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/cart", cartRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

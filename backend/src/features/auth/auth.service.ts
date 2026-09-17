@@ -2,7 +2,6 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { User } from "./user.model.js";
 import { ApiError } from "../../shared/middleware/errorHandler.js";
-import { redis } from "../../shared/utils/redis.js";
 
 function generateToken(userId: string, role: string): string {
 const secret = process.env["JWT_SECRET"];
@@ -36,13 +35,6 @@ export async function registerUser(
 
   const token = generateToken(user._id.toString(), user.role);
 
-  await redis.set(
-    `user:${user._id}`,
-    JSON.stringify({ role: user.role }),
-    "EX",
-    7 * 24 * 60 * 60
-  );
-
   return {
     user: {
       id: user._id,
@@ -71,13 +63,6 @@ export async function loginUser(email: string, password: string) {
   }
 
   const token = generateToken(user._id.toString(), user.role);
-
-  await redis.set(
-    `user:${user._id}`,
-    JSON.stringify({ role: user.role }),
-    "EX",
-    7 * 24 * 60 * 60
-  );
 
   return {
     user: {

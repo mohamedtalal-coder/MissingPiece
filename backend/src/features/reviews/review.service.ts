@@ -27,6 +27,13 @@ async function recalculateProductRating(productId: string) {
 }
 
 export async function createReview(userId: string, input: z.infer<typeof createReviewSchema>) {
+  const productExists = await Product.exists({ _id: input.product });
+  if (!productExists) {
+    const err: AppError = new Error("Product not found");
+    err.statusCode = 404;
+    throw err;
+  }
+
   const review = await Review.create({ ...input, user: userId });
   await recalculateProductRating(input.product);
   return review;

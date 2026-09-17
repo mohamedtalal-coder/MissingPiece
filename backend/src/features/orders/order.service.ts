@@ -131,10 +131,53 @@ export async function getOrderById(orderId: string, userId: string, isAdmin: boo
   return Order.findOne(filter).populate("items.product", "name images price").lean();
 }
 
+const ALLOWED_TRANSITIONS: Record<string, string[]> = {
+  pending: ["paid", "cancelled"],
+  paid: ["shipped", "cancelled"],
+  shipped: ["delivered"],
+  delivered: [],
+  cancelled: [],
+};
+
 export async function updateOrderStatus(orderId: string, status: string) {
-  return Order.findByIdAndUpdate(
-    orderId,
-    { status },
-    { new: true, runValidators: true }
-  ).lean();
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const order = await Order.findById(orderId).session(session);
+    if (!order) {
+      const err: AppError = new Error("Order not found");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    const currentStatus = order.status;
+    
+    if (!ALLOWED_TRANSITIONS[currentStatus]?.includes(status)) {
+      const err: AppError = new Error(`Invalid status transition from ${currentStatus} to ${status}`);
+      err.statusCode = 409;
+      throw err;
+    }
+
+    if (status === "cancelled" && currentStatus !== "cancelled") {
+      for (const item of order.items) {
+        await Product.findByIdAndUpdate(
+          item.product,
+          { $inc: { stock: item.quantity } },
+          { session }
+        );
+      }
+    }
+
+    order.status = status as any;
+    await order.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
+    return order;
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+  }
 }

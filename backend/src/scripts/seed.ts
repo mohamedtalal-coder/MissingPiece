@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { Product } from "../features/products/product.model.js";
+import { User } from "../features/auth/user.model.js";
+import bcrypt from "bcrypt";
 import { resolve } from "path";
 
 dotenv.config({ path: resolve(process.cwd(), ".env") });
@@ -35,6 +37,17 @@ async function seed() {
 
     console.log("Seeding 20 new puzzle products...");
     await Product.insertMany(puzzlePieces);
+
+    const adminEmail = process.env["SEED_ADMIN_EMAIL"] || "admin@missingpiece.local";
+    const adminPassword = process.env["SEED_ADMIN_PASSWORD"] || "ChangeMe123!";
+    const existingAdmin = await User.findOne({ email: adminEmail });
+    if (!existingAdmin) {
+      const passwordHash = await bcrypt.hash(adminPassword, 12);
+      await User.create({ name: "Admin", email: adminEmail, passwordHash, role: "admin" });
+      console.log(`Seeded admin user: ${adminEmail}. Please change this password after your first login!`);
+    } else {
+      console.log("Admin user already exists, skipping.");
+    }
 
     console.log("Seeding completed successfully.");
     process.exit(0);
