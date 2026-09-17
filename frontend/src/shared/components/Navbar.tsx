@@ -1,16 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, Heart, User, LogOut, Settings, Package } from 'lucide-react';
+import {
+  ShoppingBag,
+  Heart,
+  User,
+  LogOut,
+  Settings,
+  Package,
+  Sun,
+  Moon,
+  Languages,
+} from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [user, setUser] = useState<{ name: string; email: string; avatar?: string } | null>(null);
-  const navigate = useNavigate();
+  const [user, setUser] = useState<{
+    name: string;
+    email: string;
+    avatar?: string;
+  } | null>(null);
 
-  // تحديث بيانات المستخدم فوراً من localStorage
+  const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
+  const { language, toggleLanguage, isArabic } = useLanguage();
+
   useEffect(() => {
     const checkUser = () => {
       const savedUser = localStorage.getItem('currentUser');
+
       if (savedUser) {
         setUser(JSON.parse(savedUser));
       } else {
@@ -20,6 +39,7 @@ export function Navbar() {
 
     checkUser();
     window.addEventListener('storage', checkUser);
+
     return () => window.removeEventListener('storage', checkUser);
   }, []);
 
@@ -30,114 +50,246 @@ export function Navbar() {
     navigate('/login');
   };
 
+  const translations = {
+    home: isArabic ? 'الرئيسية' : 'Home',
+    catalog: isArabic ? 'المنتجات' : 'Catalog',
+    wishlist: isArabic ? 'المفضلة' : 'Wishlist',
+    orders: isArabic ? 'طلباتي' : 'My Orders',
+    admin: isArabic ? 'لوحة الإدارة' : 'Admin Portal',
+    cart: isArabic ? 'السلة' : 'Cart',
+    profile: isArabic ? 'إدارة الحساب' : 'Manage Profile & Avatar',
+    myWishlist: isArabic ? 'قائمتي المفضلة' : 'My Wishlist',
+    logout: isArabic ? 'تسجيل الخروج' : 'Logout',
+    createAccount: isArabic ? 'إنشاء حساب' : 'Create Account',
+    signIn: isArabic ? 'تسجيل الدخول' : 'Sign In',
+  };
+
   return (
-    <nav className="w-full bg-[#0b0914] border-b border-[#221738] px-8 py-4 sticky top-0 z-50 shadow-[0_4px_25px_rgba(126,34,206,0.2)] backdrop-blur-md font-sans">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        
-        {/* اللوجو */}
-        <div className="flex items-center gap-3.5">
-          <Link to="/" className="text-xl font-serif font-extrabold tracking-wider bg-gradient-to-r from-white via-[#e9d5ff] to-[#c084fc] bg-clip-text text-transparent">
-            Missing Piece
-          </Link>
-        </div>
+    <nav
+      className={`w-full px-8 py-4 sticky top-0 z-50 backdrop-blur-md font-sans border-b transition-colors duration-300 ${
+        theme === 'dark'
+          ? 'bg-[#0b0914]/95 border-[#221738] shadow-[0_4px_25px_rgba(126,34,206,0.2)]'
+          : 'bg-white/95 border-purple-100 shadow-[0_4px_20px_rgba(126,34,206,0.12)]'
+      }`}
+    >
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
 
-        {/* الروابط الأساسية */}
-        <div className="hidden lg:flex items-center gap-6 text-xs font-semibold text-[#cbd5e1]">
-          <Link to="/" className="hover:text-[#c084fc] transition-colors">Home</Link>
-          <Link to="/products" className="hover:text-[#c084fc] transition-colors">Catalog</Link>
-          <Link to="/wishlist" className="hover:text-[#c084fc] transition-colors flex items-center gap-1">
+        <Link
+          to="/"
+          className="text-xl font-serif font-extrabold tracking-wider bg-gradient-to-r from-purple-600 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent shrink-0"
+        >
+          Missing Piece
+        </Link>
+
+        <div
+          className={`hidden lg:flex items-center gap-6 text-xs font-semibold ${
+            theme === 'dark' ? 'text-[#cbd5e1]' : 'text-gray-700'
+          }`}
+        >
+          <Link
+            to="/"
+            className="hover:text-purple-500 transition-colors"
+          >
+            {translations.home}
+          </Link>
+
+          <Link
+            to="/products"
+            className="hover:text-purple-500 transition-colors"
+          >
+            {translations.catalog}
+          </Link>
+
+          <Link
+            to="/wishlist"
+            className="hover:text-purple-500 transition-colors flex items-center gap-1"
+          >
             <Heart className="w-3.5 h-3.5 text-pink-400" />
-            <span>Wishlist</span>
+            <span>{translations.wishlist}</span>
           </Link>
-          <Link to="/orders" className="hover:text-[#c084fc] transition-colors flex items-center gap-1">
-            <Package className="w-3.5 h-3.5 text-[#c084fc]" />
-            <span>My Orders</span>
+
+          <Link
+            to="/orders"
+            className="hover:text-purple-500 transition-colors flex items-center gap-1"
+          >
+            <Package className="w-3.5 h-3.5 text-purple-500" />
+            <span>{translations.orders}</span>
           </Link>
-          <Link to="/admin/orders" className="hover:text-[#c084fc] transition-colors">Admin Portal</Link>
+
+          <Link
+            to="/admin/orders"
+            className="hover:text-purple-500 transition-colors"
+          >
+            {translations.admin}
+          </Link>
         </div>
 
-        {/* اليمين: السلة والبروفايل */}
-        <div className="flex items-center gap-4 relative">
-          <Link to="/cart" className="bg-gradient-to-r from-[#7e22ce] to-[#a855f7] text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+        <div className="flex items-center gap-3 relative">
+
+          <button
+            onClick={toggleTheme}
+            className={`w-9 h-9 rounded-xl border flex items-center justify-center transition-all ${
+              theme === 'dark'
+                ? 'bg-[#130e21] border-[#7e22ce]/40 text-[#c084fc] hover:border-[#c084fc]'
+                : 'bg-purple-50 border-purple-200 text-purple-600 hover:border-purple-400'
+            }`}
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-4 h-4" />
+            ) : (
+              <Moon className="w-4 h-4" />
+            )}
+          </button>
+
+          <button
+            onClick={toggleLanguage}
+            className={`h-9 px-3 rounded-xl border flex items-center gap-1.5 transition-all text-xs font-semibold ${
+              theme === 'dark'
+                ? 'bg-[#130e21] border-[#7e22ce]/40 text-[#c084fc] hover:border-[#c084fc]'
+                : 'bg-purple-50 border-purple-200 text-purple-600 hover:border-purple-400'
+            }`}
+            aria-label="Change language"
+          >
+            <Languages className="w-4 h-4" />
+            <span>{language === 'en' ? 'AR' : 'EN'}</span>
+          </button>
+
+          <Link
+            to="/cart"
+            className="bg-gradient-to-r from-[#7e22ce] to-[#a855f7] text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-[0_0_15px_rgba(168,85,247,0.4)]"
+          >
             <ShoppingBag className="w-3.5 h-3.5" />
-            <span>Cart</span>
+            <span>{translations.cart}</span>
           </Link>
 
           <div className="relative">
-            <button 
+            <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-10 h-10 rounded-full bg-[#130e21] border border-[#a855f7]/60 flex items-center justify-center text-[#e9d5ff] hover:border-[#c084fc] shadow-[0_0_10px_rgba(168,85,247,0.3)] cursor-pointer overflow-hidden"
+              className={`w-10 h-10 rounded-full border flex items-center justify-center cursor-pointer overflow-hidden transition-all ${
+                theme === 'dark'
+                  ? 'bg-[#130e21] border-[#a855f7]/60 text-[#e9d5ff] hover:border-[#c084fc]'
+                  : 'bg-purple-50 border-purple-300 text-purple-600 hover:border-purple-500'
+              }`}
             >
               {user?.avatar ? (
-                <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" />
+                <img
+                  src={user.avatar}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
               ) : (
-                <User className="w-4 h-4 text-[#c084fc]" />
+                <User className="w-4 h-4" />
               )}
             </button>
 
-            {/* القائمة المنسدلة */}
             {isDropdownOpen && (
-              <div className="absolute right-0 mt-3 w-56 bg-[#130e21] border border-[#7e22ce]/50 rounded-2xl shadow-[0_0_25px_rgba(126,34,206,0.3)] py-2 z-50 text-xs">
+              <div
+                className={`absolute ${
+                  isArabic ? 'left-0' : 'right-0'
+                } mt-3 w-56 rounded-2xl border py-2 z-50 text-xs shadow-[0_0_25px_rgba(126,34,206,0.3)] ${
+                  theme === 'dark'
+                    ? 'bg-[#130e21] border-[#7e22ce]/50'
+                    : 'bg-white border-purple-200'
+                }`}
+              >
                 {user ? (
                   <>
-                    <div className="px-4 py-3 border-b border-[#7e22ce]/30">
-                      <p className="text-white font-bold">{user.name}</p>
-                      <p className="text-[10px] text-[#cbd5e1] truncate">{user.email}</p>
+                    <div
+                      className={`px-4 py-3 border-b ${
+                        theme === 'dark'
+                          ? 'border-[#7e22ce]/30'
+                          : 'border-purple-100'
+                      }`}
+                    >
+                      <p
+                        className={`font-bold ${
+                          theme === 'dark'
+                            ? 'text-white'
+                            : 'text-gray-900'
+                        }`}
+                      >
+                        {user.name}
+                      </p>
+
+                      <p
+                        className={`text-[10px] truncate ${
+                          theme === 'dark'
+                            ? 'text-[#cbd5e1]'
+                            : 'text-gray-500'
+                        }`}
+                      >
+                        {user.email}
+                      </p>
                     </div>
 
                     <div className="py-1">
-                      {/* زرار الانتقال لصفحة البروفايل وتعديل البيانات والصورة */}
-                      <Link 
-                        to="/account" 
+                      <Link
+                        to="/account"
                         onClick={() => setIsDropdownOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-[#cbd5e1] hover:bg-[#7e22ce]/20 hover:text-white transition-colors"
+                        className={`flex items-center gap-2.5 px-4 py-2.5 transition-colors ${
+                          theme === 'dark'
+                            ? 'text-[#cbd5e1] hover:bg-[#7e22ce]/20 hover:text-white'
+                            : 'text-gray-700 hover:bg-purple-50 hover:text-purple-600'
+                        }`}
                       >
-                        <Settings className="w-3.5 h-3.5 text-[#c084fc]" />
-                        <span>Manage Profile & Avatar</span>
+                        <Settings className="w-3.5 h-3.5 text-purple-500" />
+                        <span>{translations.profile}</span>
                       </Link>
 
-                      <Link 
-                        to="/wishlist" 
+                      <Link
+                        to="/wishlist"
                         onClick={() => setIsDropdownOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-[#cbd5e1] hover:bg-[#7e22ce]/20 hover:text-white transition-colors"
+                        className={`flex items-center gap-2.5 px-4 py-2.5 transition-colors ${
+                          theme === 'dark'
+                            ? 'text-[#cbd5e1] hover:bg-[#7e22ce]/20 hover:text-white'
+                            : 'text-gray-700 hover:bg-purple-50 hover:text-purple-600'
+                        }`}
                       >
                         <Heart className="w-3.5 h-3.5 text-pink-400" />
-                        <span>My Wishlist</span>
+                        <span>{translations.myWishlist}</span>
                       </Link>
 
-                      <button 
+                      <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-red-400 hover:bg-red-500/10 transition-colors text-left cursor-pointer border-t border-[#7e22ce]/20 mt-1"
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-red-400 hover:bg-red-500/10 transition-colors border-t border-purple-500/20 mt-1"
                       >
                         <LogOut className="w-3.5 h-3.5" />
-                        <span>Logout</span>
+                        <span>{translations.logout}</span>
                       </button>
                     </div>
                   </>
                 ) : (
                   <div className="py-1">
-                    <Link 
-                      to="/register" 
+                    <Link
+                      to="/register"
                       onClick={() => setIsDropdownOpen(false)}
-                      className="block px-4 py-2.5 text-[#cbd5e1] hover:bg-[#7e22ce]/20 hover:text-white"
+                      className={`block px-4 py-2.5 transition-colors ${
+                        theme === 'dark'
+                          ? 'text-[#cbd5e1] hover:bg-[#7e22ce]/20 hover:text-white'
+                          : 'text-gray-700 hover:bg-purple-50 hover:text-purple-600'
+                      }`}
                     >
-                      Create Account
+                      {translations.createAccount}
                     </Link>
-                    <Link 
-                      to="/login" 
+
+                    <Link
+                      to="/login"
                       onClick={() => setIsDropdownOpen(false)}
-                      className="block px-4 py-2.5 text-[#cbd5e1] hover:bg-[#7e22ce]/20 hover:text-white"
+                      className={`block px-4 py-2.5 transition-colors ${
+                        theme === 'dark'
+                          ? 'text-[#cbd5e1] hover:bg-[#7e22ce]/20 hover:text-white'
+                          : 'text-gray-700 hover:bg-purple-50 hover:text-purple-600'
+                      }`}
                     >
-                      Sign In
+                      {translations.signIn}
                     </Link>
                   </div>
                 )}
               </div>
             )}
           </div>
-
         </div>
-
       </div>
     </nav>
   );
