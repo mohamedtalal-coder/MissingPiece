@@ -1,8 +1,17 @@
 import type { Request, Response, NextFunction } from "express";
-import { registerSchema, loginSchema } from "./auth.validation.js";
-import { registerUser, loginUser } from "./auth.service.js";
+import {
+  registerSchema,
+  loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from "./auth.validation.js";
 import { revokeAllUserTokens } from "../../shared/utils/tokenRevocation.js";
-
+import {
+  registerUser,
+  loginUser,
+  forgotPassword as forgotPasswordService,
+  resetPassword as resetPasswordService,
+} from "./auth.service.js";
 export async function register(
   req: Request,
   res: Response,
@@ -63,6 +72,47 @@ export async function logout(
     res.status(200).json({
       success: true,
       message: "Logout successful",
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+export async function forgotPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const data = forgotPasswordSchema.parse(req.body);
+
+    await forgotPasswordService(data.email);
+
+    res.status(200).json({
+      success: true,
+      message: "If an account exists, a reset code has been sent",
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function resetPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const data = resetPasswordSchema.parse(req.body);
+
+    await resetPasswordService(
+  data.email,
+  data.otp,
+  data.newPassword
+);
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successful",
     });
   } catch (error) {
     next(error);

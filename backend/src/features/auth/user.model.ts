@@ -19,6 +19,15 @@ const userSchema = new Schema(
       enum: ["buyer", "admin"],
       default: "buyer",
     },
+    resetPasswordOtpHash: {
+  type: String,
+  select: false,
+},
+
+resetPasswordOtpExpires: {
+  type: Date,
+  select: false,
+},
 
     addresses: [
       {
