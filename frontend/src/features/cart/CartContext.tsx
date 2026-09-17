@@ -86,7 +86,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } else {
       setCart(prevCart => {
         const existingIndex = prevCart.findIndex(item => item.productId === product._id);
-        let updated = [...prevCart];
+        const updated = [...prevCart];
         if (existingIndex > -1) {
           updated[existingIndex].quantity += qty;
         } else {
