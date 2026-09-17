@@ -32,10 +32,10 @@ export function RegisterForm() {
 
   return (
     <div className="min-h-screen bg-[#0b0914] text-white flex items-center justify-center px-6 py-12 font-sans">
-      <div className="max-w-md w-full bg-[#130e21] border border-[#221738] p-8 rounded-3xl space-y-6 shadow-xl">
+      <div className="max-w-md w-full bg-background border border-[#221738] p-8 rounded-md space-y-6 shadow-xl">
 
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 bg-[#7e22ce]/20 border border-[#7e22ce]/40 rounded-2xl flex items-center justify-center mx-auto text-[#c084fc]">
+          <div className="w-12 h-12 bg-[#7e22ce]/20 border border-border rounded-md flex items-center justify-center mx-auto text-[#c084fc]">
             <UserPlus className="w-6 h-6" />
           </div>
           <h1 className="text-2xl font-serif font-bold text-white tracking-wide">Create Account</h1>
@@ -43,7 +43,7 @@ export function RegisterForm() {
         </div>
 
         {error && (
-          <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-800/50 text-rose-300 text-xs text-center">
+          <div className="p-3.5 rounded-md bg-rose-950/40 border border-rose-800/50 text-rose-300 text-xs text-center">
             {error}
           </div>
         )}
@@ -59,7 +59,7 @@ export function RegisterForm() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Salma Yehia"
-                className="w-full bg-[#0b0914] border border-[#221738] rounded-xl px-4 py-2.5 pl-10 text-xs text-white focus:outline-none focus:border-[#7e22ce]"
+                className="w-full bg-[#0b0914] border border-[#221738] rounded-md px-4 py-2.5 pl-10 text-xs text-white focus:outline-none focus:border-border"
               />
             </div>
           </div>
@@ -74,7 +74,7 @@ export function RegisterForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="salma@example.com"
-                className="w-full bg-[#0b0914] border border-[#221738] rounded-xl px-4 py-2.5 pl-10 text-xs text-white focus:outline-none focus:border-[#7e22ce]"
+                className="w-full bg-[#0b0914] border border-[#221738] rounded-md px-4 py-2.5 pl-10 text-xs text-white focus:outline-none focus:border-border"
               />
             </div>
           </div>
@@ -89,7 +89,7 @@ export function RegisterForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-[#0b0914] border border-[#221738] rounded-xl px-4 py-2.5 pl-10 text-xs text-white focus:outline-none focus:border-[#7e22ce]"
+                className="w-full bg-[#0b0914] border border-[#221738] rounded-md px-4 py-2.5 pl-10 text-xs text-white focus:outline-none focus:border-border"
               />
             </div>
           </div>
@@ -97,7 +97,7 @@ export function RegisterForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-gradient-to-r from-[#7e22ce] to-[#a855f7] text-white rounded-xl text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer shadow-md shadow-purple-900/30 disabled:opacity-50"
+            className="w-full py-3 bg-primary from-[#7e22ce] to-[#a855f7] text-white rounded-md text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer shadow-md shadow-subtle disabled:opacity-50"
           >
             {loading ? 'Creating account...' : 'Create Account'}
           </button>

@@ -18,8 +18,8 @@ export function AboutPage() {
       </div>
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-[var(--bg-card)] border border-[#7e22ce]/40 p-6 rounded-2xl space-y-4 shadow-xl hover:border-[#a855f7] transition-all">
-          <div className="w-12 h-12 bg-[var(--bg-main)] rounded-xl flex items-center justify-center text-[#c084fc] border border-[#7e22ce]/40">
+        <div className="bg-[var(--bg-card)] border border-border p-6 rounded-md space-y-4 shadow-xl hover:border-[#a855f7] transition-all">
+          <div className="w-12 h-12 bg-[var(--bg-main)] rounded-md flex items-center justify-center text-[#c084fc] border border-border">
             <Sparkles className="w-6 h-6" />
           </div>
 
@@ -32,8 +32,8 @@ export function AboutPage() {
           </p>
         </div>
 
-        <div className="bg-[var(--bg-card)] border border-[#7e22ce]/40 p-6 rounded-2xl space-y-4 shadow-xl hover:border-[#a855f7] transition-all">
-          <div className="w-12 h-12 bg-[var(--bg-main)] rounded-xl flex items-center justify-center text-[#c084fc] border border-[#7e22ce]/40">
+        <div className="bg-[var(--bg-card)] border border-border p-6 rounded-md space-y-4 shadow-xl hover:border-[#a855f7] transition-all">
+          <div className="w-12 h-12 bg-[var(--bg-main)] rounded-md flex items-center justify-center text-[#c084fc] border border-border">
             <ShieldCheck className="w-6 h-6" />
           </div>
 
@@ -46,8 +46,8 @@ export function AboutPage() {
           </p>
         </div>
 
-        <div className="bg-[var(--bg-card)] border border-[#7e22ce]/40 p-6 rounded-2xl space-y-4 shadow-xl hover:border-[#a855f7] transition-all">
-          <div className="w-12 h-12 bg-[var(--bg-main)] rounded-xl flex items-center justify-center text-[#c084fc] border border-[#7e22ce]/40">
+        <div className="bg-[var(--bg-card)] border border-border p-6 rounded-md space-y-4 shadow-xl hover:border-[#a855f7] transition-all">
+          <div className="w-12 h-12 bg-[var(--bg-main)] rounded-md flex items-center justify-center text-[#c084fc] border border-border">
             <HeartHandshake className="w-6 h-6" />
           </div>
 

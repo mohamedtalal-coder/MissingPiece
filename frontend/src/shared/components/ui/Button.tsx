@@ -47,7 +47,7 @@ export const Button: React.FC<ButtonProps> = ({
       {...props}
     >
       {isLoading ? (
-        <span className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
+        <span className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-md animate-spin" />
       ) : icon && iconPosition === 'left' ? (
         <Icon name={icon} className={`text-lg ${children ? 'mr-1' : ''}`} />
       ) : null}

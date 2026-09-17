@@ -39,10 +39,10 @@ export const ContactForm: React.FC = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-5 bg-[var(--bg-card)] border border-[#7e22ce]/40 p-8 rounded-3xl"
+      className="space-y-5 bg-[var(--bg-card)] border border-border p-8 rounded-md"
     >
       {success && (
-        <div className="flex items-center gap-2 p-4 rounded-xl bg-emerald-950/40 border border-emerald-800/50 text-emerald-300 text-xs">
+        <div className="flex items-center gap-2 p-4 rounded-md bg-emerald-950/40 border border-emerald-800/50 text-emerald-300 text-xs">
           <CheckCircle2 className="w-4 h-4" />
 
           <span>{t.contact.sendSuccess}</span>
@@ -50,7 +50,7 @@ export const ContactForm: React.FC = () => {
       )}
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-950/40 border border-rose-800/50 text-rose-300 text-xs">
+        <div className="p-4 rounded-md bg-rose-950/40 border border-rose-800/50 text-rose-300 text-xs">
           {error}
         </div>
       )}
@@ -65,7 +65,7 @@ export const ContactForm: React.FC = () => {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={t.contact.namePlaceholder}
-          className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-purple-500"
+          className="w-full bg-[var(--bg-main)] border border-border rounded-md px-3.5 py-2.5 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-border"
           required
         />
       </div>
@@ -80,7 +80,7 @@ export const ContactForm: React.FC = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t.contact.emailPlaceholder}
-          className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-purple-500"
+          className="w-full bg-[var(--bg-main)] border border-border rounded-md px-3.5 py-2.5 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-border"
           required
         />
       </div>
@@ -95,7 +95,7 @@ export const ContactForm: React.FC = () => {
           onChange={(e) => setMessage(e.target.value)}
           placeholder={t.contact.helpPlaceholder}
           rows={4}
-          className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-purple-500"
+          className="w-full bg-[var(--bg-main)] border border-border rounded-md px-3.5 py-2.5 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-border"
           required
         />
       </div>
@@ -103,7 +103,7 @@ export const ContactForm: React.FC = () => {
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-medium hover:from-purple-500 hover:to-indigo-500 transition-all flex justify-center items-center gap-2 shadow-lg shadow-purple-900/40"
+        className="w-full py-3 rounded-md bg-primary from-primary to-primary text-white text-xs font-medium hover:from-primary hover:to-primary transition-all flex justify-center items-center gap-2 shadow-lg shadow-subtle"
       >
         {loading && <Loader2 className="w-4 h-4 animate-spin" />}
 

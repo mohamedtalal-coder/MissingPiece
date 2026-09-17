@@ -27,19 +27,19 @@ export function MyOrdersPage() {
 
       <div className="max-w-4xl mx-auto">
         {orders.length === 0 ? (
-          <div className="text-center py-20 bg-[#130e21] border border-[#221738] rounded-3xl space-y-3 font-sans shadow-[0_0_30px_rgba(126,34,206,0.1)]">
+          <div className="text-center py-20 bg-background border border-[#221738] rounded-md space-y-3 font-sans shadow-[0_0_30px_rgba(126,34,206,0.1)]">
             <Clock className="w-10 h-10 mx-auto text-[#7e22ce]" />
             <p className="text-xs text-[#a1a1aa]">You haven't placed any orders yet.</p>
           </div>
         ) : (
           <div className="space-y-4 font-sans">
             {orders.map((order: any, idx: number) => (
-              <div key={order.id || idx} className="bg-[#130e21] border border-[#221738] p-6 rounded-2xl flex justify-between items-center">
+              <div key={order.id || idx} className="bg-background border border-[#221738] p-6 rounded-md flex justify-between items-center">
                 <div className="space-y-1">
                   <h3 className="text-xs font-bold text-white">Order #{order.id || idx + 1}</h3>
                   <p className="text-[10px] text-[#a1a1aa]">Total: ${order.total || order.price || '0.00'}</p>
                 </div>
-                <span className="px-3 py-1 rounded-full text-[10px] bg-purple-950/80 text-[#d8b4fe] border border-[#7e22ce]/40">
+                <span className="px-3 py-1 rounded-md text-[10px] bg-surface text-[#d8b4fe] border border-border">
                   {order.status || 'Processing'}
                 </span>
               </div>

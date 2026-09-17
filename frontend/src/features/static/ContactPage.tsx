@@ -13,7 +13,7 @@ export function ContactPage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] font-serif py-16 px-6">
-      <div className="max-w-4xl mx-auto space-y-10 bg-[var(--bg-card)] border border-[var(--border-main)] p-10 md:p-14 rounded-3xl shadow-xl">
+      <div className="max-w-4xl mx-auto space-y-10 bg-[var(--bg-card)] border border-[var(--border-main)] p-10 md:p-14 rounded-md shadow-xl">
         <div className="text-center space-y-3">
           <h1 className="text-3xl md:text-4xl font-bold tracking-wide text-[var(--text-main)]">
             {t.contact.title}
@@ -52,10 +52,10 @@ export function ContactPage() {
             </div>
           </div>
 
-          <div className="bg-[var(--bg-main)] p-6 rounded-2xl border border-[var(--border-main)]">
+          <div className="bg-[var(--bg-main)] p-6 rounded-md border border-[var(--border-main)]">
             {submitted ? (
               <div className="text-center py-10 space-y-3">
-                <div className="w-12 h-12 bg-emerald-950 text-emerald-400 border border-emerald-800 rounded-full flex items-center justify-center mx-auto text-lg font-bold">
+                <div className="w-12 h-12 bg-emerald-950 text-emerald-400 border border-emerald-800 rounded-md flex items-center justify-center mx-auto text-lg font-bold">
                   ✓
                 </div>
 
@@ -78,7 +78,7 @@ export function ContactPage() {
                     type="text"
                     required
                     placeholder={t.contact.namePlaceholder}
-                    className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl px-3.5 py-2 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#7e22ce]"
+                    className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-md px-3.5 py-2 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-border"
                   />
                 </div>
 
@@ -91,7 +91,7 @@ export function ContactPage() {
                     type="email"
                     required
                     placeholder={t.contact.emailPlaceholder}
-                    className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl px-3.5 py-2 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#7e22ce]"
+                    className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-md px-3.5 py-2 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-border"
                   />
                 </div>
 
@@ -104,13 +104,13 @@ export function ContactPage() {
                     required
                     rows={4}
                     placeholder={t.contact.messagePlaceholder}
-                    className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl px-3.5 py-2 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#7e22ce] resize-none"
+                    className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-md px-3.5 py-2 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-border resize-none"
                   ></textarea>
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full py-2.5 bg-gradient-to-r from-[#7e22ce] to-[#a855f7] text-white rounded-xl text-xs font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-md"
+                  className="w-full py-2.5 bg-primary from-[#7e22ce] to-[#a855f7] text-white rounded-md text-xs font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-md"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>{t.contact.sendMessage}</span>

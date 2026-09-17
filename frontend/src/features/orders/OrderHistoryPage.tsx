@@ -62,8 +62,8 @@ export function OrderHistoryPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-8 py-12 font-sans text-[var(--text-main)] space-y-8">
-      <div className="flex items-center gap-3 border-b border-[#7e22ce]/30 pb-6">
-        <div className="w-10 h-10 rounded-xl bg-[var(--bg-card)] border border-[#7e22ce]/50 flex items-center justify-center shadow-[0_0_15px_rgba(126,34,206,0.3)]">
+      <div className="flex items-center gap-3 border-b border-border pb-6">
+        <div className="w-10 h-10 rounded-md bg-[var(--bg-card)] border border-border flex items-center justify-center shadow-[0_0_15px_rgba(126,34,206,0.3)]">
           <Package className="w-5 h-5 text-[#c084fc]" />
         </div>
 
@@ -82,9 +82,9 @@ export function OrderHistoryPage() {
         {orders.map((order) => (
           <div
             key={order.id}
-            className="bg-[var(--bg-card)] border border-[#7e22ce]/40 rounded-2xl p-6 space-y-4 shadow-[0_0_20px_rgba(126,34,206,0.15)]"
+            className="bg-[var(--bg-card)] border border-border rounded-md p-6 space-y-4 shadow-[0_0_20px_rgba(126,34,206,0.15)]"
           >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#7e22ce]/20 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-4">
               <div>
                 <span className="text-xs text-[#c084fc] font-semibold">
                   {order.id}
@@ -97,7 +97,7 @@ export function OrderHistoryPage() {
 
               <div className="flex items-center gap-3">
                 <span
-                  className={`text-xs px-3 py-1 rounded-full font-semibold flex items-center gap-1.5 ${
+                  className={`text-xs px-3 py-1 rounded-md font-semibold flex items-center gap-1.5 ${
                     order.status === 'Pending'
                       ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                       : order.status === 'Delivered'
@@ -123,7 +123,7 @@ export function OrderHistoryPage() {
                 {order.status === 'Pending' && (
                   <button
                     onClick={() => handleCancelOrder(order.id)}
-                    className="bg-red-500/10 border border-red-500/30 text-red-400 text-xs px-3 py-1 rounded-xl hover:bg-red-500/20 transition-colors cursor-pointer"
+                    className="bg-red-500/10 border border-red-500/30 text-red-400 text-xs px-3 py-1 rounded-md hover:bg-red-500/20 transition-colors cursor-pointer"
                   >
                     {t.orderHistory.cancelOrder}
                   </button>

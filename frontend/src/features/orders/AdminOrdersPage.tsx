@@ -78,9 +78,9 @@ export function AdminOrdersPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-8 py-12 font-sans text-[var(--text-main)] space-y-8">
-      <div className="flex items-center justify-between border-b border-[#7e22ce]/30 pb-6">
+      <div className="flex items-center justify-between border-b border-border pb-6">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-[var(--bg-card)] border border-[#7e22ce]/50 flex items-center justify-center shadow-[0_0_15px_rgba(126,34,206,0.3)]">
+          <div className="w-12 h-12 rounded-md bg-[var(--bg-card)] border border-border flex items-center justify-center shadow-[0_0_15px_rgba(126,34,206,0.3)]">
             <ShieldCheck className="w-6 h-6 text-[#c084fc]" />
           </div>
 
@@ -103,18 +103,18 @@ export function AdminOrdersPage() {
 
             setOrders(current);
           }}
-          className="flex items-center gap-2 bg-[#7e22ce]/20 border border-[#7e22ce]/40 text-[#c084fc] text-xs px-4 py-2.5 rounded-xl hover:bg-[#7e22ce]/30 transition-colors cursor-pointer"
+          className="flex items-center gap-2 bg-[#7e22ce]/20 border border-border text-[#c084fc] text-xs px-4 py-2.5 rounded-md hover:bg-[#7e22ce]/30 transition-colors cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           <span>{t.adminOrders.refresh}</span>
         </button>
       </div>
 
-      <div className="bg-[var(--bg-card)] border border-[#7e22ce]/40 rounded-3xl p-6 shadow-[0_0_20px_rgba(126,34,206,0.15)] overflow-x-auto">
+      <div className="bg-[var(--bg-card)] border border-border rounded-md p-6 shadow-[0_0_20px_rgba(126,34,206,0.15)] overflow-x-auto">
         {orders.length > 0 ? (
           <table className="w-full text-left text-xs text-[var(--text-muted)]">
             <thead>
-              <tr className="border-b border-[#7e22ce]/30 text-[var(--text-main)]">
+              <tr className="border-b border-border text-[var(--text-main)]">
                 <th className="pb-3 px-3">{t.adminOrders.orderId}</th>
                 <th className="pb-3 px-3">{t.adminOrders.customer}</th>
                 <th className="pb-3 px-3">{t.adminOrders.date}</th>
@@ -155,7 +155,7 @@ export function AdminOrdersPage() {
 
                   <td className="py-4 px-3">
                     <span
-                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-semibold ${
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md font-semibold ${
                         order.status === 'Pending'
                           ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                           : order.status === 'Processing'
@@ -174,7 +174,7 @@ export function AdminOrdersPage() {
                       onClick={() =>
                         handleStatusChange(order.id, 'Processing')
                       }
-                      className="bg-blue-500/10 border border-blue-500/30 text-blue-300 px-3 py-1.5 rounded-xl hover:bg-blue-500/20 cursor-pointer transition-colors"
+                      className="bg-blue-500/10 border border-blue-500/30 text-blue-300 px-3 py-1.5 rounded-md hover:bg-blue-500/20 cursor-pointer transition-colors"
                     >
                       {t.adminOrders.process}
                     </button>
@@ -183,7 +183,7 @@ export function AdminOrdersPage() {
                       onClick={() =>
                         handleStatusChange(order.id, 'Delivered')
                       }
-                      className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 px-3 py-1.5 rounded-xl hover:bg-emerald-500/20 cursor-pointer transition-colors"
+                      className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 px-3 py-1.5 rounded-md hover:bg-emerald-500/20 cursor-pointer transition-colors"
                     >
                       {t.adminOrders.deliver}
                     </button>

@@ -78,7 +78,7 @@ export function ProductListPage() {
       </div>
 
       {/* Filters */}
-      <div className="max-w-7xl mx-auto bg-[var(--bg-card)] border border-[#7e22ce]/40 rounded-2xl p-6 md:p-8 shadow-xl">
+      <div className="max-w-7xl mx-auto bg-[var(--bg-card)] border border-border rounded-md p-6 md:p-8 shadow-xl">
         <ProductFilters 
           categories={categories}
           selectedCategory={selectedCategory}
@@ -96,12 +96,12 @@ export function ProductListPage() {
       {/* Grid Area */}
       <div className="max-w-7xl mx-auto min-h-[50vh]">
         {error ? (
-          <div className="flex flex-col items-center justify-center py-24 space-y-4 text-center bg-[var(--bg-card)] border border-red-500/30 rounded-2xl">
+          <div className="flex flex-col items-center justify-center py-24 space-y-4 text-center bg-[var(--bg-card)] border border-red-500/30 rounded-md">
             <Icon name="error_outline" className="text-6xl text-red-400 drop-shadow-[0_0_15px_rgba(248,113,113,0.5)]" />
             <h3 className="text-2xl font-semibold text-[var(--text-main)]">{error}</h3>
             <button 
               onClick={() => fetchProducts()}
-              className="mt-6 px-8 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-full transition-all duration-300 shadow-[0_0_20px_rgba(147,51,234,0.4)] font-semibold"
+              className="mt-6 px-8 py-3 bg-surface hover:bg-surface text-white rounded-md transition-all duration-300 shadow-[0_0_20px_rgba(147,51,234,0.4)] font-semibold"
             >
               Try Again
             </button>
@@ -113,7 +113,7 @@ export function ProductListPage() {
             ))}
           </div>
         ) : products.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 space-y-4 text-center bg-[var(--bg-card)] border border-[#7e22ce]/30 rounded-2xl">
+          <div className="flex flex-col items-center justify-center py-24 space-y-4 text-center bg-[var(--bg-card)] border border-border rounded-md">
             <Icon name="search_off" className="text-6xl text-[var(--text-muted)]" />
             <h3 className="text-2xl font-semibold text-[var(--text-main)]">{t.productList.noProducts}</h3>
             <p className="text-lg text-[var(--text-muted)]">Try adjusting your filters or search term.</p>
@@ -124,7 +124,7 @@ export function ProductListPage() {
                 setMinPrice(0);
                 setMaxPrice(200);
               }}
-              className="mt-6 px-8 py-3 border-2 border-purple-500/30 text-[var(--text-main)] rounded-full hover:bg-[#7e22ce]/20 hover:border-purple-400 transition-all duration-300 font-semibold"
+              className="mt-6 px-8 py-3 border-2 border-border text-[var(--text-main)] rounded-md hover:bg-[#7e22ce]/20 hover:border-border transition-all duration-300 font-semibold"
             >
               Clear Filters
             </button>

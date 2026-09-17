@@ -76,7 +76,7 @@ export function ProductDetailPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#090614] text-white px-4 py-24 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
+        <div className="animate-spin rounded-md h-8 w-8 border-t-2 border-b-2 border-border"></div>
       </div>
     );
   }
@@ -86,7 +86,7 @@ export function ProductDetailPage() {
       <div className="min-h-screen bg-[#090614] text-white px-4 py-24 flex flex-col items-center justify-center">
         <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
         <h2 className="text-xl font-bold text-white mb-6">{error || 'Product not found'}</h2>
-        <Link to="/products" className="px-6 py-2.5 bg-[#1a1433] hover:bg-[#231a42] border border-purple-500/20 text-white rounded-md transition-colors">
+        <Link to="/products" className="px-6 py-2.5 bg-surface hover:bg-surfaceHover border border-border text-white rounded-md transition-colors">
           Return to Catalog
         </Link>
       </div>
@@ -120,15 +120,15 @@ export function ProductDetailPage() {
         <nav>
           <Link
             to="/products"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] bg-[var(--bg-card)] border border-[#7e22ce]/40 px-4 py-2 rounded-xl transition-all"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] bg-[var(--bg-card)] border border-border px-4 py-2 rounded-md transition-all"
           >
             <ArrowLeft className="w-4 h-4 text-[#c084fc]" />
             <span>{t.productDetail.backToCatalog}</span>
           </Link>
         </nav>
 
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-10 bg-[var(--bg-card)] border border-[#7e22ce]/40 p-8 rounded-3xl shadow-2xl items-start">
-          <div className="w-full h-96 bg-[var(--bg-main)] rounded-2xl overflow-hidden border border-[#7e22ce]/30 relative">
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-10 bg-[var(--bg-card)] border border-border p-8 rounded-md shadow-2xl items-start">
+          <div className="w-full h-96 bg-[var(--bg-main)] rounded-md overflow-hidden border border-border relative">
             <img
               src={product.images?.[0] ?? '/placeholder.png'}
               alt={product.name}
@@ -143,7 +143,7 @@ export function ProductDetailPage() {
 
           <div className="space-y-6 flex flex-col justify-between">
             <div className="space-y-3">
-              <span className="text-xs font-semibold text-[#c084fc] bg-[var(--bg-main)] border border-[#7e22ce]/40 px-3 py-1 rounded-lg">
+              <span className="text-xs font-semibold text-[#c084fc] bg-[var(--bg-main)] border border-border px-3 py-1 rounded-lg">
                 {product.category?.replace('-', ' ')}
               </span>
 
@@ -175,14 +175,14 @@ export function ProductDetailPage() {
               </p>
             </div>
 
-            <div className="space-y-4 pt-4 border-t border-[#7e22ce]/30">
+            <div className="space-y-4 pt-4 border-t border-border">
               {product.stock > 0 && (
                 <div className="flex items-center gap-4">
                   <span className="text-xs text-[var(--text-muted)]">
                     {t.productDetail.quantity}:
                   </span>
 
-                  <div className="flex items-center bg-[var(--bg-main)] border border-[#7e22ce]/40 rounded-xl overflow-hidden">
+                  <div className="flex items-center bg-[var(--bg-main)] border border-border rounded-md overflow-hidden">
                     <button
                       onClick={() =>
                         setQuantity(Math.max(1, quantity - 1))
@@ -217,7 +217,7 @@ export function ProductDetailPage() {
                   className={`flex-1 py-3.5 rounded-md text-sm font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer
                     ${isSuccessCart 
                       ? 'bg-green-500 text-white' 
-                      : 'bg-purple-600 hover:bg-purple-500 active:bg-purple-700 text-white active:scale-[0.98]'
+                      : 'bg-surface hover:bg-surface active:bg-surface text-white active:scale-[0.98]'
                     }
                   `}
                 >
@@ -231,10 +231,10 @@ export function ProductDetailPage() {
 
                 <button
                   onClick={handleToggleWishlist}
-                  className={`p-3 rounded-xl border transition-all ${
+                  className={`p-3 rounded-md border transition-all ${
                     isWishlisted
                       ? 'bg-pink-950/40 border-pink-500 text-pink-400'
-                      : 'bg-[var(--bg-main)] border-[#7e22ce]/40 text-[var(--text-main)] hover:text-pink-400'
+                      : 'bg-[var(--bg-main)] border-border text-[var(--text-main)] hover:text-pink-400'
                   }`}
                   title={isWishlisted ? t.productDetail.addToWishlist : t.productDetail.addToWishlist}
 
@@ -247,7 +247,7 @@ export function ProductDetailPage() {
         </section>
 
         {relatedProducts.length > 0 && (
-          <section className="pt-16 pb-12 border-t border-[#7e22ce]/30">
+          <section className="pt-16 pb-12 border-t border-border">
             <h2 className="text-2xl font-serif font-bold text-[var(--text-main)] mb-8">You May Also Like</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
               {relatedProducts.map(relatedProduct => (

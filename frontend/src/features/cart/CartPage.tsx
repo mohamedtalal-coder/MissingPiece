@@ -28,8 +28,8 @@ export function CartPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-8 py-12 font-sans space-y-8 text-white">
-      <div className="flex items-center gap-3 border-b border-[#7e22ce]/30 pb-6">
-        <div className="w-12 h-12 rounded-2xl bg-[#130e21] border border-[#7e22ce]/50 flex items-center justify-center shadow-[0_0_15px_rgba(126,34,206,0.3)]">
+      <div className="flex items-center gap-3 border-b border-border pb-6">
+        <div className="w-12 h-12 rounded-md bg-background border border-border flex items-center justify-center shadow-[0_0_15px_rgba(126,34,206,0.3)]">
           <ShoppingBag className="w-6 h-6 text-[#c084fc]" />
         </div>
         <div>
@@ -41,9 +41,9 @@ export function CartPage() {
       {loading ? (
         <p className="text-xs text-[#cbd5e1] text-center py-16">Loading your cart...</p>
       ) : cart.length === 0 ? (
-        <div className="text-center py-16 bg-[#130e21] border border-[#7e22ce]/40 rounded-3xl space-y-4">
+        <div className="text-center py-16 bg-background border border-border rounded-md space-y-4">
           <p className="text-sm text-[#cbd5e1]">Your cart is currently empty.</p>
-          <Link to="/products" className="inline-block bg-[#7e22ce] text-white text-xs px-6 py-3 rounded-xl font-semibold shadow-[0_0_15px_rgba(126,34,206,0.4)]">
+          <Link to="/products" className="inline-block bg-[#7e22ce] text-white text-xs px-6 py-3 rounded-md font-semibold shadow-[0_0_15px_rgba(126,34,206,0.4)]">
             Explore Catalog
           </Link>
         </div>
@@ -51,8 +51,8 @@ export function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
             {validated.map(item => (
-              <div key={item.productId} className="bg-[#130e21] border border-[#7e22ce]/40 p-4 rounded-2xl flex items-center justify-between gap-4 shadow-[0_0_15px_rgba(126,34,206,0.1)]">
-                <img src={item.imageUrl} alt={item.title} className="w-20 h-20 object-cover rounded-xl border border-[#7e22ce]/30" />
+              <div key={item.productId} className="bg-background border border-border p-4 rounded-md flex items-center justify-between gap-4 shadow-[0_0_15px_rgba(126,34,206,0.1)]">
+                <img src={item.imageUrl} alt={item.title} className="w-20 h-20 object-cover rounded-md border border-border" />
 
                 <div className="flex-1 space-y-1">
                   <h3 className="font-serif font-bold text-sm line-clamp-1">{item.title}</h3>
@@ -62,7 +62,7 @@ export function CartPage() {
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 bg-[#0b0914] border border-[#7e22ce]/30 px-2.5 py-1.5 rounded-xl">
+                <div className="flex items-center gap-2 bg-[#0b0914] border border-border px-2.5 py-1.5 rounded-md">
                   <button onClick={() => updateQty(item.productId, item.quantity - 1)} className="text-[#cbd5e1] hover:text-white cursor-pointer">
                     <Minus className="w-3.5 h-3.5" />
                   </button>
@@ -79,8 +79,8 @@ export function CartPage() {
             ))}
           </div>
 
-          <div className="bg-[#130e21] border border-[#7e22ce]/40 p-6 rounded-3xl space-y-6 h-fit shadow-[0_0_20px_rgba(126,34,206,0.15)]">
-            <h3 className="font-serif font-bold text-base border-b border-[#7e22ce]/20 pb-3">Order Summary</h3>
+          <div className="bg-background border border-border p-6 rounded-md space-y-6 h-fit shadow-[0_0_20px_rgba(126,34,206,0.15)]">
+            <h3 className="font-serif font-bold text-base border-b border-border pb-3">Order Summary</h3>
             <div className="flex justify-between text-xs text-[#cbd5e1]">
               <span>Subtotal</span>
               <span className="text-white font-bold">${subtotal.toFixed(2)}</span>
@@ -89,14 +89,14 @@ export function CartPage() {
               <span>Shipping</span>
               <span className="text-emerald-400 font-semibold">Free</span>
             </div>
-            <div className="flex justify-between text-sm font-bold text-white border-t border-[#7e22ce]/20 pt-4">
+            <div className="flex justify-between text-sm font-bold text-white border-t border-border pt-4">
               <span>Total</span>
               <span className="text-[#c084fc]">${subtotal.toFixed(2)}</span>
             </div>
 
             <button
               onClick={() => navigate('/checkout')}
-              className="w-full bg-gradient-to-r from-[#7e22ce] to-[#a855f7] text-white py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(168,85,247,0.4)] cursor-pointer"
+              className="w-full bg-primary from-[#7e22ce] to-[#a855f7] text-white py-3 rounded-md text-xs font-semibold flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(168,85,247,0.4)] cursor-pointer"
             >
               <span>Proceed to Checkout</span>
               <ArrowRight className="w-4 h-4" />

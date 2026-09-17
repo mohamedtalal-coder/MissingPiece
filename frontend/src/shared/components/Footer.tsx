@@ -8,11 +8,11 @@ export function Footer() {
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-[var(--border-main)]">
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[var(--bg-card)] border border-[#a855f7]/80 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.5)]">
+            <div className="w-9 h-9 rounded-md bg-[var(--bg-card)] border border-[#a855f7]/80 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.5)]">
               <span className="text-xl">🧩</span>
             </div>
 
-            <span className="text-lg font-serif font-bold bg-gradient-to-r from-[var(--text-main)] via-[#e9d5ff] to-[#c084fc] bg-clip-text text-transparent">
+            <span className="text-lg font-serif font-bold bg-primary from-[var(--text-main)] via-[#e9d5ff] to-[#c084fc] bg-clip-text text-transparent">
               Missing Piece
             </span>
           </div>

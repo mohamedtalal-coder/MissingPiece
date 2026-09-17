@@ -43,9 +43,9 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] font-serif flex flex-col justify-between space-y-16 pb-16">
       <div className="max-w-7xl mx-auto px-6 pt-10 w-full">
-        <div className="bg-[var(--bg-card)] border border-[#7e22ce]/50 rounded-3xl p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-10 shadow-[0_0_40px_rgba(126,34,206,0.2)] backdrop-blur-md relative overflow-hidden">
+        <div className="bg-[var(--bg-card)] border border-border rounded-md p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-10 shadow-[0_0_40px_rgba(126,34,206,0.2)]  relative overflow-hidden">
           <div className="space-y-5 max-w-xl z-10">
-            <span className="inline-flex items-center gap-1.5 bg-[var(--bg-main)] border border-[#a855f7]/50 text-[var(--text-main)] text-xs px-3 py-1 rounded-full shadow-[0_0_10px_rgba(168,85,247,0.3)]">
+            <span className="inline-flex items-center gap-1.5 bg-[var(--bg-main)] border border-[#a855f7]/50 text-[var(--text-main)] text-xs px-3 py-1 rounded-md shadow-[0_0_10px_rgba(168,85,247,0.3)]">
               <Sparkles className="w-3.5 h-3.5 text-[#c084fc]" />
               {t.home.premiumCollection}
             </span>
@@ -61,15 +61,15 @@ export default function HomePage() {
             <div>
               <Link
                 to="/products"
-                className="inline-block bg-gradient-to-r from-[#7e22ce] to-[#a855f7] text-white text-xs font-sans font-semibold px-7 py-3.5 rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.5)] hover:opacity-90 transition-opacity"
+                className="inline-block bg-primary from-[#7e22ce] to-[#a855f7] text-white text-xs font-sans font-semibold px-7 py-3.5 rounded-md shadow-[0_0_20px_rgba(168,85,247,0.5)] hover:opacity-90 transition-opacity"
               >
                 {t.home.exploreCollection}
               </Link>
             </div>
           </div>
 
-          <div className="w-full md:w-80 h-72 bg-[var(--bg-main)] rounded-3xl flex items-center justify-center shadow-[0_0_45px_rgba(168,85,247,0.5)] border-2 border-[#a855f7] relative overflow-hidden group animate-pulse">
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#7e22ce]/20 to-transparent"></div>
+          <div className="w-full md:w-80 h-72 bg-[var(--bg-main)] rounded-md flex items-center justify-center shadow-[0_0_45px_rgba(168,85,247,0.5)] border-2 border-[#a855f7] relative overflow-hidden group animate-pulse">
+            <div className="absolute inset-0 bg-primary from-[#7e22ce]/20 to-transparent"></div>
 
             <svg
               className="w-40 h-40 drop-shadow-[0_0_20px_rgba(168,85,247,0.9)] group-hover:scale-110 transition-transform duration-500 z-10"
@@ -109,9 +109,9 @@ export default function HomePage() {
             <Link
               to="/products"
               key={idx}
-              className="bg-[var(--bg-card)] border border-[#7e22ce]/40 p-6 rounded-2xl text-center space-y-3 hover:border-[#a855f7] hover:shadow-[0_0_25px_rgba(168,85,247,0.3)] transition-all group"
+              className="bg-[var(--bg-card)] border border-border p-6 rounded-md text-center space-y-3 hover:border-[#a855f7] hover:shadow-[0_0_25px_rgba(168,85,247,0.3)] transition-all group"
             >
-              <div className="w-14 h-14 bg-[var(--bg-main)] mx-auto rounded-xl flex items-center justify-center text-2xl border border-[#7e22ce]/40 group-hover:scale-105 transition-transform">
+              <div className="w-14 h-14 bg-[var(--bg-main)] mx-auto rounded-md flex items-center justify-center text-2xl border border-border group-hover:scale-105 transition-transform">
                 {cat.icon}
               </div>
 
@@ -142,9 +142,9 @@ export default function HomePage() {
           {bestSellers.map((product) => (
             <div
               key={product.id}
-              className="bg-[var(--bg-card)] border border-[#7e22ce]/40 p-5 rounded-2xl space-y-4 shadow-xl hover:border-[#a855f7] transition-all group"
+              className="bg-[var(--bg-card)] border border-border p-5 rounded-md space-y-4 shadow-xl hover:border-[#a855f7] transition-all group"
             >
-              <div className="w-full h-48 bg-[var(--bg-main)] rounded-xl overflow-hidden border border-[#7e22ce]/30 relative">
+              <div className="w-full h-48 bg-[var(--bg-main)] rounded-md overflow-hidden border border-border relative">
                 <img
                   src={product.image}
                   alt={product.name}
@@ -162,14 +162,14 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <div className="flex items-center justify-between pt-2 border-t border-[#7e22ce]/30">
+              <div className="flex items-center justify-between pt-2 border-t border-border">
                 <span className="text-sm font-bold text-[var(--text-main)]">
                   {product.price}
                 </span>
 
                 <Link
                   to="/products"
-                  className="bg-[#7e22ce]/30 border border-[#a855f7]/60 text-[var(--text-main)] text-xs px-3.5 py-2 rounded-xl hover:bg-[#7e22ce]/50 transition-colors flex items-center gap-1.5"
+                  className="bg-[#7e22ce]/30 border border-[#a855f7]/60 text-[var(--text-main)] text-xs px-3.5 py-2 rounded-md hover:bg-[#7e22ce]/50 transition-colors flex items-center gap-1.5"
                 >
                   <ShoppingBag className="w-3.5 h-3.5" />
                   <span>{t.home.addToCart}</span>

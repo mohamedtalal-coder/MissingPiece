@@ -37,36 +37,36 @@ export const LoginForm: React.FC = () => {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {error && (
-        <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-800/50 text-rose-300 text-xs text-center">
+        <div className="p-3.5 rounded-md bg-rose-950/40 border border-rose-800/50 text-rose-300 text-xs text-center">
           {error}
         </div>
       )}
 
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-purple-200">Email Address</label>
+        <label className="text-xs font-medium text-primary">Email Address</label>
         <div className="relative">
-          <Mail className="absolute left-3.5 top-3 w-4 h-4 text-purple-400" />
+          <Mail className="absolute left-3.5 top-3 w-4 h-4 text-primary" />
           <input 
             type="email" 
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="name@example.com"
-            className="w-full bg-purple-950/60 border border-purple-800/50 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white focus:outline-none focus:border-purple-500"
+            className="w-full bg-surface border border-border rounded-md pl-10 pr-4 py-2.5 text-xs text-white focus:outline-none focus:border-border"
             required
           />
         </div>
       </div>
 
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-purple-200">Password</label>
+        <label className="text-xs font-medium text-primary">Password</label>
         <div className="relative">
-          <Lock className="absolute left-3.5 top-3 w-4 h-4 text-purple-400" />
+          <Lock className="absolute left-3.5 top-3 w-4 h-4 text-primary" />
           <input 
             type="password" 
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            className="w-full bg-purple-950/60 border border-purple-800/50 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white focus:outline-none focus:border-purple-500"
+            className="w-full bg-surface border border-border rounded-md pl-10 pr-4 py-2.5 text-xs text-white focus:outline-none focus:border-border"
             required
           />
         </div>
@@ -75,16 +75,16 @@ export const LoginForm: React.FC = () => {
       <button 
         type="submit" 
         disabled={loading}
-        className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-medium hover:from-purple-500 hover:to-indigo-500 transition-all flex justify-center items-center gap-2 shadow-lg shadow-purple-900/40"
+        className="w-full py-3 rounded-md bg-primary from-primary to-primary text-white text-xs font-medium hover:from-primary hover:to-primary transition-all flex justify-center items-center gap-2 shadow-lg shadow-subtle"
       >
         {loading && <Loader2 className="w-4 h-4 animate-spin" />}
         <span>Sign In</span>
         {!loading && <ArrowRight className="w-3.5 h-3.5" />}
       </button>
 
-      <p className="text-center text-xs text-purple-300/70 pt-2">
+      <p className="text-center text-xs text-primary pt-2">
         Don't have an account?{' '}
-        <Link to="/register" className="text-purple-400 hover:text-purple-300 font-medium underline">
+        <Link to="/register" className="text-primary hover:text-primary font-medium underline">
           Register here
         </Link>
       </p>

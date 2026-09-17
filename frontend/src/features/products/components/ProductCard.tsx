@@ -50,7 +50,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <Link to={`/products/${product.slug}`} className="group block relative w-full overflow-hidden rounded-2xl bg-purple-950/30 border border-purple-500/10 shadow-lg hover:shadow-[0_0_25px_rgba(168,85,247,0.3)] hover:border-purple-500/30 hover:-translate-y-1 transition-all duration-300 backdrop-blur-md">
+    <Link to={`/products/${product.slug}`} className="group block relative w-full overflow-hidden rounded-md bg-surface border border-border shadow-lg hover:shadow-[0_0_25px_rgba(168,85,247,0.3)] hover:border-border hover:-translate-y-1 transition-all duration-300 ">
       {/* Image container */}
       <div className="relative aspect-[4/5] overflow-hidden bg-black/40">
         <img
@@ -63,15 +63,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Wishlist Button */}
         <button 
           onClick={handleToggleWishlist}
-          className="absolute top-3 right-3 p-2.5 rounded-full bg-black/40 backdrop-blur-md text-white/70 hover:text-red-400 hover:bg-black/60 transition-all duration-300 shadow-sm z-10 hover:scale-110 cursor-pointer"
+          className="absolute top-3 right-3 p-2.5 rounded-md bg-black/40  text-white/70 hover:text-red-400 hover:bg-black/60 transition-all duration-300 shadow-sm z-10 hover:scale-110 cursor-pointer"
           aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
         >
           <Icon name={isWishlisted ? 'favorite' : 'favorite_border'} className={`text-xl transition-colors ${isWishlisted ? 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)] fill-current' : ''}`} />
         </button>
 
         {product.stock === 0 && (
-          <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
-            <span className="bg-red-500/80 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(239,68,68,0.5)]">Out of Stock</span>
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center ">
+            <span className="bg-red-500/80 text-white px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(239,68,68,0.5)]">Out of Stock</span>
           </div>
         )}
       </div>
@@ -79,28 +79,28 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       {/* Content */}
       <div className="p-5 flex flex-col gap-3">
         <div>
-          <h3 className="text-lg font-semibold text-purple-50 truncate group-hover:text-purple-300 transition-colors drop-shadow-sm">
+          <h3 className="text-lg font-semibold text-primary truncate group-hover:text-primary transition-colors drop-shadow-sm">
             {product.name}
           </h3>
-          <p className="text-sm text-purple-300/60 truncate capitalize mt-0.5">
+          <p className="text-sm text-primary truncate capitalize mt-0.5">
             {product.category?.replace('-', ' ')}
           </p>
         </div>
         
         <div className="flex items-center justify-between mt-auto pt-2">
-          <p className="text-xl text-purple-100 font-bold tracking-tight">
+          <p className="text-xl text-primary font-bold tracking-tight">
             ${product.price?.toFixed(2)}
           </p>
           <button
             onClick={handleAddToCart}
             disabled={product.stock === 0 || isAdding || isSuccess}
             className={`
-              flex items-center justify-center px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 min-w-[110px] shadow-md cursor-pointer
+              flex items-center justify-center px-4 py-2 rounded-md text-sm font-semibold transition-all duration-300 min-w-[110px] shadow-md cursor-pointer
               ${product.stock === 0 
-                ? 'bg-purple-900/30 text-purple-300/40 cursor-not-allowed border border-purple-900/50' 
+                ? 'bg-surface text-primary cursor-not-allowed border border-border' 
                 : isSuccess 
                   ? 'bg-green-500 text-white shadow-[0_0_15px_rgba(34,197,94,0.5)]'
-                  : 'bg-purple-600 text-white hover:bg-purple-500 hover:shadow-[0_0_15px_rgba(168,85,247,0.5)] active:scale-95'
+                  : 'bg-surface text-white hover:bg-surface hover:shadow-[0_0_15px_rgba(168,85,247,0.5)] active:scale-95'
               }
             `}
           >

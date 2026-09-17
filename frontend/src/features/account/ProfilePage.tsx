@@ -44,8 +44,8 @@ export function ProfilePage() {
 
   return (
     <div className="max-w-4xl mx-auto px-8 py-12 font-sans space-y-8">
-      <div className="flex items-center gap-4 border-b border-[#7e22ce]/30 pb-6">
-        <div className="w-20 h-20 rounded-full bg-[#130e21] border-2 border-[#a855f7] flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(168,85,247,0.5)] relative group">
+      <div className="flex items-center gap-4 border-b border-border pb-6">
+        <div className="w-20 h-20 rounded-md bg-background border-2 border-[#a855f7] flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(168,85,247,0.5)] relative group">
           {user.avatar ? (
             <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" />
           ) : (
@@ -62,21 +62,21 @@ export function ProfilePage() {
       </div>
 
       {message && (
-        <div className="bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-xs p-3 rounded-xl flex items-center gap-2">
+        <div className="bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-xs p-3 rounded-md flex items-center gap-2">
           <CheckCircle className="w-4 h-4 shrink-0" />
           <span>{message}</span>
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-[#130e21] border border-[#7e22ce]/40 p-6 rounded-3xl space-y-6 shadow-[0_0_20px_rgba(126,34,206,0.15)]">
-          <h2 className="text-white font-serif font-bold text-base border-b border-[#7e22ce]/20 pb-3">Edit Profile Details</h2>
+        <div className="bg-background border border-border p-6 rounded-md space-y-6 shadow-[0_0_20px_rgba(126,34,206,0.15)]">
+          <h2 className="text-white font-serif font-bold text-base border-b border-border pb-3">Edit Profile Details</h2>
           
           <form onSubmit={handleUpdate} className="space-y-4 text-xs">
             <div className="space-y-1.5">
               <label className="text-[#e9d5ff]">Upload Profile Picture from Device</label>
               <div className="flex items-center gap-3">
-                <label className="flex-1 bg-[#7e22ce]/20 border border-[#7e22ce]/40 text-[#c084fc] hover:bg-[#7e22ce]/30 py-2.5 px-4 rounded-xl text-center cursor-pointer transition-colors flex items-center justify-center gap-2">
+                <label className="flex-1 bg-[#7e22ce]/20 border border-border text-[#c084fc] hover:bg-[#7e22ce]/30 py-2.5 px-4 rounded-md text-center cursor-pointer transition-colors flex items-center justify-center gap-2">
                   <Upload className="w-4 h-4" />
                   <span>Choose Image File</span>
                   <input 
@@ -95,7 +95,7 @@ export function ProfilePage() {
                 type="text" 
                 value={user.name}
                 onChange={(e) => setUser({ ...user, name: e.target.value })}
-                className="w-full bg-[#0b0914] border border-[#7e22ce]/40 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#a855f7]"
+                className="w-full bg-[#0b0914] border border-border rounded-md px-4 py-2.5 text-white focus:outline-none focus:border-[#a855f7]"
               />
             </div>
 
@@ -105,31 +105,31 @@ export function ProfilePage() {
                 type="text" 
                 value={user.location}
                 onChange={(e) => setUser({ ...user, location: e.target.value })}
-                className="w-full bg-[#0b0914] border border-[#7e22ce]/40 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#a855f7]"
+                className="w-full bg-[#0b0914] border border-border rounded-md px-4 py-2.5 text-white focus:outline-none focus:border-[#a855f7]"
               />
             </div>
 
             <button 
               type="submit" 
-              className="w-full bg-gradient-to-r from-[#7e22ce] to-[#a855f7] text-white font-semibold py-3 rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.4)] cursor-pointer"
+              className="w-full bg-primary from-[#7e22ce] to-[#a855f7] text-white font-semibold py-3 rounded-md shadow-[0_0_15px_rgba(168,85,247,0.4)] cursor-pointer"
             >
               Save Changes
             </button>
           </form>
         </div>
 
-        <div className="bg-[#130e21] border border-[#7e22ce]/40 p-6 rounded-3xl space-y-6 shadow-[0_0_20px_rgba(126,34,206,0.15)] flex flex-col justify-between">
+        <div className="bg-background border border-border p-6 rounded-md space-y-6 shadow-[0_0_20px_rgba(126,34,206,0.15)] flex flex-col justify-between">
           <div className="space-y-4">
-            <h2 className="text-white font-serif font-bold text-base border-b border-[#7e22ce]/20 pb-3">Quick Navigation</h2>
+            <h2 className="text-white font-serif font-bold text-base border-b border-border pb-3">Quick Navigation</h2>
             <p className="text-xs text-[#cbd5e1] leading-relaxed">
               You can now upload any picture from your PC as your profile avatar! It will update instantly across the entire website navbar.
             </p>
           </div>
           <div className="space-y-3">
-            <Link to="/orders" className="block text-center bg-[#7e22ce]/20 border border-[#7e22ce]/40 text-[#c084fc] py-3 rounded-xl text-xs hover:bg-[#7e22ce]/30 transition-colors">
+            <Link to="/orders" className="block text-center bg-[#7e22ce]/20 border border-border text-[#c084fc] py-3 rounded-md text-xs hover:bg-[#7e22ce]/30 transition-colors">
               View My Orders History
             </Link>
-            <Link to="/wishlist" className="block text-center bg-pink-500/10 border border-pink-500/30 text-pink-300 py-3 rounded-xl text-xs hover:bg-pink-500/20 transition-colors">
+            <Link to="/wishlist" className="block text-center bg-pink-500/10 border border-pink-500/30 text-pink-300 py-3 rounded-md text-xs hover:bg-pink-500/20 transition-colors">
               View My Wishlist
             </Link>
           </div>

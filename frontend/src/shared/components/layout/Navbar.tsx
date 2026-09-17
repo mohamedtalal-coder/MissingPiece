@@ -22,7 +22,7 @@ export const Navbar: React.FC = () => {
       </div>
 
       {/* Main Header */}
-      <header className="w-full bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+      <header className="w-full bg-surface/90  shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
         <div className="h-20 max-w-7xl mx-auto px-margin lg:px-margin-lg flex items-center justify-between gap-gutter">
 
           {/* Logo & Navigation */}
@@ -79,7 +79,7 @@ export const Navbar: React.FC = () => {
               <Link to="/cart" className="relative p-space-xs rounded hover:bg-surface-container-high transition-colors text-on-surface-variant hover:text-on-surface flex items-center justify-center">
                 <Icon name="shopping_bag" className="text-xl" />
                 {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary-container text-on-primary-container font-label-sm text-label-sm w-4 h-4 rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-primary-container text-on-primary-container font-label-sm text-label-sm w-4 h-4 rounded-md flex items-center justify-center">
                     {totalItems}
                   </span>
                 )}

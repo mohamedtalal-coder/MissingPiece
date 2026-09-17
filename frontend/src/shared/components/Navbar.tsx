@@ -45,10 +45,10 @@ export function Navbar() {
 
   return (
     <nav
-      className={`w-full px-8 py-4 sticky top-0 z-50 backdrop-blur-md font-sans border-b transition-colors duration-300 ${
+      className={`w-full px-8 py-4 sticky top-0 z-50  font-sans border-b transition-colors duration-300 ${
         theme === 'dark'
           ? 'bg-[#0b0914]/95 border-[#221738] shadow-[0_4px_25px_rgba(126,34,206,0.2)]'
-          : 'bg-white/95 border-purple-100 shadow-[0_4px_20px_rgba(126,34,206,0.12)]'
+          : 'bg-white/95 border-border shadow-[0_4px_20px_rgba(126,34,206,0.12)]'
       }`}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
@@ -57,8 +57,8 @@ export function Navbar() {
           to="/"
           className={`text-xl font-serif font-extrabold tracking-wider bg-clip-text text-transparent shrink-0 ${
             theme === 'dark'
-              ? 'bg-gradient-to-r from-white via-[#e9d5ff] to-[#c084fc]'
-              : 'bg-gradient-to-r from-purple-600 via-purple-500 to-fuchsia-500'
+              ? 'bg-primary from-white via-[#e9d5ff] to-[#c084fc]'
+              : 'bg-primary from-primary via-purple-500 to-fuchsia-500'
           }`}
         >
           Missing Piece
@@ -71,21 +71,21 @@ export function Navbar() {
         >
           <Link
             to="/"
-            className="hover:text-purple-500 transition-colors"
+            className="hover:text-primary transition-colors"
           >
             {translations.home}
           </Link>
 
           <Link
             to="/products"
-            className="hover:text-purple-500 transition-colors"
+            className="hover:text-primary transition-colors"
           >
             {translations.catalog}
           </Link>
 
           <Link
             to="/wishlist"
-            className="hover:text-purple-500 transition-colors flex items-center gap-1"
+            className="hover:text-primary transition-colors flex items-center gap-1"
           >
             <Heart className="w-3.5 h-3.5 text-pink-400" />
             <span>{translations.wishlist}</span>
@@ -93,16 +93,16 @@ export function Navbar() {
 
           <Link
             to="/orders"
-            className="hover:text-purple-500 transition-colors flex items-center gap-1"
+            className="hover:text-primary transition-colors flex items-center gap-1"
           >
-            <Package className="w-3.5 h-3.5 text-purple-500" />
+            <Package className="w-3.5 h-3.5 text-primary" />
             <span>{translations.orders}</span>
           </Link>
 
           {isAdmin && (
             <Link
               to="/admin/orders"
-              className="hover:text-purple-500 transition-colors"
+              className="hover:text-primary transition-colors"
             >
               {translations.admin}
             </Link>
@@ -113,10 +113,10 @@ export function Navbar() {
 
           <button
             onClick={toggleTheme}
-            className={`w-9 h-9 rounded-xl border flex items-center justify-center transition-all ${
+            className={`w-9 h-9 rounded-md border flex items-center justify-center transition-all ${
               theme === 'dark'
-                ? 'bg-[#130e21] border-[#7e22ce]/40 text-[#c084fc] hover:border-[#c084fc]'
-                : 'bg-purple-50 border-purple-200 text-purple-600 hover:border-purple-400'
+                ? 'bg-background border-border text-[#c084fc] hover:border-[#c084fc]'
+                : 'bg-surface border-border text-primary hover:border-border'
             }`}
             aria-label="Toggle theme"
           >
@@ -129,10 +129,10 @@ export function Navbar() {
 
           <button
             onClick={toggleLanguage}
-            className={`h-9 px-3 rounded-xl border flex items-center gap-1.5 transition-all text-xs font-semibold ${
+            className={`h-9 px-3 rounded-md border flex items-center gap-1.5 transition-all text-xs font-semibold ${
               theme === 'dark'
-                ? 'bg-[#130e21] border-[#7e22ce]/40 text-[#c084fc] hover:border-[#c084fc]'
-                : 'bg-purple-50 border-purple-200 text-purple-600 hover:border-purple-400'
+                ? 'bg-background border-border text-[#c084fc] hover:border-[#c084fc]'
+                : 'bg-surface border-border text-primary hover:border-border'
             }`}
             aria-label="Change language"
           >
@@ -142,7 +142,7 @@ export function Navbar() {
 
           <Link
             to="/cart"
-            className="bg-gradient-to-r from-[#7e22ce] to-[#a855f7] text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-[0_0_15px_rgba(168,85,247,0.4)]"
+            className="bg-primary from-[#7e22ce] to-[#a855f7] text-white text-xs font-semibold px-4 py-2 rounded-md flex items-center gap-1.5 shadow-[0_0_15px_rgba(168,85,247,0.4)]"
           >
             <ShoppingBag className="w-3.5 h-3.5" />
             <span>{translations.cart}</span>
@@ -151,10 +151,10 @@ export function Navbar() {
           <div className="relative">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className={`w-10 h-10 rounded-full border flex items-center justify-center cursor-pointer overflow-hidden transition-all ${
+              className={`w-10 h-10 rounded-md border flex items-center justify-center cursor-pointer overflow-hidden transition-all ${
                 theme === 'dark'
-                  ? 'bg-[#130e21] border-[#a855f7]/60 text-[#e9d5ff] hover:border-[#c084fc]'
-                  : 'bg-purple-50 border-purple-300 text-purple-600 hover:border-purple-500'
+                  ? 'bg-background border-[#a855f7]/60 text-[#e9d5ff] hover:border-[#c084fc]'
+                  : 'bg-surface border-border text-primary hover:border-border'
               }`}
             >
               {(user as any)?.avatar ? (
@@ -172,10 +172,10 @@ export function Navbar() {
               <div
                 className={`absolute ${
                   isArabic ? 'left-0' : 'right-0'
-                } mt-3 w-56 rounded-2xl border py-2 z-50 text-xs shadow-[0_0_25px_rgba(126,34,206,0.3)] ${
+                } mt-3 w-56 rounded-md border py-2 z-50 text-xs shadow-[0_0_25px_rgba(126,34,206,0.3)] ${
                   theme === 'dark'
-                    ? 'bg-[#130e21] border-[#7e22ce]/50'
-                    : 'bg-white border-purple-200'
+                    ? 'bg-background border-border'
+                    : 'bg-white border-border'
                 }`}
               >
                 {user ? (
@@ -183,8 +183,8 @@ export function Navbar() {
                     <div
                       className={`px-4 py-3 border-b ${
                         theme === 'dark'
-                          ? 'border-[#7e22ce]/30'
-                          : 'border-purple-100'
+                          ? 'border-border'
+                          : 'border-border'
                       }`}
                     >
                       <p
@@ -215,10 +215,10 @@ export function Navbar() {
                         className={`flex items-center gap-2.5 px-4 py-2.5 transition-colors ${
                           theme === 'dark'
                             ? 'text-[#cbd5e1] hover:bg-[#7e22ce]/20 hover:text-white'
-                            : 'text-gray-700 hover:bg-purple-50 hover:text-purple-600'
+                            : 'text-gray-700 hover:bg-surface hover:text-primary'
                         }`}
                       >
-                        <Settings className="w-3.5 h-3.5 text-purple-500" />
+                        <Settings className="w-3.5 h-3.5 text-primary" />
                         <span>{translations.profile}</span>
                       </Link>
 
@@ -228,7 +228,7 @@ export function Navbar() {
                         className={`flex items-center gap-2.5 px-4 py-2.5 transition-colors ${
                           theme === 'dark'
                             ? 'text-[#cbd5e1] hover:bg-[#7e22ce]/20 hover:text-white'
-                            : 'text-gray-700 hover:bg-purple-50 hover:text-purple-600'
+                            : 'text-gray-700 hover:bg-surface hover:text-primary'
                         }`}
                       >
                         <Heart className="w-3.5 h-3.5 text-pink-400" />
@@ -237,7 +237,7 @@ export function Navbar() {
 
                       <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-red-400 hover:bg-red-500/10 transition-colors border-t border-purple-500/20 mt-1"
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-red-400 hover:bg-red-500/10 transition-colors border-t border-border mt-1"
                       >
                         <LogOut className="w-3.5 h-3.5" />
                         <span>{translations.logout}</span>
@@ -252,7 +252,7 @@ export function Navbar() {
                       className={`block px-4 py-2.5 transition-colors ${
                         theme === 'dark'
                           ? 'text-[#cbd5e1] hover:bg-[#7e22ce]/20 hover:text-white'
-                          : 'text-gray-700 hover:bg-purple-50 hover:text-purple-600'
+                          : 'text-gray-700 hover:bg-surface hover:text-primary'
                       }`}
                     >
                       {translations.createAccount}
@@ -264,7 +264,7 @@ export function Navbar() {
                       className={`block px-4 py-2.5 transition-colors ${
                         theme === 'dark'
                           ? 'text-[#cbd5e1] hover:bg-[#7e22ce]/20 hover:text-white'
-                          : 'text-gray-700 hover:bg-purple-50 hover:text-purple-600'
+                          : 'text-gray-700 hover:bg-surface hover:text-primary'
                       }`}
                     >
                       {translations.signIn}

@@ -40,7 +40,7 @@ export const AdminMessagesPage: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-[var(--bg-main)] flex justify-center items-center">
-        <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
@@ -48,7 +48,7 @@ export const AdminMessagesPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] py-12 px-6">
       <div className="max-w-4xl mx-auto space-y-8">
-        <div className="border-b border-[#7e22ce]/40 pb-4">
+        <div className="border-b border-border pb-4">
           <h1 className="text-3xl font-serif text-[var(--text-main)]">
             {t.adminMessages.title}
           </h1>
@@ -59,8 +59,8 @@ export const AdminMessagesPage: React.FC = () => {
         </div>
 
         {messages.length === 0 ? (
-          <div className="text-center py-24 space-y-3 bg-[var(--bg-card)] rounded-3xl border border-[#7e22ce]/40">
-            <Mail className="w-10 h-10 text-purple-400 mx-auto" />
+          <div className="text-center py-24 space-y-3 bg-[var(--bg-card)] rounded-md border border-border">
+            <Mail className="w-10 h-10 text-primary mx-auto" />
 
             <h2 className="text-xl font-serif text-[var(--text-main)]">
               {t.adminMessages.noMessages}
@@ -75,15 +75,15 @@ export const AdminMessagesPage: React.FC = () => {
             {messages.map((msg) => (
               <div
                 key={msg.id}
-                className="bg-[var(--bg-card)] border border-[#7e22ce]/40 p-6 rounded-3xl space-y-2"
+                className="bg-[var(--bg-card)] border border-border p-6 rounded-md space-y-2"
               >
-                <div className="flex justify-between items-center border-b border-[#7e22ce]/30 pb-3">
+                <div className="flex justify-between items-center border-b border-border pb-3">
                   <div>
                     <h3 className="text-sm font-medium text-[var(--text-main)]">
                       {msg.name}
                     </h3>
 
-                    <p className="text-[11px] text-purple-400">
+                    <p className="text-[11px] text-primary">
                       {msg.email}
                     </p>
                   </div>

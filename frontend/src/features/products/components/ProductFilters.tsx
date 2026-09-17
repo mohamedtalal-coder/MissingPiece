@@ -66,30 +66,30 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
       {/* Top Row: Search and Sort */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="relative w-full md:w-96">
-          <Icon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-300/60" />
+          <Icon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 text-primary" />
           <input 
             type="text" 
             placeholder="Search puzzles..." 
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
-            className="w-full bg-purple-900/20 border border-purple-500/20 rounded-full pl-10 pr-4 py-2.5 text-sm md:text-base text-purple-100 placeholder-purple-300/40 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all shadow-inner"
+            className="w-full bg-surface border border-border rounded-md pl-10 pr-4 py-2.5 text-sm md:text-base text-primary placeholder-purple-300/40 focus:outline-none focus:border-border focus:ring-1 focus:ring-purple-400 transition-all shadow-inner"
           />
           {localSearch && (
             <button 
               onClick={() => setLocalSearch('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-purple-300/60 hover:text-purple-100 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-primary hover:text-primary transition-colors"
             >
               <Icon name="close" className="text-sm" />
             </button>
           )}
         </div>
 
-        <div className="flex items-center gap-2 w-full md:w-auto bg-purple-900/20 border border-purple-500/20 rounded-full px-4 py-2">
-          <Icon name="sort" className="text-purple-300/60" />
+        <div className="flex items-center gap-2 w-full md:w-auto bg-surface border border-border rounded-md px-4 py-2">
+          <Icon name="sort" className="text-primary" />
           <select 
             value={sortBy}
             onChange={(e) => onSortChange(e.target.value)}
-            className="bg-transparent border-none text-sm font-medium text-purple-100 focus:outline-none cursor-pointer appearance-none [&>option]:bg-[#130e21] [&>option]:text-purple-100 pr-2"
+            className="bg-transparent border-none text-sm font-medium text-primary focus:outline-none cursor-pointer appearance-none [&>option]:bg-background [&>option]:text-primary pr-2"
           >
             <option value="newest">Newest Arrivals</option>
             <option value="price_asc">Price: Low to High</option>
@@ -105,17 +105,17 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
         <div className="relative w-full md:w-64" ref={categoryRef}>
           <button
             onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-            className="w-full flex items-center justify-between bg-purple-900/20 border border-purple-500/20 rounded-xl px-4 py-2.5 text-sm text-purple-100 hover:bg-purple-900/30 transition-colors"
+            className="w-full flex items-center justify-between bg-surface border border-border rounded-md px-4 py-2.5 text-sm text-primary hover:bg-surface transition-colors"
           >
             <span className="truncate">{selectedCategory || 'All Categories'}</span>
-            <Icon name={isCategoryOpen ? 'expand_less' : 'expand_more'} className="text-purple-300/60 flex-shrink-0 ml-2" />
+            <Icon name={isCategoryOpen ? 'expand_less' : 'expand_more'} className="text-primary flex-shrink-0 ml-2" />
           </button>
           
           {isCategoryOpen && (
-            <div className="absolute top-full left-0 mt-2 w-full bg-[#130e21] border border-purple-500/20 rounded-xl shadow-xl overflow-hidden z-20">
+            <div className="absolute top-full left-0 mt-2 w-full bg-background border border-border rounded-md shadow-xl overflow-hidden z-20">
               <button
                 onClick={() => { onCategoryChange(''); setIsCategoryOpen(false); }}
-                className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${selectedCategory === '' ? 'bg-purple-600/30 text-purple-100' : 'text-purple-300 hover:bg-purple-900/40 hover:text-purple-100'}`}
+                className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${selectedCategory === '' ? 'bg-surface text-primary' : 'text-primary hover:bg-surface hover:text-primary'}`}
               >
                 All Categories
               </button>
@@ -123,7 +123,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
                 <button
                   key={cat}
                   onClick={() => { onCategoryChange(cat); setIsCategoryOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors truncate ${selectedCategory === cat ? 'bg-purple-600/30 text-purple-100' : 'text-purple-300 hover:bg-purple-900/40 hover:text-purple-100'}`}
+                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors truncate ${selectedCategory === cat ? 'bg-surface text-primary' : 'text-primary hover:bg-surface hover:text-primary'}`}
                 >
                   {cat}
                 </button>
@@ -133,16 +133,16 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
         </div>
 
         {/* Price Slider */}
-        <div className="w-full md:w-72 space-y-3 bg-purple-900/10 px-4 py-3 rounded-xl border border-purple-500/10">
-          <div className="flex justify-between items-center text-xs text-purple-300/80">
+        <div className="w-full md:w-72 space-y-3 bg-surface px-4 py-3 rounded-md border border-border">
+          <div className="flex justify-between items-center text-xs text-primary">
             <span>Price Range</span>
-            <span className="font-semibold text-purple-100">${localMin} - ${localMax}</span>
+            <span className="font-semibold text-primary">${localMin} - ${localMax}</span>
           </div>
           
-          <div className="relative h-1.5 w-full bg-purple-900/40 rounded-full">
+          <div className="relative h-1.5 w-full bg-surface rounded-md">
             {/* Active track highlight */}
             <div 
-              className="absolute h-full bg-purple-500 rounded-full"
+              className="absolute h-full bg-surface rounded-md"
               style={{ 
                 left: `${(localMin / 200) * 100}%`, 
                 right: `${100 - (localMax / 200) * 100}%` 
@@ -155,7 +155,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
               max="200" 
               value={localMin}
               onChange={(e) => setLocalMin(Math.min(Number(e.target.value), localMax))}
-              className="absolute w-full top-0 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:bg-purple-300 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:bg-purple-300 [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:rounded-full"
+              className="absolute w-full top-0 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:bg-surface [&::-webkit-slider-thumb]:rounded-md [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:bg-surface [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:rounded-md"
             />
             <input 
               type="range" 
@@ -163,7 +163,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
               max="200" 
               value={localMax}
               onChange={(e) => setLocalMax(Math.max(Number(e.target.value), localMin))}
-              className="absolute w-full top-0 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:bg-purple-300 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:bg-purple-300 [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:rounded-full"
+              className="absolute w-full top-0 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:bg-surface [&::-webkit-slider-thumb]:rounded-md [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:bg-surface [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:rounded-md"
             />
           </div>
         </div>

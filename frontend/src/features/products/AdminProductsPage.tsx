@@ -109,7 +109,7 @@ export const AdminProductsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] py-12 px-6">
       <div className="max-w-6xl mx-auto space-y-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#7e22ce]/40 pb-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border pb-4">
           <div>
             <h1 className="text-3xl font-serif text-[var(--text-main)]">
               {t.adminProducts.title}
@@ -120,7 +120,7 @@ export const AdminProductsPage: React.FC = () => {
           </div>
           <button 
             onClick={handleAddNewClick}
-            className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium transition-all flex items-center gap-2 shadow-lg shadow-purple-900/40 cursor-pointer"
+            className="px-4 py-2.5 rounded-md bg-surface hover:bg-surface text-white text-sm font-medium transition-all flex items-center gap-2 shadow-lg shadow-subtle cursor-pointer"
           >
             <Plus className="w-5 h-5" />
             <span>{t.adminProducts.addNew}</span>
@@ -128,15 +128,15 @@ export const AdminProductsPage: React.FC = () => {
         </div>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-xl flex items-center gap-3">
+          <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-md flex items-center gap-3">
             <AlertCircle className="w-5 h-5" />
             <span>{error}</span>
           </div>
         )}
 
         {showModal && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-            <div className="bg-[var(--bg-card)] border border-[#7e22ce]/40 p-6 rounded-3xl w-full max-w-lg space-y-6">
+          <div className="fixed inset-0 bg-black/70  flex justify-center items-center z-50 p-4">
+            <div className="bg-[var(--bg-card)] border border-border p-6 rounded-md w-full max-w-lg space-y-6">
               <h3 className="text-xl font-serif text-[var(--text-main)]">
                 {editingProductId ? 'Edit Product' : t.adminProducts.createProduct}
               </h3>
@@ -147,14 +147,14 @@ export const AdminProductsPage: React.FC = () => {
                   placeholder={t.adminProducts.productTitle}
                   value={name} 
                   onChange={(e) => setName(e.target.value)} 
-                  className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-purple-500" 
+                  className="w-full bg-[var(--bg-main)] border border-border rounded-md px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-border" 
                   required 
                 />
                 <textarea 
                   placeholder={t.adminProducts.productDescription}
                   value={description} 
                   onChange={(e) => setDescription(e.target.value)} 
-                  className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-purple-500" 
+                  className="w-full bg-[var(--bg-main)] border border-border rounded-md px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-border" 
                   rows={3}
                   required
                 />
@@ -166,7 +166,7 @@ export const AdminProductsPage: React.FC = () => {
                     min="0"
                     value={price} 
                     onChange={(e) => setPrice(e.target.value)} 
-                    className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-purple-500" 
+                    className="w-full bg-[var(--bg-main)] border border-border rounded-md px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-border" 
                     required 
                   />
                   <input 
@@ -175,7 +175,7 @@ export const AdminProductsPage: React.FC = () => {
                     min="0"
                     value={stock} 
                     onChange={(e) => setStock(e.target.value)} 
-                    className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-purple-500" 
+                    className="w-full bg-[var(--bg-main)] border border-border rounded-md px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-border" 
                     required 
                   />
                 </div>
@@ -183,7 +183,7 @@ export const AdminProductsPage: React.FC = () => {
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-purple-500"
+                  className="w-full bg-[var(--bg-main)] border border-border rounded-md px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-border"
                 >
                   <option value="Jigsaw Puzzles">
                     {t.adminProducts.categories.jigsaw}
@@ -203,7 +203,7 @@ export const AdminProductsPage: React.FC = () => {
                   placeholder={t.adminProducts.imageUrl}
                   value={imageUrl} 
                   onChange={(e) => setImageUrl(e.target.value)} 
-                  className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-purple-500" 
+                  className="w-full bg-[var(--bg-main)] border border-border rounded-md px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-border" 
                 />
 
                 <div className="flex justify-end gap-3 pt-4">
@@ -213,7 +213,7 @@ export const AdminProductsPage: React.FC = () => {
                       setShowModal(false);
                       resetForm();
                     }}
-                    className="px-5 py-2.5 rounded-xl bg-[var(--bg-main)] border border-[#7e22ce]/50 text-sm text-[var(--text-muted)] hover:border-purple-500 hover:text-[var(--text-main)] cursor-pointer"
+                    className="px-5 py-2.5 rounded-md bg-[var(--bg-main)] border border-border text-sm text-[var(--text-muted)] hover:border-border hover:text-[var(--text-main)] cursor-pointer"
                   >
                     {t.common.cancel}
                   </button>
@@ -221,7 +221,7 @@ export const AdminProductsPage: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-sm text-white font-medium disabled:opacity-50 cursor-pointer"
+                    className="px-5 py-2.5 rounded-md bg-surface hover:bg-surface text-sm text-white font-medium disabled:opacity-50 cursor-pointer"
                   >
                     {isSubmitting 
                       ? 'Saving...' 
@@ -234,16 +234,16 @@ export const AdminProductsPage: React.FC = () => {
           </div>
         )}
 
-        <div className="bg-[var(--bg-card)] border border-[#7e22ce]/40 rounded-3xl overflow-hidden">
+        <div className="bg-[var(--bg-card)] border border-border rounded-md overflow-hidden">
           <div className="overflow-x-auto">
             {isLoading ? (
               <div className="flex justify-center p-12">
-                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-500"></div>
+                <div className="animate-spin rounded-md h-10 w-10 border-t-2 border-b-2 border-border"></div>
               </div>
             ) : (
               <table className="w-full text-left border-collapse text-sm">
                 <thead>
-                  <tr className="border-b border-[#7e22ce]/40 bg-[var(--bg-main)]/60 text-[var(--text-muted)]">
+                  <tr className="border-b border-border bg-[var(--bg-main)]/60 text-[var(--text-muted)]">
                     <th className="p-5 font-semibold">{t.adminProducts.product}</th>
                     <th className="p-5 font-semibold">{t.adminProducts.category}</th>
                     <th className="p-5 font-semibold">{t.common.price}</th>
@@ -254,23 +254,23 @@ export const AdminProductsPage: React.FC = () => {
                 <tbody className="divide-y divide-purple-900/30">
                   {products.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="p-8 text-center text-purple-300/50">
+                      <td colSpan={5} className="p-8 text-center text-primary">
                         No products found in the database.
                       </td>
                     </tr>
                   ) : (
                     products.map((product) => (
-                      <tr key={product._id} className="hover:bg-purple-900/10 transition-colors">
+                      <tr key={product._id} className="hover:bg-surface transition-colors">
                         <td className="p-5 flex items-center gap-4">
                           <img 
                             src={product.images?.[0] || 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=500&auto=format&fit=crop&q=60'} 
                             alt={product.name} 
-                            className="w-12 h-12 object-cover rounded-xl border border-purple-900/40" 
+                            className="w-12 h-12 object-cover rounded-md border border-border" 
                           />
                           <span className="font-medium text-white">{product.name}</span>
                         </td>
-                        <td className="p-5 text-purple-300/80">{product.category}</td>
-                        <td className="p-5 text-purple-200 font-semibold">${product.price.toFixed(2)}</td>
+                        <td className="p-5 text-primary">{product.category}</td>
+                        <td className="p-5 text-primary font-semibold">${product.price.toFixed(2)}</td>
                         <td className="p-5">
                           <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${
                             product.stock > 10 ? 'bg-green-500/10 text-green-400' :
@@ -283,14 +283,14 @@ export const AdminProductsPage: React.FC = () => {
                         <td className="p-5 text-right space-x-2 whitespace-nowrap">
                           <button 
                             onClick={() => handleEditClick(product)}
-                            className="p-2.5 text-blue-400 hover:bg-blue-950/40 rounded-xl transition-colors cursor-pointer"
+                            className="p-2.5 text-blue-400 hover:bg-blue-950/40 rounded-md transition-colors cursor-pointer"
                             title="Edit Product"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button 
                             onClick={() => handleDelete(product._id)}
-                            className="p-2.5 text-rose-400 hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer"
+                            className="p-2.5 text-rose-400 hover:bg-rose-950/40 rounded-md transition-colors cursor-pointer"
                             title="Delete Product"
                           >
                             <Trash2 className="w-4 h-4" />

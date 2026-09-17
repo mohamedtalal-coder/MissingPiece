@@ -80,7 +80,7 @@ export function CheckoutPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-8 py-12 font-sans space-y-8 text-[var(--text-main)]">
-      <div className="border-b border-[#7e22ce]/30 pb-6">
+      <div className="border-b border-border pb-6">
         <h1 className="text-2xl font-serif font-bold text-[var(--text-main)]">
           {t.checkout.title}
         </h1>
@@ -91,7 +91,7 @@ export function CheckoutPage() {
       </div>
 
       {!user ? (
-        <div className="bg-red-500/10 border border-red-500/30 p-6 rounded-2xl text-xs space-y-3">
+        <div className="bg-red-500/10 border border-red-500/30 p-6 rounded-md text-xs space-y-3">
           <div className="flex items-center gap-2 text-red-300">
             <AlertCircle className="w-5 h-5" />
 
@@ -106,7 +106,7 @@ export function CheckoutPage() {
 
           <button
             onClick={() => navigate('/login')}
-            className="bg-[#7e22ce] text-white px-4 py-2 rounded-xl font-semibold cursor-pointer hover:opacity-90 transition-opacity"
+            className="bg-[#7e22ce] text-white px-4 py-2 rounded-md font-semibold cursor-pointer hover:opacity-90 transition-opacity"
           >
             {t.checkout.signInNow}
           </button>
@@ -114,7 +114,7 @@ export function CheckoutPage() {
       ) : (
         <form
           onSubmit={handleCheckout}
-          className="space-y-6 bg-[var(--bg-card)] border border-[#7e22ce]/40 p-8 rounded-3xl shadow-[0_0_25px_rgba(126,34,206,0.15)] text-xs"
+          className="space-y-6 bg-[var(--bg-card)] border border-border p-8 rounded-md shadow-[0_0_25px_rgba(126,34,206,0.15)] text-xs"
         >
           <div className="space-y-2">
             <label className="text-[var(--text-main)] font-bold">
@@ -127,7 +127,7 @@ export function CheckoutPage() {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder={t.checkout.addressPlaceholder}
-              className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/40 rounded-xl px-4 py-3 text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#a855f7]"
+              className="w-full bg-[var(--bg-main)] border border-border rounded-md px-4 py-3 text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#a855f7]"
             />
           </div>
 
@@ -136,14 +136,14 @@ export function CheckoutPage() {
               {t.checkout.paymentMethod}
             </label>
 
-            <div className="p-3 bg-[var(--bg-main)] border border-[#7e22ce]/30 rounded-xl text-[var(--text-muted)]">
+            <div className="p-3 bg-[var(--bg-main)] border border-border rounded-md text-[var(--text-muted)]">
               💵 {t.checkout.cashOnDelivery}
             </div>
           </div>
 
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-[#7e22ce] to-[#a855f7] text-white font-semibold py-3.5 rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.4)] cursor-pointer text-sm hover:opacity-90 transition-opacity"
+            className="w-full bg-primary from-[#7e22ce] to-[#a855f7] text-white font-semibold py-3.5 rounded-md shadow-[0_0_20px_rgba(168,85,247,0.4)] cursor-pointer text-sm hover:opacity-90 transition-opacity"
           >
             {t.checkout.confirmOrder}
           </button>
