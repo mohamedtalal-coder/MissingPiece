@@ -1,7 +1,7 @@
 import { apiClient } from '../../api/client';
 
 export interface CartItemDto {
-  productId: string | number;
+  productId: string ;
   quantity: number;
 }
 

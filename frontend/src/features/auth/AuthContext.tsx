@@ -1,21 +1,29 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+interface User {
+  id: string | number;
+  name: string;
+  email: string;
+  role: 'guest' | 'buyer' | 'admin';
+}
+
 interface AuthContextType {
-  user: any;
-  login: (userData: any) => void;
+  user: User | null;
+  login: (token: string, userData: User) => void;
   logout: () => void;
   isAuthenticated: boolean;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // قراءة اليوزر من الـ LocalStorage عند فتح الموقع
     const savedUser = localStorage.getItem('mp_user');
-    if (savedUser) {
+    const savedToken = localStorage.getItem('token');
+    if (savedUser && savedToken) {
       try {
         setUser(JSON.parse(savedUser));
       } catch {
@@ -24,20 +32,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const login = (userData: any) => {
+  const login = (token: string, userData: User) => {
     setUser(userData);
     localStorage.setItem('mp_user', JSON.stringify(userData));
-    localStorage.setItem('mp_token', 'mock_token_123');
+    localStorage.setItem('token', token); // نفس المفتاح اللي بيقرأه client.ts
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('mp_user');
-    localStorage.removeItem('mp_token');
+    localStorage.removeItem('token');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        logout,
+        isAuthenticated: !!user,
+        isAdmin: user?.role === 'admin',
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

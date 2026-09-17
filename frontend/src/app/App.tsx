@@ -106,4 +106,4 @@ export function App() {
   );
 }
 
-export default App; // 👈 ده السطر اللي كان ناقص وحل الإيرور نهائياً
+export default App; 
