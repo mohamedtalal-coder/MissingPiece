@@ -1,10 +1,10 @@
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import request from "supertest";
-import app from "../../app.js";
-import { User } from "../auth/user.model.js";
-import { getUserProfile, updateUserProfile } from "./account.service.js";
-import { registerUser } from "../auth/auth.service.js";
+import app from "../../../app.js";
+import { User } from "../../../features/auth/user.model.js";
+import { getUserProfile, updateUserProfile } from "../../../features/account/account.service.js";
+import { registerUser } from "../../../features/auth/auth.service.js";
 
 let mongoServer: MongoMemoryServer;
 let testToken: string;

@@ -1,5 +1,6 @@
 import { Cart } from "./cart.model.js";
 import { Product } from "../products/product.model.js";
+import mongoose from "mongoose";
 
 export async function getCart(userId: string) {
   const cart = await Cart.findOne({ userId }).lean();
@@ -15,22 +16,41 @@ export async function addItem(
     throw new Error("addItem: exceeded retry limit — possible persistent conflict");
   }
 
-  let incremented = await Cart.findOneAndUpdate(
+  const incremented = await Cart.findOneAndUpdate(
     { userId, "items.productId": productId },
-    { $inc: { "items.$.quantity": quantity } },
-    { new: true, lean: true }
+    [
+      {
+        $set: {
+          items: {
+            $map: {
+              input: "$items",
+              as: "item",
+              in: {
+                $cond: [
+                  { $eq: ["$$item.productId", new mongoose.Types.ObjectId(productId)] },
+                  {
+                    $mergeObjects: [
+                      "$$item",
+                      {
+                        quantity: {
+                          $min: [1000, { $add: ["$$item.quantity", quantity] }]
+                        }
+                      }
+                    ]
+                  },
+                  "$$item"
+                ]
+              }
+            }
+          }
+        }
+      }
+    ],
+    { returnDocument: 'after', updatePipeline: true, lean: true }
   );
 
   if (incremented) {
-    const item = incremented.items.find((i: any) => String(i.productId) === String(productId));
-    if (item && item.quantity > 1000) {
-      incremented = await Cart.findOneAndUpdate(
-        { userId, "items.productId": productId },
-        { $set: { "items.$.quantity": 1000 } },
-        { new: true, lean: true }
-      );
-    }
-    return incremented?.items ?? [];
+    return incremented.items;
   }
 
   try {

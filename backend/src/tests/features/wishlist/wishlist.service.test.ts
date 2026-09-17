@@ -1,9 +1,9 @@
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
-import { User } from "../auth/user.model.js";
-import { Product } from "../products/product.model.js";
-import { addProductToWishlist, removeProductFromWishlist, getUserWishlist } from "./wishlist.service.js";
-import { registerUser } from "../auth/auth.service.js";
+import { User } from "../../../features/auth/user.model.js";
+import { Product } from "../../../features/products/product.model.js";
+import { addProductToWishlist, removeProductFromWishlist, getUserWishlist } from "../../../features/wishlist/wishlist.service.js";
+import { registerUser } from "../../../features/auth/auth.service.js";
 
 let mongoServer: MongoMemoryServer;
 let userId: string;

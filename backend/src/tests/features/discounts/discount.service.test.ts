@@ -7,8 +7,8 @@ import {
   createDiscount,
   updateDiscount,
   softDeleteDiscount
-} from "./discount.service.js";
-import { Discount } from "./discount.model.js";
+} from "../../../features/discounts/discount.service.js";
+import { Discount } from "../../../features/discounts/discount.model.js";
 
 let mongoServer: MongoMemoryServer;
 

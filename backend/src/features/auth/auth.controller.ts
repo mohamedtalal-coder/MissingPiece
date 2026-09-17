@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { registerSchema, loginSchema } from "./auth.validation.js";
 import { registerUser, loginUser } from "./auth.service.js";
+import { revokeAllUserTokens } from "../../shared/utils/tokenRevocation.js";
 
 export async function register(
   req: Request,
@@ -43,6 +44,25 @@ export async function login(
       success: true,
       message: "Login successful",
       data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function logout(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    if (req.userId) {
+      await revokeAllUserTokens(req.userId);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Logout successful",
     });
   } catch (error) {
     next(error);

@@ -1,5 +1,7 @@
 import rateLimit from "express-rate-limit";
 import type { Request, Response } from "express";
+import { RedisStore } from "rate-limit-redis";
+import { redis } from "../utils/redis.js";
 
 function rateLimitHandler(_req: Request, res: Response) {
   res.status(429).json({
@@ -28,12 +30,27 @@ function keyByIp(req: Request): string {
   return getIpBucket(ip);
 }
 
+const store = new RedisStore({
+  // @ts-expect-error - Known issue with the `ioredis` and `rate-limit-redis` types
+  sendCommand: async (...args: string[]) => {
+    try {
+      return await redis.call(...(args as [string, ...string[]]));
+    } catch (error) {
+      console.warn("Redis rate limiter store error:", error);
+      throw error;
+    }
+  },
+});
+
 const sharedOpts = {
   standardHeaders: "draft-8" as const,
   legacyHeaders: false,
   handler: rateLimitHandler,
   validate: false,
+  store,
+  passOnStoreError: true, // Fail open if Redis is down
 };
+
 
 export const cartReadLimiter = rateLimit({
   ...sharedOpts,

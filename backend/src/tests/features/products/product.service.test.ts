@@ -1,12 +1,12 @@
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import request from "supertest";
-import app from "../../app.js";
-import { Product } from "./product.model.js";
-import { createProduct, updateProduct, softDeleteProduct, listProducts } from "./product.service.js";
-import { Order } from "../orders/order.model.js";
-import { registerUser } from "../auth/auth.service.js";
-import { User } from "../auth/user.model.js";
+import app from "../../../app.js";
+import { Product } from "../../../features/products/product.model.js";
+import { createProduct, updateProduct, softDeleteProduct, listProducts } from "../../../features/products/product.service.js";
+import { Order } from "../../../features/orders/order.model.js";
+import { registerUser } from "../../../features/auth/auth.service.js";
+import { User } from "../../../features/auth/user.model.js";
 import jwt from "jsonwebtoken";
 
 let mongoServer: MongoMemoryServer;

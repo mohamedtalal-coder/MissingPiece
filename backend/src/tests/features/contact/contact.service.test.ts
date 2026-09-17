@@ -1,11 +1,11 @@
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import request from "supertest";
-import app from "../../app.js";
-import { Contact } from "./contact.model.js";
-import { createContactMessage, listContacts, updateContactStatus } from "./contact.service.js";
-import { registerUser } from "../auth/auth.service.js";
-import { User } from "../auth/user.model.js";
+import app from "../../../app.js";
+import { Contact } from "../../../features/contact/contact.model.js";
+import { createContactMessage, listContacts, updateContactStatus } from "../../../features/contact/contact.service.js";
+import { registerUser } from "../../../features/auth/auth.service.js";
+import { User } from "../../../features/auth/user.model.js";
 import jwt from "jsonwebtoken";
 
 let mongoServer: MongoMemoryServer;

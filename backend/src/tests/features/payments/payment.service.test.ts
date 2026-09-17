@@ -1,15 +1,15 @@
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import { Order } from "../orders/order.model.js";
-import { WebhookEvent } from "./webhookEvent.model.js";
+import { Order } from "../../../features/orders/order.model.js";
+import { WebhookEvent } from "../../../features/payments/webhookEvent.model.js";
 import { jest } from "@jest/globals";
 
 process.env["STRIPE_SECRET_KEY"] = "sk_test_123";
 process.env["STRIPE_WEBHOOK_SECRET"] = "whsec_test";
 
-import { createCheckoutSessionForOrder, handleStripeWebhook } from "./payment.service.js";
-import { stripe } from "../../shared/config/stripe.js";
-import { ApiError } from "../../shared/middleware/errorHandler.js";
+import { createCheckoutSessionForOrder, handleStripeWebhook } from "../../../features/payments/payment.service.js";
+import { stripe } from "../../../shared/config/stripe.js";
+import { ApiError } from "../../../shared/middleware/errorHandler.js";
 import Stripe from "stripe";
 
 let mongoServer: MongoMemoryServer;

@@ -5,11 +5,11 @@ import {
   updateReview,
   deleteReview,
   listReviewsForProduct,
-} from "./review.service.js";
-import { Review } from "./review.model.js";
-import { Product } from "../products/product.model.js";
-import { User } from "../auth/user.model.js";
-import { createReviewSchema, updateReviewSchema } from "./review.validation.js";
+} from "../../../features/reviews/review.service.js";
+import { Review } from "../../../features/reviews/review.model.js";
+import { Product } from "../../../features/products/product.model.js";
+import { User } from "../../../features/auth/user.model.js";
+import { createReviewSchema, updateReviewSchema } from "../../../features/reviews/review.validation.js";
 
 let mongoServer: MongoMemoryServer;
 

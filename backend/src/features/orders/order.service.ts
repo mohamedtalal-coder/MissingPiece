@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { withTransaction } from "../../shared/utils/withTransaction.js";
 import { Order } from "./order.model.js";
 import type { ShippingAddress } from "./order.model.js";
 import { Product } from "../products/product.model.js";
@@ -12,10 +13,7 @@ export interface CreateOrderInput {
 }
 
 export async function createOrder(userId: string, input: CreateOrderInput) {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
-  try {
+  return withTransaction(async (session) => {
     let totalAmount = 0;
     const orderItems = [];
 
@@ -89,14 +87,8 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
 
     await order.save({ session });
 
-    await session.commitTransaction();
-    session.endSession();
     return order;
-  } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    throw error;
-  }
+  });
 }
 
 export interface ListOrdersParams {
@@ -140,10 +132,7 @@ const ALLOWED_TRANSITIONS: Record<string, string[]> = {
 };
 
 export async function updateOrderStatus(orderId: string, status: string) {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
-  try {
+  return withTransaction(async (session) => {
     const order = await Order.findById(orderId).session(session);
     if (!order) {
       const err: AppError = new Error("Order not found");
@@ -172,12 +161,6 @@ export async function updateOrderStatus(orderId: string, status: string) {
     order.status = status as any;
     await order.save({ session });
 
-    await session.commitTransaction();
-    session.endSession();
     return order;
-  } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    throw error;
-  }
+  });
 }

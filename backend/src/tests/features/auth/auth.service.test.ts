@@ -2,9 +2,9 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { User } from "./user.model.js";
-import { registerUser, loginUser } from "./auth.service.js";
-import { registerSchema } from "./auth.validation.js";
+import { User } from "../../../features/auth/user.model.js";
+import { registerUser, loginUser } from "../../../features/auth/auth.service.js";
+import { registerSchema } from "../../../features/auth/auth.validation.js";
 
 let mongoServer: MongoMemoryServer;
 

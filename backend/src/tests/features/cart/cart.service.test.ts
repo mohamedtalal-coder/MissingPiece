@@ -1,12 +1,12 @@
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import request from "supertest";
-import app from "../../app.js";
-import { Cart } from "./cart.model.js";
-import { Product } from "../products/product.model.js";
-import { User } from "../auth/user.model.js";
-import { addItem, updateItemQuantity, removeItem, mergeGuestCart, validateCartItems, getCart } from "./cart.service.js";
-import { registerUser } from "../auth/auth.service.js";
+import app from "../../../app.js";
+import { Cart } from "../../../features/cart/cart.model.js";
+import { Product } from "../../../features/products/product.model.js";
+import { User } from "../../../features/auth/user.model.js";
+import { addItem, updateItemQuantity, removeItem, mergeGuestCart, validateCartItems, getCart } from "../../../features/cart/cart.service.js";
+import { registerUser } from "../../../features/auth/auth.service.js";
 
 let mongoServer: MongoMemoryServer;
 let userToken: string;
@@ -56,6 +56,22 @@ describe("Cart Service", () => {
       
       const cart = await getCart(userId);
       expect(cart[0]!.quantity).toBe(1000); // capped
+    });
+
+    it("handles concurrent addItem calls and never exceeds 1000", async () => {
+      const p = await Product.create({ name: "P3", slug: "p3", description: "D", price: 10, category: "cat", stock: 10000 });
+      const pid = p._id.toString();
+
+      // Start near the limit
+      await addItem(userId, pid, 900);
+
+      // Fire 10 concurrent requests of 50 each
+      await Promise.all(
+        Array.from({ length: 10 }).map(() => addItem(userId, pid, 50))
+      );
+
+      const cart = await getCart(userId);
+      expect(cart[0]!.quantity).toBe(1000);
     });
   });
 

@@ -1,9 +1,10 @@
+import { jest } from "@jest/globals";
 import mongoose from "mongoose";
 import { MongoMemoryReplSet } from "mongodb-memory-server";
-import { createOrder, updateOrderStatus, getOrderById } from "./order.service.js";
-import { Order } from "./order.model.js";
-import { Product } from "../products/product.model.js";
-import { Discount } from "../discounts/discount.model.js";
+import { createOrder, updateOrderStatus, getOrderById } from "../../../features/orders/order.service.js";
+import { Order } from "../../../features/orders/order.model.js";
+import { Product } from "../../../features/products/product.model.js";
+import { Discount } from "../../../features/discounts/discount.model.js";
 
 let mongoServer: MongoMemoryReplSet;
 
@@ -160,6 +161,53 @@ describe("Order Service - Discounts Integration", () => {
       const order = await createOrder(userId, maliciousInput as any);
       expect(order.totalAmount).toBe(100); // the real price is 100
       expect(order.items[0]!.priceAtPurchase).toBe(100);
+    });
+  });
+
+  describe("Transaction retry behavior", () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("should retry on TransientTransactionError and eventually succeed", async () => {
+      let attempts = 0;
+      const originalSave = Order.prototype.save;
+      jest.spyOn(Order.prototype, "save").mockImplementation(async function(this: any, options) {
+        attempts++;
+        if (attempts < 3) { // Fail on attempt 1 and 2, succeed on attempt 3
+          const err = new Error("Transient error");
+          (err as any).hasErrorLabel = (label: string) => label === "TransientTransactionError";
+          throw err;
+        }
+        return originalSave.call(this, options);
+      });
+
+      const input = {
+        items: [{ product: product._id.toString(), quantity: 1 }],
+        shippingAddress: { street: "123", city: "A", state: "B", zipCode: "C", country: "D" },
+      };
+
+      const order = await createOrder(userId, input);
+      expect(attempts).toBe(3);
+      expect(order).toBeDefined();
+    });
+
+    it("should give up after retry cap is hit", async () => {
+      let attempts = 0;
+      jest.spyOn(Order.prototype, "save").mockImplementation(async function() {
+        attempts++;
+        const err = new Error("Persistent transient error");
+        (err as any).hasErrorLabel = (label: string) => label === "TransientTransactionError";
+        throw err;
+      });
+
+      const input = {
+        items: [{ product: product._id.toString(), quantity: 1 }],
+        shippingAddress: { street: "123", city: "A", state: "B", zipCode: "C", country: "D" },
+      };
+
+      await expect(createOrder(userId, input)).rejects.toThrow("Persistent transient error");
+      expect(attempts).toBe(3);
     });
   });
 });
