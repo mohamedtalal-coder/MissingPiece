@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { redis } from "../../../shared/utils/redis.js";
 
-jest.mock("ioredis", () => require("ioredis-mock"));
+jest.mock("ioredis", () => jest.requireActual("ioredis-mock"));
 
 describe("Auth Routes", () => {
   let mongoServer: MongoMemoryServer;

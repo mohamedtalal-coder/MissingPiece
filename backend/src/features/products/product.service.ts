@@ -1,4 +1,5 @@
 import { Product } from "./product.model.js";
+import type { Types } from "mongoose";
 
 function slugify(input: string): string {
   return input.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
@@ -17,14 +18,15 @@ export interface ListProductsParams {
 }
 
 export async function listProducts(params: ListProductsParams) {
-  const filter: Record<string, any> = {};
+  const filter: Record<string, unknown> = {};
   if (!params.includeInactive) filter.isActive = true;
   if (params.category) filter.category = params.category;
 
   if (params.minPrice !== undefined || params.maxPrice !== undefined) {
-    filter.price = {};
-    if (params.minPrice !== undefined) filter.price.$gte = params.minPrice;
-    if (params.maxPrice !== undefined) filter.price.$lte = params.maxPrice;
+    const priceFilter: Record<string, number> = {};
+    if (params.minPrice !== undefined) priceFilter.$gte = params.minPrice;
+    if (params.maxPrice !== undefined) priceFilter.$lte = params.maxPrice;
+    filter.price = priceFilter;
   }
 
   if (params.search) {
@@ -52,7 +54,7 @@ export async function listProducts(params: ListProductsParams) {
 }
 
 export async function getProductBySlug(slug: string, includeInactive = false) {
-  const filter: Record<string, any> = { slug };
+  const filter: Record<string, unknown> = { slug };
   if (!includeInactive) filter.isActive = true;
   return Product.findOne(filter).lean();
 }
@@ -70,7 +72,21 @@ export interface CreateProductInput {
   images: string[];
 }
 
-export async function createProduct(input: CreateProductInput, attempt = 0): Promise<any> {
+export interface CreateProductOutput {
+  _id: Types.ObjectId;
+  name: string;
+  slug: string;
+  description: string;
+  price: number;
+  category: string;
+  stock: number;
+  images: string[];
+  isActive: boolean;
+  averageRating: number;
+  reviewCount: number;
+}
+
+export async function createProduct(input: CreateProductInput, attempt = 0): Promise<CreateProductOutput> {
   const base = slugify(input.name);
   const slug = attempt === 0 ? base : `${base}-${attempt}`;
   
@@ -80,11 +96,13 @@ export async function createProduct(input: CreateProductInput, attempt = 0): Pro
   );
   
   try {
-    return await Product.create(doc as any);
-  } catch (error: any) {
-    if (error.code === 11000 && error.keyPattern?.slug) {
-      if (attempt >= 3) throw new Error("Could not generate a unique slug after 3 attempts");
-      return createProduct(input, attempt + 1);
+    return (await Product.create(doc as Omit<CreateProductInput, "description"> & { description?: string; slug: string })) as unknown as CreateProductOutput;
+  } catch (error: unknown) {
+    if (error && typeof error === "object" && "code" in error && (error as { code: unknown }).code === 11000) {
+      if ("keyPattern" in error && (error as { keyPattern: { slug?: unknown } }).keyPattern?.slug) {
+        if (attempt >= 3) throw new Error("Could not generate a unique slug after 3 attempts", { cause: error });
+        return createProduct(input, attempt + 1);
+      }
     }
     throw error;
   }

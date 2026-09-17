@@ -9,7 +9,7 @@ import {
 import { Review } from "../../../features/reviews/review.model.js";
 import { Product } from "../../../features/products/product.model.js";
 import { User } from "../../../features/auth/user.model.js";
-import { createReviewSchema, updateReviewSchema } from "../../../features/reviews/review.validation.js";
+import { createReviewSchema } from "../../../features/reviews/review.validation.js";
 
 let mongoServer: MongoMemoryServer;
 
@@ -202,7 +202,7 @@ describe("Review Service", () => {
       const result = await listReviewsForProduct({ product: productId, page: 1, limit: 10 });
       expect(result.reviews.length).toBe(1);
       
-      const reviewUser = result.reviews[0]!.user as any;
+      const reviewUser = result.reviews[0]!.user as { name?: string; email?: string; passwordHash?: string };
       expect(reviewUser.name).toBe("Rev User");
       expect(reviewUser.email).toBeUndefined();
       expect(reviewUser.passwordHash).toBeUndefined();

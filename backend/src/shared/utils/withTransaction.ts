@@ -4,10 +4,13 @@ import type { ClientSession } from "mongoose";
 async function commitWithRetry(session: ClientSession) {
   try {
     await session.commitTransaction();
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (
-      error.hasErrorLabel &&
-      error.hasErrorLabel("UnknownTransactionCommitResult")
+      error &&
+      typeof error === "object" &&
+      "hasErrorLabel" in error &&
+      typeof (error as { hasErrorLabel: unknown }).hasErrorLabel === "function" &&
+      (error as { hasErrorLabel: (label: string) => boolean }).hasErrorLabel("UnknownTransactionCommitResult")
     ) {
       await commitWithRetry(session);
     } else {
@@ -29,11 +32,14 @@ export async function withTransaction<T>(
         const result = await callback(session);
         await commitWithRetry(session);
         return result;
-      } catch (error: any) {
+      } catch (error: unknown) {
         await session.abortTransaction();
         if (
-          error.hasErrorLabel &&
-          error.hasErrorLabel("TransientTransactionError") &&
+          error &&
+          typeof error === "object" &&
+          "hasErrorLabel" in error &&
+          typeof (error as { hasErrorLabel: unknown }).hasErrorLabel === "function" &&
+          (error as { hasErrorLabel: (label: string) => boolean }).hasErrorLabel("TransientTransactionError") &&
           attempt < maxRetries
         ) {
           continue;

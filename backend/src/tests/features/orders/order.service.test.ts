@@ -33,8 +33,8 @@ afterEach(async () => {
 });
 
 describe("Order Service - Discounts Integration", () => {
-  let product: any;
-  let userId = new mongoose.Types.ObjectId().toString();
+  let product: { _id: mongoose.Types.ObjectId; stock: number };
+  const userId = new mongoose.Types.ObjectId().toString();
   const validFrom = new Date(Date.now() - 10000);
   const validTo = new Date(Date.now() + 10000);
 
@@ -102,13 +102,13 @@ describe("Order Service - Discounts Integration", () => {
   });
 
   describe("Order status transitions & stock", () => {
-    let order: any;
+    let order: Awaited<ReturnType<typeof createOrder>>;
     beforeEach(async () => {
       order = await createOrder(userId, {
         items: [{ product: product._id.toString(), quantity: 2 }],
         shippingAddress: { street: "123", city: "A", state: "B", zipCode: "C", country: "D" }
       });
-      product = await Product.findById(product._id);
+      product = (await Product.findById(product._id))!;
     });
 
     it("cancelling pending restores stock, twice does not double-restore", async () => {
@@ -117,7 +117,7 @@ describe("Order Service - Discounts Integration", () => {
       expect(p?.stock).toBe(10); // restored 2 (initial was 10, created was 8, cancelled is 10)
 
       await expect(updateOrderStatus(order._id.toString(), "cancelled")).rejects.toThrow();
-      p = await Product.findById(product._id);
+      p = (await Product.findById(product._id))!;
       expect(p?.stock).toBe(10); // still 10, no double-restore
     });
 
@@ -151,14 +151,14 @@ describe("Order Service - Discounts Integration", () => {
 
   describe("createOrder price security", () => {
     it("forged priceAtPurchase or totalAmount in request body has zero effect", async () => {
-      // @ts-ignore - simulating a malicious client bypassing types/zod
+
       const maliciousInput = {
         items: [{ product: product._id.toString(), quantity: 1, priceAtPurchase: 1 }],
         shippingAddress: { street: "123", city: "A", state: "B", zipCode: "C", country: "D" },
         totalAmount: 1
       };
 
-      const order = await createOrder(userId, maliciousInput as any);
+      const order = await createOrder(userId, maliciousInput as unknown as Parameters<typeof createOrder>[1]);
       expect(order.totalAmount).toBe(100); // the real price is 100
       expect(order.items[0]!.priceAtPurchase).toBe(100);
     });
@@ -172,11 +172,11 @@ describe("Order Service - Discounts Integration", () => {
     it("should retry on TransientTransactionError and eventually succeed", async () => {
       let attempts = 0;
       const originalSave = Order.prototype.save;
-      jest.spyOn(Order.prototype, "save").mockImplementation(async function(this: any, options) {
+      jest.spyOn(Order.prototype, "save").mockImplementation(async function(this: unknown, options) {
         attempts++;
         if (attempts < 3) { // Fail on attempt 1 and 2, succeed on attempt 3
           const err = new Error("Transient error");
-          (err as any).hasErrorLabel = (label: string) => label === "TransientTransactionError";
+          (err as { hasErrorLabel?: unknown }).hasErrorLabel = (label: string) => label === "TransientTransactionError";
           throw err;
         }
         return originalSave.call(this, options);
@@ -197,7 +197,7 @@ describe("Order Service - Discounts Integration", () => {
       jest.spyOn(Order.prototype, "save").mockImplementation(async function() {
         attempts++;
         const err = new Error("Persistent transient error");
-        (err as any).hasErrorLabel = (label: string) => label === "TransientTransactionError";
+        (err as { hasErrorLabel?: unknown }).hasErrorLabel = (label: string) => label === "TransientTransactionError";
         throw err;
       });
 

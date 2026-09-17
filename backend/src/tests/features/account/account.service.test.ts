@@ -35,7 +35,7 @@ describe("Account Service & Controller", () => {
       const profile = await getUserProfile(testUserId);
       expect(profile).toBeDefined();
       expect(profile!.email).toBe("test@example.com");
-      expect((profile as any).passwordHash).toBeUndefined();
+      expect((profile as Record<string, unknown>).passwordHash).toBeUndefined();
     });
   });
 

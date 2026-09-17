@@ -17,5 +17,7 @@ const productSchema = new Schema(
 );
 
 productSchema.index({ name: 'text', description: 'text' });
+productSchema.index({ isActive: 1, category: 1, price: 1 });
+productSchema.index({ isActive: 1, price: 1 });
 
 export const Product = model("Product", productSchema);

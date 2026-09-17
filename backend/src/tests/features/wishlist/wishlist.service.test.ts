@@ -67,7 +67,7 @@ describe("Wishlist Service", () => {
       
       const list = await getUserWishlist(userId);
       expect(list.length).toBe(1);
-      expect((list[0] as any).name).toBe("Populated");
+      expect((list[0] as unknown as { name: string }).name).toBe("Populated");
     });
   });
 });

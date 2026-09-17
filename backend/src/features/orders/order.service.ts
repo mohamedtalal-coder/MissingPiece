@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { withTransaction } from "../../shared/utils/withTransaction.js";
 import { Order } from "./order.model.js";
 import type { ShippingAddress } from "./order.model.js";
@@ -113,7 +112,7 @@ export async function getMyOrders(userId: string, params: ListOrdersParams) {
 }
 
 export async function getOrderById(orderId: string, userId: string, isAdmin: boolean) {
-  const filter: Record<string, any> = { _id: orderId };
+  const filter: Record<string, unknown> = { _id: orderId };
   
   // Enforce IDOR protection: if not admin, must own the order
   if (!isAdmin) {
@@ -158,7 +157,7 @@ export async function updateOrderStatus(orderId: string, status: string) {
       }
     }
 
-    order.status = status as any;
+    order.status = status as typeof order.status;
     await order.save({ session });
 
     return order;

@@ -64,8 +64,8 @@ export const handleStripeWebhook = async (
 
   try {
     await WebhookEvent.create({ stripeEventId: event.id });
-  } catch (err: any) {
-    if (err.code === 11000) {
+  } catch (err: unknown) {
+    if (err && typeof err === "object" && "code" in err && (err as { code: unknown }).code === 11000) {
       // Event already processed
       return;
     }
