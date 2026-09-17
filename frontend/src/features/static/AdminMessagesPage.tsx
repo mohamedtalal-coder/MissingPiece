@@ -14,11 +14,7 @@ export const AdminMessagesPage: React.FC = () => {
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchMessages();
-  }, []);
-
-  const fetchMessages = async () => {
+  async function fetchMessages() {
     try {
       setLoading(true);
       const response = await apiClient.get<ContactMessage[]>('/admin/messages');
@@ -28,7 +24,11 @@ export const AdminMessagesPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    fetchMessages();
+  }, []);
 
   if (loading) {
     return (

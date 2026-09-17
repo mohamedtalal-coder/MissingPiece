@@ -56,103 +56,103 @@ export const cartReadLimiter = rateLimit({
   ...sharedOpts,
   windowMs: 60 * 1000,
   limit: 120,
-  keyGenerator: keyByUser,
+  keyGenerator: (req) => `cart_read:${keyByUser(req)}`,
 });
 
 export const cartWriteLimiter = rateLimit({
   ...sharedOpts,
   windowMs: 60 * 1000,
   limit: 60,
-  keyGenerator: keyByUser,
+  keyGenerator: (req) => `cart_write:${keyByUser(req)}`,
 });
 
 export const mergeLimiter = rateLimit({
   ...sharedOpts,
   windowMs: 60 * 1000,
   limit: 5,
-  keyGenerator: keyByUser,
+  keyGenerator: (req) => `merge:${keyByUser(req)}`,
 });
 
 export const validateLimiter = rateLimit({
   ...sharedOpts,
   windowMs: 60 * 1000,
   limit: 30,
-  keyGenerator: keyByIp,
+  keyGenerator: (req) => `validate:${keyByIp(req)}`,
 });
 
 export const productReadLimiter = rateLimit({
   ...sharedOpts,
   windowMs: 60 * 1000,
   limit: 100,
-  keyGenerator: keyByIp,
+  keyGenerator: (req) => `product_read:${keyByIp(req)}`,
 });
 
 export const contactSubmitLimiter = rateLimit({
   ...sharedOpts,
   windowMs: 15 * 60 * 1000, // 15 minutes
   limit: 5,
-  keyGenerator: keyByIp,
+  keyGenerator: (req) => `contact_submit:${keyByIp(req)}`,
 });
 
 export const accountWriteLimiter = rateLimit({
   ...sharedOpts,
   windowMs: 60 * 1000,
   limit: 30,
-  keyGenerator: keyByUser,
+  keyGenerator: (req) => `account_write:${keyByUser(req)}`,
 });
 
 export const wishlistWriteLimiter = rateLimit({
   ...sharedOpts,
   windowMs: 60 * 1000,
   limit: 30,
-  keyGenerator: keyByUser,
+  keyGenerator: (req) => `wishlist_write:${keyByUser(req)}`,
 });
 
 export const orderWriteLimiter = rateLimit({
   ...sharedOpts,
   windowMs: 60 * 1000,
   limit: 10,
-  keyGenerator: keyByUser,
+  keyGenerator: (req) => `order_write:${keyByUser(req)}`,
 });
 
 export const registerLimiter = rateLimit({
   ...sharedOpts,
   windowMs: 15 * 60 * 1000,
   limit: 10,
-  keyGenerator: keyByIp,
+  keyGenerator: (req) => `register:${keyByIp(req)}`,
 });
 
 export const loginLimiter = rateLimit({
   ...sharedOpts,
   windowMs: 15 * 60 * 1000,
   limit: 10,
-  keyGenerator: keyByIp,
+  keyGenerator: (req) => `login:${keyByIp(req)}`,
 });
 
 export const discountValidateLimiter = rateLimit({
   ...sharedOpts,
   windowMs: 60 * 1000,
   limit: 20,
-  keyGenerator: keyByIp,
+  keyGenerator: (req) => `discount_val:${keyByIp(req)}`,
 });
 
 export const reviewReadLimiter = rateLimit({
   ...sharedOpts,
   windowMs: 15 * 60 * 1000,
   limit: 100,
-  keyGenerator: keyByIp,
+  keyGenerator: (req) => `review_read:${keyByIp(req)}`,
 });
 
 export const reviewWriteLimiter = rateLimit({
   ...sharedOpts,
   windowMs: 60 * 1000,
   limit: 10,
-  keyGenerator: keyByUser,
+  keyGenerator: (req) => `review_write:${keyByUser(req)}`,
 });
 
 export const paymentLimiter = rateLimit({
   ...sharedOpts,
   windowMs: 60 * 1000,
   limit: 10,
-  keyGenerator: keyByUser,
+  keyGenerator: (req) => `payment:${keyByUser(req)}`,
 });

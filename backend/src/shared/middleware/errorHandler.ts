@@ -30,6 +30,7 @@ export function errorHandler(
   res: Response,
   _next: NextFunction
 ): void {
+  void _next;
   // Zod validation errors -> 400, with field-level detail
   if (err instanceof ZodError) {
     res.status(400).json({
@@ -53,11 +54,11 @@ export function errorHandler(
   }
 
   // Mongoose duplicate key (e.g. duplicate email on register) -> 409
-  if ((err as any).code === 11000) {
+  if (typeof err === "object" && err !== null && "code" in err && (err as { code: unknown }).code === 11000) {
     res.status(409).json({
       success: false,
       message: "Duplicate value",
-      details: (err as any).keyValue,
+      details: "keyValue" in err ? (err as { keyValue: unknown }).keyValue : undefined,
     });
     return;
   }

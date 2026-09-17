@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { updateProfileSchema, objectId } from "./account.validation.js";
+import { updateProfileSchema } from "./account.validation.js";
 import * as accountService from "./account.service.js";
 import type { AppError } from "../../shared/middleware/errorHandler.js";
 
@@ -11,12 +11,6 @@ function getUserId(req: Request): string {
     throw err;
   }
   return userId;
-}
-
-function getProductIdParam(req: Request): string {
-  const raw = req.params["productId"];
-  const value = Array.isArray(raw) ? raw[0] : raw;
-  return objectId.parse(value);
 }
 
 /**

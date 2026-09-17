@@ -3,12 +3,10 @@ import jwt from "jsonwebtoken";
 import { ApiError } from "./errorHandler.js";
 import { getRevocationTimestamp } from "../utils/tokenRevocation.js";
 
-declare global {
-  namespace Express {
-    interface Request {
-      userId?: string;
-      userRole?: string;
-    }
+declare module "express-serve-static-core" {
+  interface Request {
+    userId?: string;
+    userRole?: string;
   }
 }
 

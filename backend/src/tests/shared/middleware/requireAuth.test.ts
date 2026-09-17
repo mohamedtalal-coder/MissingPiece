@@ -5,7 +5,7 @@ import { requireAuth } from "../../../shared/middleware/requireAuth.js";
 import { redis } from "../../../shared/utils/redis.js";
 import { revokeAllUserTokens } from "../../../shared/utils/tokenRevocation.js";
 
-jest.mock("ioredis", () => require("ioredis-mock"));
+jest.mock("ioredis", () => jest.requireActual("ioredis-mock"));
 
 describe("requireAuth middleware", () => {
   let req: Partial<Request>;
@@ -51,7 +51,7 @@ describe("requireAuth middleware", () => {
 
     // Force redis to throw
     const originalGet = redis.get.bind(redis);
-    redis.get = jest.fn<any>().mockImplementation(() => Promise.reject(new Error("Redis connection failed")));
+    redis.get = jest.fn<() => Promise<null>>().mockImplementation(() => Promise.reject(new Error("Redis connection failed")));
 
     try {
       await requireAuth(req as Request, res as Response, next);

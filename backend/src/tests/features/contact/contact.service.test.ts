@@ -7,6 +7,7 @@ import { createContactMessage, listContacts, updateContactStatus } from "../../.
 import { registerUser } from "../../../features/auth/auth.service.js";
 import { User } from "../../../features/auth/user.model.js";
 import jwt from "jsonwebtoken";
+import { redis } from "../../../shared/utils/redis.js";
 
 let mongoServer: MongoMemoryServer;
 let adminToken: string;
@@ -24,6 +25,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
+  await redis.flushall();
   await Contact.deleteMany({});
   await User.deleteMany({});
   const adminRes = await registerUser("Admin", "admin@example.com", "Password123!");

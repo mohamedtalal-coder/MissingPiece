@@ -106,7 +106,7 @@ describe("Product Service", () => {
       expect(listing.items.length).toBe(0); // hidden
 
       const populatedOrder = await Order.findById(order._id).populate("items.product");
-      expect((populatedOrder!.items[0]!.product as any).name).toBe("To Delete"); // still resolves
+      expect((populatedOrder!.items[0]!.product as unknown as { name: string }).name).toBe("To Delete"); // still resolves
     });
   });
 

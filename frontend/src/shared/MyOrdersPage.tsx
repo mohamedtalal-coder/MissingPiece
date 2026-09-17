@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Package, Clock } from 'lucide-react';
 
 export function MyOrdersPage() {

@@ -1,39 +1,27 @@
-// src/features/wishlist/wishlistApi.ts
+import { apiClient } from '../../api/client';
+import type { Product } from '../products/productsApi';
+
+export interface WishlistItem {
+  _id: string; // The wishlist item id
+  user: string;
+  product: Product; // populated product
+  addedAt: string;
+}
 
 export const wishlistApi = {
   get: async () => {
-    try {
-      const saved = localStorage.getItem('mp_wishlist');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
+    const response = await apiClient.get<{ success: boolean; data: WishlistItem[] }>('/wishlist');
+    return response.data.data;
   },
 
-  add: async (product: any) => {
-    try {
-      const saved = localStorage.getItem('mp_wishlist');
-      const list = saved ? JSON.parse(saved) : [];
-      if (!list.some((item: any) => item.id === product.id)) {
-        list.push(product);
-        localStorage.setItem('mp_wishlist', JSON.stringify(list));
-      }
-      return { success: true };
-    } catch {
-      return { success: false };
-    }
+  add: async (productId: string) => {
+    const response = await apiClient.post<{ success: boolean; data: WishlistItem[] }>(`/wishlist/${productId}`);
+    return response.data.data;
   },
 
-  remove: async (id: any) => {
-    try {
-      const saved = localStorage.getItem('mp_wishlist');
-      let list = saved ? JSON.parse(saved) : [];
-      list = list.filter((item: any) => item.id !== id);
-      localStorage.setItem('mp_wishlist', JSON.stringify(list));
-      return { success: true };
-    } catch {
-      return { success: false };
-    }
+  remove: async (productId: string) => {
+    const response = await apiClient.delete<{ success: boolean; data: WishlistItem[] }>(`/wishlist/${productId}`);
+    return response.data.data;
   }
 };
 

@@ -1,3 +1,11 @@
 node_modules
 .env
 dist
+*.log
+
+# Scratch scripts
+test-mongoose-pipeline.ts
+test-mongoose-return.ts
+test-script.ts
+test2.ts
+test-security.js

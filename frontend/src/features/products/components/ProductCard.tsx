@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import type { Product } from '../productsApi';
 import { useCart } from '../../cart/CartContext';
 import { useToast } from '../../../shared/context/ToastContext';
+import { useWishlist } from '../../../shared/WishlistContext';
 import { Icon } from '../../../shared/components/ui/Icon';
 
 interface ProductCardProps {
@@ -11,9 +12,21 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addItem } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const { showToast } = useToast();
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  
   const [isAdding, setIsAdding] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  
+  const isWishlisted = isInWishlist(product._id || product.slug); // fallback for safety
+
+  // Reset success state after a brief moment
+  useEffect(() => {
+    if (isSuccess) {
+      const timer = setTimeout(() => setIsSuccess(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess]);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault(); // prevent navigation
@@ -21,7 +34,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     
     setIsAdding(true);
     try {
-      await addItem(product._id, 1);
+      await addItem(product, 1);
+      setIsSuccess(true);
       showToast({ message: 'Added to cart successfully', type: 'success' });
     } catch (err) {
       showToast({ message: 'Failed to add item to cart', type: 'error' });
@@ -30,67 +44,67 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     }
   };
 
-  const handleToggleWishlist = (e: React.MouseEvent) => {
+  const handleToggleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault(); // prevent navigation
-    setIsWishlisted(!isWishlisted);
-    const msg = isWishlisted ? 'Removed from wishlist' : 'Added to wishlist';
-    showToast({ message: msg, type: 'info' });
+    await toggleWishlist(product);
   };
 
   return (
-    <Link to={`/products/${product.slug}`} className="group block relative w-full overflow-hidden rounded-xl bg-surface-container-lowest shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all duration-300">
+    <Link to={`/products/${product.slug}`} className="group block relative w-full overflow-hidden rounded-2xl bg-purple-950/30 border border-purple-500/10 shadow-lg hover:shadow-[0_0_25px_rgba(168,85,247,0.3)] hover:border-purple-500/30 hover:-translate-y-1 transition-all duration-300 backdrop-blur-md">
       {/* Image container */}
-      <div className="relative aspect-[4/5] overflow-hidden bg-surface-container-low">
+      <div className="relative aspect-[4/5] overflow-hidden bg-black/40">
         <img
-          src={product.images[0] ?? '/placeholder.png'}
+          src={product.images?.[0] ?? '/placeholder.png'}
           alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
           loading="lazy"
         />
         
         {/* Wishlist Button */}
         <button 
           onClick={handleToggleWishlist}
-          className="absolute top-space-sm right-space-sm p-2 rounded-full bg-surface/80 backdrop-blur-md text-on-surface-variant hover:text-error hover:bg-surface transition-colors shadow-sm z-10"
+          className="absolute top-3 right-3 p-2.5 rounded-full bg-black/40 backdrop-blur-md text-white/70 hover:text-red-400 hover:bg-black/60 transition-all duration-300 shadow-sm z-10 hover:scale-110 cursor-pointer"
           aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
         >
-          <Icon name={isWishlisted ? 'favorite' : 'favorite_border'} className={`text-xl ${isWishlisted ? 'text-error fill-current' : ''}`} />
+          <Icon name={isWishlisted ? 'favorite' : 'favorite_border'} className={`text-xl transition-colors ${isWishlisted ? 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)] fill-current' : ''}`} />
         </button>
 
         {product.stock === 0 && (
-          <div className="absolute inset-0 bg-surface/50 flex items-center justify-center backdrop-blur-[2px]">
-            <span className="bg-surface px-space-md py-space-xs rounded-full font-label-md text-label-md text-on-surface uppercase tracking-wider">Out of Stock</span>
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
+            <span className="bg-red-500/80 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(239,68,68,0.5)]">Out of Stock</span>
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className="p-space-md flex flex-col gap-space-sm bg-surface-container-lowest">
+      <div className="p-5 flex flex-col gap-3">
         <div>
-          <h3 className="font-headline-sm text-headline-sm text-on-surface truncate group-hover:text-primary transition-colors">
+          <h3 className="text-lg font-semibold text-purple-50 truncate group-hover:text-purple-300 transition-colors drop-shadow-sm">
             {product.name}
           </h3>
-          <p className="text-body-sm text-on-surface-variant truncate capitalize">
-            {product.category.replace('-', ' ')}
+          <p className="text-sm text-purple-300/60 truncate capitalize mt-0.5">
+            {product.category?.replace('-', ' ')}
           </p>
         </div>
         
-        <div className="flex items-center justify-between mt-auto pt-space-xs">
-          <p className="font-label-lg text-label-lg text-on-surface font-semibold">
-            ${product.price.toFixed(2)}
+        <div className="flex items-center justify-between mt-auto pt-2">
+          <p className="text-xl text-purple-100 font-bold tracking-tight">
+            ${product.price?.toFixed(2)}
           </p>
           <button
             onClick={handleAddToCart}
-            disabled={product.stock === 0 || isAdding}
+            disabled={product.stock === 0 || isAdding || isSuccess}
             className={`
-              flex items-center justify-center px-space-md py-2 rounded font-label-md text-label-md transition-all duration-200
+              flex items-center justify-center px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 min-w-[110px] shadow-md cursor-pointer
               ${product.stock === 0 
-                ? 'bg-surface-container-highest text-on-surface-variant cursor-not-allowed opacity-60' 
-                : 'bg-primary text-on-primary hover:bg-primary/90 active:scale-95 shadow-sm hover:shadow-md'
+                ? 'bg-purple-900/30 text-purple-300/40 cursor-not-allowed border border-purple-900/50' 
+                : isSuccess 
+                  ? 'bg-green-500 text-white shadow-[0_0_15px_rgba(34,197,94,0.5)]'
+                  : 'bg-purple-600 text-white hover:bg-purple-500 hover:shadow-[0_0_15px_rgba(168,85,247,0.5)] active:scale-95'
               }
             `}
           >
-            {isAdding ? 'Adding...' : 'Add to cart'}
+            {isAdding ? 'Adding...' : isSuccess ? <Icon name="check" className="text-xl drop-shadow-md" /> : 'Add to cart'}
           </button>
         </div>
       </div>

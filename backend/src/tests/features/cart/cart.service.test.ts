@@ -9,7 +9,6 @@ import { addItem, updateItemQuantity, removeItem, mergeGuestCart, validateCartIt
 import { registerUser } from "../../../features/auth/auth.service.js";
 
 let mongoServer: MongoMemoryServer;
-let userToken: string;
 let userId: string;
 
 beforeAll(async () => {
@@ -30,7 +29,6 @@ beforeEach(async () => {
   await User.deleteMany({});
   const res = await registerUser("Cart User", "cart@example.com", "Password123!");
   userId = res.user.id.toString();
-  userToken = res.token;
 });
 
 describe("Cart Service", () => {

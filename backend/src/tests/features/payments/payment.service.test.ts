@@ -89,7 +89,7 @@ describe("Payment Service", () => {
       const mockSessionId = "cs_test_123";
       const mockSessionUrl = "https://checkout.stripe.com/test";
 
-      // @ts-ignore
+      // @ts-expect-error - mocking stripe method
       stripe.checkout.sessions.create = jest.fn().mockResolvedValue({
         id: mockSessionId,
         url: mockSessionUrl,
@@ -118,7 +118,7 @@ describe("Payment Service", () => {
       // Change order total to something that could cause precision issues if not rounded
       await Order.findByIdAndUpdate(orderId, { totalAmount: 47.999 });
 
-      // @ts-ignore
+      // @ts-expect-error - mocking stripe method
       stripe.checkout.sessions.create = jest.fn().mockResolvedValue({
         id: "cs_test_123", url: "https://checkout.stripe.com/test",
       });
@@ -144,7 +144,7 @@ describe("Payment Service", () => {
 
   describe("handleStripeWebhook", () => {
     it("should reject a payload with a bad/mismatched signature before DB write", async () => {
-      // @ts-ignore
+      // @ts-expect-error - mocking stripe method
       stripe.webhooks.constructEvent = jest.fn().mockImplementation(() => {
         throw new Error("Invalid signature");
       });
@@ -179,7 +179,7 @@ describe("Payment Service", () => {
         },
       } as unknown as Stripe.Event;
 
-      // @ts-ignore
+      // @ts-expect-error - mocking stripe method
       stripe.webhooks.constructEvent = jest.fn().mockReturnValue(mockEvent);
 
       await handleStripeWebhook(Buffer.from("raw"), "valid_sig");
@@ -207,7 +207,7 @@ describe("Payment Service", () => {
         },
       } as unknown as Stripe.Event;
 
-      // @ts-ignore
+      // @ts-expect-error - mocking stripe method
       stripe.webhooks.constructEvent = jest.fn().mockReturnValue(mockEvent);
 
       // First call
@@ -241,7 +241,7 @@ describe("Payment Service", () => {
         },
       } as unknown as Stripe.Event;
 
-      // @ts-ignore
+      // @ts-expect-error - mocking stripe method
       stripe.webhooks.constructEvent = jest.fn().mockReturnValue(mockEvent);
       await handleStripeWebhook(Buffer.from("raw"), "valid_sig");
 
@@ -261,7 +261,7 @@ describe("Payment Service", () => {
         },
       } as unknown as Stripe.Event;
 
-      // @ts-ignore
+      // @ts-expect-error - mocking stripe method
       stripe.webhooks.constructEvent = jest.fn().mockReturnValue(mockEvent);
       
       // Should not throw

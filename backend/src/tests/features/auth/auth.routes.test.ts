@@ -1,12 +1,10 @@
-import { jest } from "@jest/globals";
+
 import request from "supertest";
 import app from "../../../app.js";
 import { User } from "../../../features/auth/user.model.js";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { redis } from "../../../shared/utils/redis.js";
-
-jest.mock("ioredis", () => require("ioredis-mock"));
 
 describe("Auth Routes", () => {
   let mongoServer: MongoMemoryServer;
@@ -66,7 +64,7 @@ describe("Auth Routes", () => {
   it("Rate Limiter correctly uses RedisStore instead of MemoryStore", async () => {
     // Make enough requests to trigger the register rate limit
     // registerLimiter allows 10 requests per 15 minutes.
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 15; i++) {
       await request(app).post("/api/auth/register").send({
         name: `User ${i}`,
         email: `user${i}@example.com`,

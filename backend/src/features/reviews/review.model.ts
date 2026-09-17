@@ -20,5 +20,6 @@ const reviewSchema = new Schema(
 );
 
 reviewSchema.index({ product: 1, user: 1 }, { unique: true });
+reviewSchema.index({ product: 1, createdAt: -1 });
 
 export const Review = model("Review", reviewSchema);

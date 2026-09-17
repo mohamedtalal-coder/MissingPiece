@@ -7,6 +7,6 @@ if (!stripeSecretKey) {
 }
 
 export const stripe = new Stripe(stripeSecretKey, {
-  // @ts-ignore - Stripe's TS definitions are strictly pinned to their latest beta, we override it here for production stability.
+  // @ts-expect-error - Stripe's TS definitions are strictly pinned to their latest beta, we override it here for production stability.
   apiVersion: "2024-06-20",
 });

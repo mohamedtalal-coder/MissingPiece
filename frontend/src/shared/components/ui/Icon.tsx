@@ -1,7 +1,7 @@
 import {
   Search, Heart, ShoppingBag, UserCircle2, SlidersHorizontal,
   ListFilter, ChevronUp, ChevronDown, ChevronRight, ChevronLeft,
-  AlertCircle, PackageOpen, Leaf, X, Settings
+  AlertCircle, PackageOpen, Leaf, X, Settings, ArrowUpDown, Check, CheckCircle
 } from "lucide-react";
 import type { LucideProps, LucideIcon } from "lucide-react";
 
@@ -22,6 +22,9 @@ const ICONS: Record<string, LucideIcon> = {
   spa: Leaf,
   close: X,
   settings: Settings,
+  sort: ArrowUpDown,
+  check: Check,
+  check_circle: CheckCircle,
 };
 
 interface IconProps extends Omit<LucideProps, "size"> {

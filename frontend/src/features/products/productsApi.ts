@@ -41,8 +41,8 @@ export interface CreateProductInput {
 }
 
 export const productsApi = {
-  getAll: async (params: ListProductsParams = {}): Promise<ProductListResult> => {
-    const response = await apiClient.get<{ success: boolean } & ProductListResult>('/products', { params });
+  getAll: async (params: ListProductsParams = {}, signal?: AbortSignal): Promise<ProductListResult> => {
+    const response = await apiClient.get<{ success: boolean } & ProductListResult>('/products', { params, signal });
     return response.data;
   },
 
@@ -62,7 +62,7 @@ export const productsApi = {
   },
 
   update: async (id: string, input: Partial<CreateProductInput>): Promise<Product> => {
-    const response = await apiClient.put<{ success: boolean; product: Product }>(`/products/${id}`, input);
+    const response = await apiClient.patch<{ success: boolean; product: Product }>(`/products/${id}`, input);
     return response.data.product;
   },
 

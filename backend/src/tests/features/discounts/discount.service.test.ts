@@ -41,14 +41,14 @@ describe("Discount Service", () => {
     ]; // Total = 300
 
     it("should calculate percentage discount correctly", () => {
-      const discount: any = { type: "percentage", value: 20, applicableProducts: [] };
+      const discount = { type: "percentage", value: 20, applicableProducts: [] } as unknown as Parameters<typeof calculateDiscount>[0];
       const { discountAmount, applied } = calculateDiscount(discount, items);
       expect(applied).toBe(true);
       expect(discountAmount).toBe(60); // 20% of 300
     });
 
     it("should calculate fixed discount correctly", () => {
-      const discount: any = { type: "fixed", value: 50, applicableProducts: [] };
+      const discount = { type: "fixed", value: 50, applicableProducts: [] } as unknown as Parameters<typeof calculateDiscount>[0];
       const { discountAmount, applied } = calculateDiscount(discount, items);
       expect(applied).toBe(true);
       expect(discountAmount).toBe(50);
@@ -56,36 +56,36 @@ describe("Discount Service", () => {
 
     it("should cap percentage discount at subtotal (should not exceed total)", () => {
       // Though value <= 100 is validated, calculateDiscount should handle edge cases safely
-      const discount: any = { type: "percentage", value: 150, applicableProducts: [] };
+      const discount = { type: "percentage", value: 150, applicableProducts: [] } as unknown as Parameters<typeof calculateDiscount>[0];
       const { discountAmount, applied } = calculateDiscount(discount, items);
       expect(applied).toBe(true);
       expect(discountAmount).toBe(300); // Capped at total
     });
 
     it("should cap fixed discount at subtotal", () => {
-      const discount: any = { type: "fixed", value: 500, applicableProducts: [] };
+      const discount = { type: "fixed", value: 500, applicableProducts: [] } as unknown as Parameters<typeof calculateDiscount>[0];
       const { discountAmount, applied } = calculateDiscount(discount, items);
       expect(applied).toBe(true);
       expect(discountAmount).toBe(300); // Capped at total
     });
 
     it("should only apply to applicable products", () => {
-      const discount: any = { 
+      const discount = { 
         type: "percentage", 
         value: 10, 
         applicableProducts: [items[0]!.product] 
-      };
+      } as unknown as Parameters<typeof calculateDiscount>[0];
       const { discountAmount, applied } = calculateDiscount(discount, items);
       expect(applied).toBe(true);
       expect(discountAmount).toBe(10); // 10% of 100
     });
 
     it("should return 0 if no applicable products are in the cart", () => {
-      const discount: any = { 
+      const discount = { 
         type: "percentage", 
         value: 10, 
         applicableProducts: [new mongoose.Types.ObjectId()] 
-      };
+      } as unknown as Parameters<typeof calculateDiscount>[0];
       const { discountAmount, applied } = calculateDiscount(discount, items);
       expect(applied).toBe(false);
       expect(discountAmount).toBe(0);

@@ -5,8 +5,8 @@ import { Icon } from '../ui/Icon';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
-  const { items } = useCart();
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const { cart } = useCart();
+  const totalItems = cart.reduce((sum: number, item: any) => sum + item.quantity, 0);
 
   const isActive = (path: string) => location.pathname === path;
 
