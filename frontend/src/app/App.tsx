@@ -13,14 +13,17 @@ import { OrderHistoryPage } from '../features/orders/OrderHistoryPage';
 import { ProfilePage } from '../features/account/ProfilePage';
 import { AdminOrdersPage } from '../features/orders/AdminOrdersPage';
 import { Truck, Shield, Clock } from 'lucide-react';
+import { useLanguage } from '../shared/context/LanguageContext';
 
 export function App() {
+  const { t } = useLanguage();
+
   return (
     <Router>
-      <div className="min-h-screen bg-[#0b0914] text-white flex flex-col justify-between">
+      <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] flex flex-col justify-between">
         <div>
           <Navbar />
-          
+
           <main>
             <Routes>
               <Route path="/" element={<HomePage />} />
@@ -39,71 +42,142 @@ export function App() {
           </main>
         </div>
 
-        {/* الفوتر العام */}
-        <footer className="w-full bg-[#130e21] border-t border-[#7e22ce]/50 pt-12 pb-8 px-8 font-sans shadow-[0_-4px_30px_rgba(126,34,206,0.15)] mt-20">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-[#7e22ce]/30">
-            
+        <footer className="w-full bg-[var(--bg-card)] border-t border-[var(--border-main)] pt-12 pb-8 px-8 font-sans shadow-[0_-4px_30px_rgba(126,34,206,0.15)] mt-20">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-[var(--border-main)]">
             <div className="space-y-3">
               <div className="flex items-center gap-2.5">
                 <span className="text-lg">🧩</span>
-                <span className="text-base font-serif font-bold text-white">Missing Piece</span>
+
+                <span className="text-base font-serif font-bold text-[var(--text-main)]">
+                  Missing Piece
+                </span>
               </div>
-              <p className="text-xs text-[#cbd5e1] leading-relaxed">
-                Your premier destination for exquisite, high-end puzzles crafted for true connoisseurs.
+
+              <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                {t.footer.description}
               </p>
             </div>
 
             <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#c084fc]">Quick Links</h4>
-              <ul className="space-y-2 text-xs text-[#cbd5e1]">
-                <li><Link to="/products" className="hover:text-white transition-colors">Catalog Collection</Link></li>
-                <li><Link to="/wishlist" className="hover:text-white transition-colors">My Wishlist</Link></li>
-                <li><Link to="/orders" className="hover:text-white transition-colors">Order History</Link></li>
-                <li><Link to="/account" className="hover:text-white transition-colors">My Profile</Link></li>
-                <li><Link to="/admin/orders" className="hover:text-white transition-colors">Admin Portal</Link></li>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#c084fc]">
+                {t.footer.quickLinks}
+              </h4>
+
+              <ul className="space-y-2 text-xs text-[var(--text-muted)]">
+                <li>
+                  <Link
+                    to="/products"
+                    className="hover:text-[var(--text-main)] transition-colors"
+                  >
+                    {t.footer.catalog}
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    to="/wishlist"
+                    className="hover:text-[var(--text-main)] transition-colors"
+                  >
+                    {t.footer.wishlist}
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    to="/orders"
+                    className="hover:text-[var(--text-main)] transition-colors"
+                  >
+                    {t.footer.orderHistory}
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    to="/account"
+                    className="hover:text-[var(--text-main)] transition-colors"
+                  >
+                    {t.footer.profile}
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    to="/admin/orders"
+                    className="hover:text-[var(--text-main)] transition-colors"
+                  >
+                    {t.footer.admin}
+                  </Link>
+                </li>
               </ul>
             </div>
 
             <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#c084fc]">Customer Care</h4>
-              <ul className="space-y-2 text-xs text-[#cbd5e1]">
-                <li><Link to="/about" className="hover:text-white transition-colors">About Us</Link></li>
-                <li><Link to="/contact" className="hover:text-white transition-colors">Contact Support</Link></li>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#c084fc]">
+                {t.footer.customerCare}
+              </h4>
+
+              <ul className="space-y-2 text-xs text-[var(--text-muted)]">
+                <li>
+                  <Link
+                    to="/about"
+                    className="hover:text-[var(--text-main)] transition-colors"
+                  >
+                    {t.footer.about}
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    to="/contact"
+                    className="hover:text-[var(--text-main)] transition-colors"
+                  >
+                    {t.footer.contact}
+                  </Link>
+                </li>
               </ul>
             </div>
 
             <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#c084fc]">Why Choose Us</h4>
-              <div className="space-y-2 text-xs text-[#cbd5e1]">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#c084fc]">
+                {t.footer.whyChooseUs}
+              </h4>
+
+              <div className="space-y-2 text-xs text-[var(--text-muted)]">
                 <div className="flex items-center gap-2">
                   <Truck className="w-3.5 h-3.5 text-[#c084fc]" />
-                  <span>Fast & Secure Shipping</span>
+                  <span>{t.footer.shipping}</span>
                 </div>
+
                 <div className="flex items-center gap-2">
                   <Shield className="w-3.5 h-3.5 text-[#c084fc]" />
-                  <span>100% Quality Guarantee</span>
+                  <span>{t.footer.quality}</span>
                 </div>
+
                 <div className="flex items-center gap-2">
                   <Clock className="w-3.5 h-3.5 text-[#c084fc]" />
-                  <span>24/7 Customer Support</span>
+                  <span>{t.footer.support}</span>
                 </div>
               </div>
             </div>
-
           </div>
 
-          <div className="max-w-7xl mx-auto pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-[#94a3b8] gap-4">
-            <p>© 2026 Missing Piece. All rights reserved.</p>
+          <div className="max-w-7xl mx-auto pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-[var(--text-muted)] gap-4">
+            <p>{t.footer.copyright}</p>
+
             <div className="flex gap-6">
-              <span className="hover:text-white cursor-pointer">Privacy Policy</span>
-              <span className="hover:text-white cursor-pointer">Terms of Service</span>
+              <span className="hover:text-[var(--text-main)] cursor-pointer">
+                {t.footer.privacy}
+              </span>
+
+              <span className="hover:text-[var(--text-main)] cursor-pointer">
+                {t.footer.terms}
+              </span>
             </div>
           </div>
         </footer>
-
       </div>
     </Router>
   );
 }
 
-export default App; // 👈 ده السطر اللي كان ناقص وحل الإيرور نهائياً
+export default App;
