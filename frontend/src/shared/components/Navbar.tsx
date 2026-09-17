@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ShoppingBag,
@@ -13,39 +13,18 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../../features/auth/AuthContext';
 
 export function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [user, setUser] = useState<{
-    name: string;
-    email: string;
-    avatar?: string;
-  } | null>(null);
-
+  const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { language, toggleLanguage, isArabic } = useLanguage();
 
-  useEffect(() => {
-    const checkUser = () => {
-      const savedUser = localStorage.getItem('currentUser');
-
-      if (savedUser) {
-        setUser(JSON.parse(savedUser));
-      } else {
-        setUser(null);
-      }
-    };
-
-    checkUser();
-    window.addEventListener('storage', checkUser);
-
-    return () => window.removeEventListener('storage', checkUser);
-  }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('currentUser');
-    setUser(null);
+    logout();
     setIsDropdownOpen(false);
     navigate('/login');
   };
@@ -76,7 +55,11 @@ export function Navbar() {
 
         <Link
           to="/"
-          className="text-xl font-serif font-extrabold tracking-wider bg-gradient-to-r from-purple-600 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent shrink-0"
+          className={`text-xl font-serif font-extrabold tracking-wider bg-clip-text text-transparent shrink-0 ${
+            theme === 'dark'
+              ? 'bg-gradient-to-r from-white via-[#e9d5ff] to-[#c084fc]'
+              : 'bg-gradient-to-r from-purple-600 via-purple-500 to-fuchsia-500'
+          }`}
         >
           Missing Piece
         </Link>
@@ -116,12 +99,14 @@ export function Navbar() {
             <span>{translations.orders}</span>
           </Link>
 
-          <Link
-            to="/admin/orders"
-            className="hover:text-purple-500 transition-colors"
-          >
-            {translations.admin}
-          </Link>
+          {isAdmin && (
+            <Link
+              to="/admin/orders"
+              className="hover:text-purple-500 transition-colors"
+            >
+              {translations.admin}
+            </Link>
+          )}
         </div>
 
         <div className="flex items-center gap-3 relative">
@@ -172,9 +157,9 @@ export function Navbar() {
                   : 'bg-purple-50 border-purple-300 text-purple-600 hover:border-purple-500'
               }`}
             >
-              {user?.avatar ? (
+              {(user as any)?.avatar ? (
                 <img
-                  src={user.avatar}
+                  src={(user as any).avatar}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />

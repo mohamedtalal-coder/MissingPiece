@@ -1,40 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useCart } from './CartContext';
+import { cartApi, type ValidatedCartItem } from './cartApi';
 
 export function CartPage() {
-  const [cartItems, setCartItems] = useState<any[]>([]);
+  const { cart, updateQty, removeFromCart } = useCart();
+  const [validated, setValidated] = useState<ValidatedCartItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // تحميل السلة من localStorage فور فتح الصفحة ومع كل تحديث
-  const loadCart = () => {
-    const items = JSON.parse(localStorage.getItem('cart') || '[]');
-    setCartItems(items);
-  };
-
   useEffect(() => {
-    loadCart();
-    window.addEventListener('storage', loadCart);
-    return () => window.removeEventListener('storage', loadCart);
-  }, []);
+    if (cart.length === 0) {
+      setValidated([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    cartApi
+      .validateCart(cart.map(item => ({ productId: item.productId, quantity: item.quantity })))
+      .then(setValidated)
+      .catch(() => setValidated([]))
+      .finally(() => setLoading(false));
+  }, [cart]);
 
-  // تحديث الكمية (زيادة أو نقصان)
-  const handleUpdateQty = (index: number, newQty: number) => {
-    if (newQty < 1) return;
-    const updated = [...cartItems];
-    updated[index].qty = newQty;
-    setCartItems(updated);
-    localStorage.setItem('cart', JSON.stringify(updated));
-  };
-
-  // حذف منتج من السلة
-  const handleRemove = (index: number) => {
-    const updated = cartItems.filter((_, i) => i !== index);
-    setCartItems(updated);
-    localStorage.setItem('cart', JSON.stringify(updated));
-  };
-
-  const subtotal = cartItems.reduce((sum, item) => sum + (Number(item.price || 0) * (item.qty || 1)), 0);
+  const subtotal = validated.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
     <div className="max-w-6xl mx-auto px-8 py-12 font-sans space-y-8 text-white">
@@ -48,7 +38,9 @@ export function CartPage() {
         </div>
       </div>
 
-      {cartItems.length === 0 ? (
+      {loading ? (
+        <p className="text-xs text-[#cbd5e1] text-center py-16">Loading your cart...</p>
+      ) : cart.length === 0 ? (
         <div className="text-center py-16 bg-[#130e21] border border-[#7e22ce]/40 rounded-3xl space-y-4">
           <p className="text-sm text-[#cbd5e1]">Your cart is currently empty.</p>
           <Link to="/products" className="inline-block bg-[#7e22ce] text-white text-xs px-6 py-3 rounded-xl font-semibold shadow-[0_0_15px_rgba(126,34,206,0.4)]">
@@ -58,26 +50,29 @@ export function CartPage() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
-            {cartItems.map((item, index) => (
-              <div key={index} className="bg-[#130e21] border border-[#7e22ce]/40 p-4 rounded-2xl flex items-center justify-between gap-4 shadow-[0_0_15px_rgba(126,34,206,0.1)]">
-                <img src={item.image || item.imageUrl || item.img} alt={item.title} className="w-20 h-20 object-cover rounded-xl border border-[#7e22ce]/30" />
-                
+            {validated.map(item => (
+              <div key={item.productId} className="bg-[#130e21] border border-[#7e22ce]/40 p-4 rounded-2xl flex items-center justify-between gap-4 shadow-[0_0_15px_rgba(126,34,206,0.1)]">
+                <img src={item.imageUrl} alt={item.title} className="w-20 h-20 object-cover rounded-xl border border-[#7e22ce]/30" />
+
                 <div className="flex-1 space-y-1">
                   <h3 className="font-serif font-bold text-sm line-clamp-1">{item.title}</h3>
-                  <p className="text-[#c084fc] font-semibold text-xs">${Number(item.price || 0).toFixed(2)}</p>
+                  <p className="text-[#c084fc] font-semibold text-xs">${item.price.toFixed(2)}</p>
+                  {item.stock < item.quantity && (
+                    <p className="text-red-400 text-[10px]">Only {item.stock} left in stock</p>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-2 bg-[#0b0914] border border-[#7e22ce]/30 px-2.5 py-1.5 rounded-xl">
-                  <button onClick={() => handleUpdateQty(index, (item.qty || 1) - 1)} className="text-[#cbd5e1] hover:text-white cursor-pointer">
+                  <button onClick={() => updateQty(item.productId, item.quantity - 1)} className="text-[#cbd5e1] hover:text-white cursor-pointer">
                     <Minus className="w-3.5 h-3.5" />
                   </button>
-                  <span className="text-xs font-bold w-6 text-center">{item.qty || 1}</span>
-                  <button onClick={() => handleUpdateQty(index, (item.qty || 1) + 1)} className="text-[#cbd5e1] hover:text-white cursor-pointer">
+                  <span className="text-xs font-bold w-6 text-center">{item.quantity}</span>
+                  <button onClick={() => updateQty(item.productId, item.quantity + 1)} className="text-[#cbd5e1] hover:text-white cursor-pointer">
                     <Plus className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
-                <button onClick={() => handleRemove(index)} className="text-red-400 hover:text-red-300 p-2 cursor-pointer">
+                <button onClick={() => removeFromCart(item.productId)} className="text-red-400 hover:text-red-300 p-2 cursor-pointer">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
@@ -99,7 +94,7 @@ export function CartPage() {
               <span className="text-[#c084fc]">${subtotal.toFixed(2)}</span>
             </div>
 
-            <button 
+            <button
               onClick={() => navigate('/checkout')}
               className="w-full bg-gradient-to-r from-[#7e22ce] to-[#a855f7] text-white py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(168,85,247,0.4)] cursor-pointer"
             >

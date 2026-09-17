@@ -1,84 +1,109 @@
-import React, { useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Trash2, AlertCircle, Edit2 } from 'lucide-react';
 import { useLanguage } from '../../shared/context/LanguageContext';
-
-interface Product {
-  id: string | number;
-  title: string;
-  description: string;
-  price: number;
-  stock: number;
-  category: string;
-  imageUrl: string;
-}
-
-const fallbackProducts: Product[] = [
-  {
-    id: '1',
-    title: 'The Mystery Manor 1000-Piece Jigsaw',
-    description:
-      'An immersive mystery puzzle where you solve a crime as you build.',
-    price: 34.99,
-    stock: 15,
-    category: 'Mystery Puzzles',
-    imageUrl:
-      'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=500&auto=format&fit=crop&q=60',
-  },
-  {
-    id: '2',
-    title: 'Wooden 3D Mechanical Globe',
-    description:
-      'A stunning intricate wooden gear model that actually rotates.',
-    price: 49.99,
-    stock: 8,
-    category: 'Wooden Puzzles',
-    imageUrl:
-      'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=500&auto=format&fit=crop&q=60',
-  },
-];
+import { productsApi, type Product, type CreateProductInput } from './productsApi';
 
 export const AdminProductsPage: React.FC = () => {
   const { t } = useLanguage();
-
-  const [products, setProducts] = useState<Product[]>(fallbackProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [title, setTitle] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  
+  // Form state
+  const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
   const [category, setCategory] = useState('Jigsaw Puzzles');
   const [imageUrl, setImageUrl] = useState('');
 
-  const handleCreateProduct = (e: React.FormEvent) => {
+  const fetchProducts = async () => {
+    setIsLoading(true);
+    try {
+      const result = await productsApi.getAll({ limit: 50 });
+      setProducts(result.items);
+      setError(null);
+    } catch (err) {
+      setError('Failed to fetch products');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    try {
+      const input: CreateProductInput = {
+        name,
+        description,
+        price: Number(price),
+        stock: Number(stock),
+        category,
+        images: imageUrl ? [imageUrl] : ['https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=500&auto=format&fit=crop&q=60']
+      };
+      
+      if (editingProductId) {
+        const updated = await productsApi.update(editingProductId, input);
+        setProducts(products.map(p => p._id === editingProductId ? updated : p));
+      } else {
+        const created = await productsApi.create(input);
+        setProducts([created, ...products]);
+      }
+      
+      setShowModal(false);
+      resetForm();
+    } catch (err) {
+      alert(`Failed to ${editingProductId ? 'update' : 'create'} product`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-    const newProduct: Product = {
-      id: Date.now(),
-      title,
-      description,
-      price: Number(price),
-      stock: Number(stock),
-      category,
-      imageUrl:
-        imageUrl ||
-        'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=500&auto=format&fit=crop&q=60',
-    };
+  const handleEditClick = (product: Product) => {
+    setName(product.name);
+    setDescription(product.description || '');
+    setPrice(product.price.toString());
+    setStock(product.stock.toString());
+    setCategory(product.category);
+    setImageUrl(product.images?.[0] || '');
+    
+    setEditingProductId(product._id);
+    setShowModal(true);
+  };
 
-    setProducts([newProduct, ...products]);
-    setShowModal(false);
-    setTitle('');
+  const handleAddNewClick = () => {
+    resetForm();
+    setShowModal(true);
+  };
+
+  const resetForm = () => {
+    setName('');
     setDescription('');
     setPrice('');
     setStock('');
     setImageUrl('');
+    setEditingProductId(null);
   };
 
-  const handleDelete = (id: string | number) => {
-    if (!window.confirm(t.adminProducts.deleteConfirm)) {
-      return;
+  const handleDelete = async (id: string) => {
+    if (!window.confirm(t.adminProducts.deleteConfirm || 'Are you sure you want to delete this product?')) return;
+    
+    try {
+      await productsApi.delete(id);
+      setProducts(products.filter(p => p._id !== id));
+    } catch (err) {
+      alert('Failed to delete product');
     }
-
-    setProducts(products.filter((p) => p.id !== id));
   };
 
   return (
@@ -89,71 +114,76 @@ export const AdminProductsPage: React.FC = () => {
             <h1 className="text-3xl font-serif text-[var(--text-main)]">
               {t.adminProducts.title}
             </h1>
-
             <p className="text-xs text-[var(--text-muted)] mt-1">
               {t.adminProducts.description}
             </p>
           </div>
-
-          <button
-            onClick={() => setShowModal(true)}
-            className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-medium transition-all flex items-center gap-2 shadow-lg shadow-purple-900/40"
+          <button 
+            onClick={handleAddNewClick}
+            className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium transition-all flex items-center gap-2 shadow-lg shadow-purple-900/40 cursor-pointer"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-5 h-5" />
             <span>{t.adminProducts.addNew}</span>
           </button>
         </div>
 
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-xl flex items-center gap-3">
+            <AlertCircle className="w-5 h-5" />
+            <span>{error}</span>
+          </div>
+        )}
+
         {showModal && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 p-4">
             <div className="bg-[var(--bg-card)] border border-[#7e22ce]/40 p-6 rounded-3xl w-full max-w-lg space-y-6">
-              <h3 className="text-lg font-serif text-[var(--text-main)]">
-                {t.adminProducts.createProduct}
+              <h3 className="text-xl font-serif text-[var(--text-main)]">
+                {editingProductId ? 'Edit Product' : t.adminProducts.createProduct}
               </h3>
 
-              <form onSubmit={handleCreateProduct} className="space-y-4">
-                <input
-                  type="text"
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <input 
+                  type="text" 
                   placeholder={t.adminProducts.productTitle}
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-main)] focus:outline-none focus:border-purple-500"
-                  required
+                  value={name} 
+                  onChange={(e) => setName(e.target.value)} 
+                  className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-purple-500" 
+                  required 
                 />
-
-                <textarea
+                <textarea 
                   placeholder={t.adminProducts.productDescription}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-main)] focus:outline-none focus:border-purple-500"
+                  value={description} 
+                  onChange={(e) => setDescription(e.target.value)} 
+                  className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-purple-500" 
                   rows={3}
                   required
                 />
-
-                <div className="grid grid-cols-2 gap-3">
-                  <input
-                    type="number"
+                <div className="grid grid-cols-2 gap-4">
+                  <input 
+                    type="number" 
                     placeholder={t.adminProducts.price}
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-main)] focus:outline-none focus:border-purple-500"
-                    required
+                    step="0.01"
+                    min="0"
+                    value={price} 
+                    onChange={(e) => setPrice(e.target.value)} 
+                    className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-purple-500" 
+                    required 
                   />
-
-                  <input
-                    type="number"
+                  <input 
+                    type="number" 
                     placeholder={t.adminProducts.stock}
-                    value={stock}
-                    onChange={(e) => setStock(e.target.value)}
-                    className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-main)] focus:outline-none focus:border-purple-500"
-                    required
+                    min="0"
+                    value={stock} 
+                    onChange={(e) => setStock(e.target.value)} 
+                    className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-purple-500" 
+                    required 
                   />
                 </div>
 
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-main)] focus:outline-none focus:border-purple-500"
+                  className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-purple-500"
                 >
                   <option value="Jigsaw Puzzles">
                     {t.adminProducts.categories.jigsaw}
@@ -168,29 +198,35 @@ export const AdminProductsPage: React.FC = () => {
                     {t.adminProducts.categories.mystery}
                   </option>
                 </select>
-
-                <input
-                  type="text"
+                <input 
+                  type="text" 
                   placeholder={t.adminProducts.imageUrl}
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-main)] focus:outline-none focus:border-purple-500"
+                  value={imageUrl} 
+                  onChange={(e) => setImageUrl(e.target.value)} 
+                  className="w-full bg-[var(--bg-main)] border border-[#7e22ce]/50 rounded-xl px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-purple-500" 
                 />
 
-                <div className="flex justify-end gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="px-4 py-2 rounded-xl bg-[var(--bg-main)] border border-[#7e22ce]/50 text-xs text-[var(--text-muted)] hover:border-purple-500 hover:text-[var(--text-main)]"
+                <div className="flex justify-end gap-3 pt-4">
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      setShowModal(false);
+                      resetForm();
+                    }}
+                    className="px-5 py-2.5 rounded-xl bg-[var(--bg-main)] border border-[#7e22ce]/50 text-sm text-[var(--text-muted)] hover:border-purple-500 hover:text-[var(--text-main)] cursor-pointer"
                   >
                     {t.common.cancel}
                   </button>
 
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs text-white font-medium"
+                    disabled={isSubmitting}
+                    className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-sm text-white font-medium disabled:opacity-50 cursor-pointer"
                   >
-                    {t.adminProducts.saveProduct}
+                    {isSubmitting 
+                      ? 'Saving...' 
+                      : editingProductId ? 'Update Product' : t.adminProducts.saveProduct
+                    }
                   </button>
                 </div>
               </form>
@@ -200,62 +236,72 @@ export const AdminProductsPage: React.FC = () => {
 
         <div className="bg-[var(--bg-card)] border border-[#7e22ce]/40 rounded-3xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="border-b border-[#7e22ce]/40 bg-[var(--bg-main)]/60 text-[var(--text-muted)]">
-                  <th className="p-4">{t.adminProducts.product}</th>
-                  <th className="p-4">{t.adminProducts.category}</th>
-                  <th className="p-4">{t.common.price}</th>
-                  <th className="p-4">{t.common.quantity}</th>
-                  <th className="p-4 text-right">
-                    {t.adminProducts.actions}
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-[#7e22ce]/30">
-                {products.map((product) => (
-                  <tr
-                    key={product.id}
-                    className="hover:bg-purple-900/10 transition-colors"
-                  >
-                    <td className="p-4 flex items-center gap-3">
-                      <img
-                        src={product.imageUrl}
-                        alt={product.title}
-                        className="w-10 h-10 object-cover rounded-lg border border-[#7e22ce]/40"
-                      />
-
-                      <span className="font-medium text-[var(--text-main)]">
-                        {product.title}
-                      </span>
-                    </td>
-
-                    <td className="p-4 text-[var(--text-muted)]">
-                      {product.category}
-                    </td>
-
-                    <td className="p-4 text-[var(--text-main)] font-semibold">
-                      ${product.price}
-                    </td>
-
-                    <td className="p-4 text-[var(--text-muted)]">
-                      {product.stock}
-                    </td>
-
-                    <td className="p-4 text-right">
-                      <button
-                        onClick={() => handleDelete(product.id)}
-                        className="p-2 text-rose-400 hover:bg-rose-950/40 rounded-xl transition-colors"
-                        title={t.adminProducts.deleteProduct}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
+            {isLoading ? (
+              <div className="flex justify-center p-12">
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-500"></div>
+              </div>
+            ) : (
+              <table className="w-full text-left border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-[#7e22ce]/40 bg-[var(--bg-main)]/60 text-[var(--text-muted)]">
+                    <th className="p-5 font-semibold">{t.adminProducts.product}</th>
+                    <th className="p-5 font-semibold">{t.adminProducts.category}</th>
+                    <th className="p-5 font-semibold">{t.common.price}</th>
+                    <th className="p-5 font-semibold">{t.common.quantity}</th>
+                    <th className="p-5 font-semibold text-right">{t.adminProducts.actions}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-purple-900/30">
+                  {products.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="p-8 text-center text-purple-300/50">
+                        No products found in the database.
+                      </td>
+                    </tr>
+                  ) : (
+                    products.map((product) => (
+                      <tr key={product._id} className="hover:bg-purple-900/10 transition-colors">
+                        <td className="p-5 flex items-center gap-4">
+                          <img 
+                            src={product.images?.[0] || 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=500&auto=format&fit=crop&q=60'} 
+                            alt={product.name} 
+                            className="w-12 h-12 object-cover rounded-xl border border-purple-900/40" 
+                          />
+                          <span className="font-medium text-white">{product.name}</span>
+                        </td>
+                        <td className="p-5 text-purple-300/80">{product.category}</td>
+                        <td className="p-5 text-purple-200 font-semibold">${product.price.toFixed(2)}</td>
+                        <td className="p-5">
+                          <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${
+                            product.stock > 10 ? 'bg-green-500/10 text-green-400' :
+                            product.stock > 0 ? 'bg-yellow-500/10 text-yellow-400' :
+                            'bg-red-500/10 text-red-400'
+                          }`}>
+                            {product.stock}
+                          </span>
+                        </td>
+                        <td className="p-5 text-right space-x-2 whitespace-nowrap">
+                          <button 
+                            onClick={() => handleEditClick(product)}
+                            className="p-2.5 text-blue-400 hover:bg-blue-950/40 rounded-xl transition-colors cursor-pointer"
+                            title="Edit Product"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(product._id)}
+                            className="p-2.5 text-rose-400 hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer"
+                            title="Delete Product"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </div>

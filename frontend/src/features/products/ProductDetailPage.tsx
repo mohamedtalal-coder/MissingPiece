@@ -1,60 +1,139 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import {
-  ShoppingBag,
-  Heart,
-  ArrowLeft,
-  CheckCircle,
-  AlertCircle,
-} from 'lucide-react';
+import { ShoppingBag, Heart, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
 import { useLanguage } from '../../shared/context/LanguageContext';
+import { productsApi, type Product } from './productsApi';
+import { useCart } from '../cart/CartContext';
+import { useWishlist } from '../../shared/WishlistContext';
+import { useToast } from '../../shared/context/ToastContext';
+import { ProductCard } from './components/ProductCard';
 
 export function ProductDetailPage() {
-  const { id } = useParams();
   const { t } = useLanguage();
-
+  const { slug } = useParams<{ slug: string }>();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [addedToCart, setAddedToCart] = useState(false);
-  const [addedToWishlist, setAddedToWishlist] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  
+  const [isSuccessCart, setIsSuccessCart] = useState(false);
+  const [isSuccessWishlist, setIsSuccessWishlist] = useState(false);
 
-  const product = {
-    id: Number(id) || 1,
-    name: 'Mystic Nebula 1000pcs Jigsaw Puzzle',
-    category: 'Jigsaw Puzzles',
-    price: 45.0,
-    stock: 12,
-    description:
-      'Immerse yourself in the cosmos with this master-crafted 1000-piece jigsaw puzzle. Featuring high-definition vibrant cosmic imagery, precision-cut wooden pieces, and a satisfying tight fit designed for true puzzle enthusiasts.',
-    image:
-      'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?w=800&auto=format&fit=crop&q=80',
+  const { addItem } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    if (isSuccessCart) {
+      const timer = setTimeout(() => setIsSuccessCart(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccessCart]);
+
+  useEffect(() => {
+    if (isSuccessWishlist) {
+      const timer = setTimeout(() => setIsSuccessWishlist(false), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccessWishlist]);
+
+  useEffect(() => {
+    const fetchProductAndRelated = async () => {
+      if (!slug) return;
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        const fetchedProduct = await productsApi.getBySlug(slug);
+        setProduct(fetchedProduct);
+        setQuantity(1); // reset quantity on load
+        
+        // Fetch related products from the same category
+        try {
+          const relatedData = await productsApi.getAll({ category: fetchedProduct.category, limit: 5 });
+          // Filter out the current product and take up to 4
+          const filtered = relatedData.items
+            .filter(p => p._id !== fetchedProduct._id)
+            .slice(0, 4);
+          setRelatedProducts(filtered);
+        } catch (relatedErr) {
+          console.error("Failed to fetch related products", relatedErr);
+          setRelatedProducts([]);
+        }
+        
+      } catch (err) {
+        setError('Failed to load product details.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchProductAndRelated();
+  }, [slug]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#090614] text-white px-4 py-24 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="min-h-screen bg-[#090614] text-white px-4 py-24 flex flex-col items-center justify-center">
+        <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
+        <h2 className="text-xl font-bold text-white mb-6">{error || 'Product not found'}</h2>
+        <Link to="/products" className="px-6 py-2.5 bg-[#1a1433] hover:bg-[#231a42] border border-purple-500/20 text-white rounded-md transition-colors">
+          Return to Catalog
+        </Link>
+      </div>
+    );
+  }
+
+  const isWishlisted = isInWishlist(product._id || product.slug);
+
+  const handleAddToCart = async () => {
+    if (product.stock === 0 || isAddingToCart) return;
+    setIsAddingToCart(true);
+    try {
+      await addItem(product, quantity);
+      setIsSuccessCart(true);
+      showToast({ message: 'Added to cart successfully', type: 'success' });
+    } catch (err) {
+      showToast({ message: 'Failed to add item to cart', type: 'error' });
+    } finally {
+      setIsAddingToCart(false);
+    }
   };
 
-  const handleAddToCart = () => {
-    if (product.stock > 0) {
-      setAddedToCart(true);
-      setTimeout(() => setAddedToCart(false), 2500);
-    }
+  const handleToggleWishlist = async () => {
+    await toggleWishlist(product);
+    setIsSuccessWishlist(true);
   };
 
   return (
     <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] px-8 py-10 font-sans">
       <div className="max-w-6xl mx-auto space-y-8">
-        <Link
-          to="/products"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] bg-[var(--bg-card)] border border-[#7e22ce]/40 px-4 py-2 rounded-xl transition-all"
-        >
-          <ArrowLeft className="w-4 h-4 text-[#c084fc]" />
-          <span>{t.productDetail.backToCatalog}</span>
-        </Link>
+        <nav>
+          <Link
+            to="/products"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] bg-[var(--bg-card)] border border-[#7e22ce]/40 px-4 py-2 rounded-xl transition-all"
+          >
+            <ArrowLeft className="w-4 h-4 text-[#c084fc]" />
+            <span>{t.productDetail.backToCatalog}</span>
+          </Link>
+        </nav>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 bg-[var(--bg-card)] border border-[#7e22ce]/40 p-8 rounded-3xl shadow-2xl">
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-10 bg-[var(--bg-card)] border border-[#7e22ce]/40 p-8 rounded-3xl shadow-2xl items-start">
           <div className="w-full h-96 bg-[var(--bg-main)] rounded-2xl overflow-hidden border border-[#7e22ce]/30 relative">
             <img
-              src={product.image}
+              src={product.images?.[0] ?? '/placeholder.png'}
               alt={product.name}
               className="w-full h-full object-cover"
             />
-
             {product.stock === 0 && (
               <div className="absolute top-4 left-4 bg-red-950/90 border border-red-600/50 text-red-300 text-xs font-bold px-3 py-1 rounded-lg">
                 {t.productDetail.outOfStock}
@@ -65,7 +144,7 @@ export function ProductDetailPage() {
           <div className="space-y-6 flex flex-col justify-between">
             <div className="space-y-3">
               <span className="text-xs font-semibold text-[#c084fc] bg-[var(--bg-main)] border border-[#7e22ce]/40 px-3 py-1 rounded-lg">
-                {product.category}
+                {product.category?.replace('-', ' ')}
               </span>
 
               <h1 className="text-2xl md:text-3xl font-serif font-bold text-[var(--text-main)]">
@@ -131,38 +210,52 @@ export function ProductDetailPage() {
                 </div>
               )}
 
-              <div className="flex items-center gap-4">
-                <button
+              <div className="flex items-center gap-4 pt-2">
+                <button 
                   onClick={handleAddToCart}
-                  disabled={product.stock === 0}
-                  className="flex-1 py-3 bg-gradient-to-r from-[#7e22ce] to-[#a855f7] text-white rounded-xl text-xs font-semibold shadow-md hover:opacity-90 transition-opacity disabled:opacity-40 flex items-center justify-center gap-2"
+                  disabled={product.stock === 0 || isAddingToCart || isSuccessCart}
+                  className={`flex-1 py-3.5 rounded-md text-sm font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer
+                    ${isSuccessCart 
+                      ? 'bg-green-500 text-white' 
+                      : 'bg-purple-600 hover:bg-purple-500 active:bg-purple-700 text-white active:scale-[0.98]'
+                    }
+                  `}
                 >
                   <ShoppingBag className="w-4 h-4" />
-
                   <span>
-                    {addedToCart
+                    {isAddingToCart || isSuccessCart
                       ? t.productDetail.addedToCart
                       : t.productDetail.addToCart}
                   </span>
                 </button>
 
                 <button
-                  onClick={() =>
-                    setAddedToWishlist(!addedToWishlist)
-                  }
+                  onClick={handleToggleWishlist}
                   className={`p-3 rounded-xl border transition-all ${
-                    addedToWishlist
+                    isWishlisted
                       ? 'bg-pink-950/40 border-pink-500 text-pink-400'
                       : 'bg-[var(--bg-main)] border-[#7e22ce]/40 text-[var(--text-main)] hover:text-pink-400'
                   }`}
-                  title={t.productDetail.addToWishlist}
+                  title={isWishlisted ? t.productDetail.addToWishlist : t.productDetail.addToWishlist}
+
                 >
-                  <Heart className="w-5 h-5" />
+                  <Heart className={`w-5 h-5 transition-transform duration-300 ${isWishlisted ? 'fill-current' : ''} ${isSuccessWishlist ? 'scale-125' : ''}`} />
                 </button>
               </div>
             </div>
           </div>
-        </div>
+        </section>
+
+        {relatedProducts.length > 0 && (
+          <section className="pt-16 pb-12 border-t border-[#7e22ce]/30">
+            <h2 className="text-2xl font-serif font-bold text-[var(--text-main)] mb-8">You May Also Like</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+              {relatedProducts.map(relatedProduct => (
+                <ProductCard key={relatedProduct._id} product={relatedProduct} />
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );

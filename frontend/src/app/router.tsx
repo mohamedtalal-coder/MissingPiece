@@ -1,6 +1,5 @@
-import React from 'react';
 import { createBrowserRouter } from 'react-router-dom';
-import { HomePage } from '../features/static/HomePage';
+import HomePage from '../features/static/HomePage';
 import { ProductListPage } from '../features/products/ProductListPage';
 import { ProductDetailPage } from '../features/products/ProductDetailPage';
 import { CartPage } from '../features/cart/CartPage';

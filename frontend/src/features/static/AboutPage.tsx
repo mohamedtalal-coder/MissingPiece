@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { ShieldCheck, Sparkles, HeartHandshake } from 'lucide-react';
 import { useLanguage } from '../../shared/context/LanguageContext';
 
