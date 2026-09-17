@@ -17,7 +17,6 @@ export function LoginPage() {
       return;
     }
 
-    // التحقق من وجود المستخدم في القائمة المسجلة مسبقاً
     const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
     const foundUser = registeredUsers.find((u: any) => u.email === email && u.password === password);
 
@@ -26,7 +25,6 @@ export function LoginPage() {
       return;
     }
 
-    // حفظ المستخدم الحالي بشكل دائم في localStorage
     localStorage.setItem('currentUser', JSON.stringify(foundUser));
 
     alert(`Welcome back, ${foundUser.name}!`);
@@ -68,7 +66,12 @@ export function LoginPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[#e9d5ff]">Password</label>
+            <div className="flex items-center justify-between">
+              <label className="text-[#e9d5ff]">Password</label>
+              <Link to="/forgot-password" className="text-[11px] text-[#c084fc] hover:underline">
+                Forgot Password?
+              </Link>
+            </div>
             <div className="relative">
               <Lock className="w-4 h-4 text-[#c084fc] absolute left-3 top-3" />
               <input 
@@ -84,7 +87,7 @@ export function LoginPage() {
 
           <button 
             type="submit" 
-            className="w-full bg-gradient-to-r from-[#7e22ce] to-a855f7 text-white font-semibold py-3 rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.4)] cursor-pointer"
+            className="w-full bg-gradient-to-r from-[#7e22ce] to-[#a855f7] text-white font-semibold py-3 rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.4)] cursor-pointer"
           >
             Sign In
           </button>
