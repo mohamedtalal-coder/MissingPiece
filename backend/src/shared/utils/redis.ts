@@ -1,6 +1,7 @@
 import { Redis } from "ioredis";
 
-export const redis = new Redis(process.env["REDIS_URL"] || "redis://localhost:6379");
+const db = process.env.NODE_ENV === "test" ? process.env.JEST_WORKER_ID || 1 : 0;
+export const redis = new Redis(process.env["REDIS_URL"] || `redis://localhost:6379/${db}`);
 
 redis.on("error", (error: Error) => {
   console.error("Redis connection error:", error);
