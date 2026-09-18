@@ -10,6 +10,8 @@ export interface Product {
   category: string;
   stock: number;
   isActive: boolean;
+  averageRating?: number;
+  reviewCount?: number;
 }
 
 export interface ProductListResult {
@@ -38,11 +40,17 @@ export interface CreateProductInput {
   stock: number;
   category: string;
   images: string[];
+  isActive?: boolean;
 }
 
 export const productsApi = {
   getAll: async (params: ListProductsParams = {}, signal?: AbortSignal): Promise<ProductListResult> => {
     const response = await apiClient.get<{ success: boolean } & ProductListResult>('/products', { params, signal });
+    return response.data;
+  },
+
+  getAdminAll: async (params: ListProductsParams = {}, signal?: AbortSignal): Promise<ProductListResult> => {
+    const response = await apiClient.get<{ success: boolean } & ProductListResult>('/products/admin/all', { params, signal });
     return response.data;
   },
 

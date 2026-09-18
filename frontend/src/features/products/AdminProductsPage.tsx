@@ -19,11 +19,12 @@ export const AdminProductsPage: React.FC = () => {
   const [stock, setStock] = useState('');
   const [category, setCategory] = useState('Jigsaw Puzzles');
   const [imageUrl, setImageUrl] = useState('');
+  const [isActive, setIsActive] = useState(true);
 
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
-      const result = await productsApi.getAll({ limit: 50 });
+      const result = await productsApi.getAdminAll({ limit: 50 });
       setProducts(result.items);
       setError(null);
     } catch (err) {
@@ -49,6 +50,7 @@ export const AdminProductsPage: React.FC = () => {
         price: Number(price),
         stock: Number(stock),
         category,
+        isActive,
         images: imageUrl ? [imageUrl] : ['https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=500&auto=format&fit=crop&q=60']
       };
       
@@ -76,6 +78,7 @@ export const AdminProductsPage: React.FC = () => {
     setStock(product.stock.toString());
     setCategory(product.category);
     setImageUrl(product.images?.[0] || '');
+    setIsActive(product.isActive !== false); // default to true if undefined
     
     setEditingProductId(product._id);
     setShowModal(true);
@@ -92,6 +95,7 @@ export const AdminProductsPage: React.FC = () => {
     setPrice('');
     setStock('');
     setImageUrl('');
+    setIsActive(true);
     setEditingProductId(null);
   };
 
@@ -205,6 +209,19 @@ export const AdminProductsPage: React.FC = () => {
                   onChange={(e) => setImageUrl(e.target.value)} 
                   className="w-full bg-[var(--bg-main)] border border-border rounded-md px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-border" 
                 />
+                
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="isActive"
+                    checked={isActive}
+                    onChange={(e) => setIsActive(e.target.checked)}
+                    className="w-4 h-4 bg-[var(--bg-main)] border-border rounded text-blue-600 focus:ring-blue-500"
+                  />
+                  <label htmlFor="isActive" className="text-sm text-[var(--text-main)] cursor-pointer">
+                    Active Product (Visible to customers)
+                  </label>
+                </div>
 
                 <div className="flex justify-end gap-3 pt-4">
                   <button 
@@ -248,6 +265,9 @@ export const AdminProductsPage: React.FC = () => {
                     <th className="p-5 font-semibold">{t.adminProducts.category}</th>
                     <th className="p-5 font-semibold">{t.common.price}</th>
                     <th className="p-5 font-semibold">{t.common.quantity}</th>
+                    <th className="p-5 font-semibold">Status</th>
+                    <th className="p-5 font-semibold">Rating</th>
+                    <th className="p-5 font-semibold">Reviews</th>
                     <th className="p-5 font-semibold text-right">{t.adminProducts.actions}</th>
                   </tr>
                 </thead>
@@ -279,6 +299,19 @@ export const AdminProductsPage: React.FC = () => {
                           }`}>
                             {product.stock}
                           </span>
+                        </td>
+                        <td className="p-5">
+                          <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${
+                            product.isActive ? 'bg-green-500/10 text-green-400' : 'bg-gray-500/10 text-gray-400'
+                          }`}>
+                            {product.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="p-5 text-primary">
+                          {product.averageRating ? product.averageRating.toFixed(1) : '-'}
+                        </td>
+                        <td className="p-5 text-primary">
+                          {product.reviewCount || 0}
                         </td>
                         <td className="p-5 text-right space-x-2 whitespace-nowrap">
                           <button 

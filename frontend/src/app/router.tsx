@@ -14,6 +14,7 @@ import { AdminOrdersPage } from '../features/orders/AdminOrdersPage';
 import { AdminMessagesPage } from '../features/static/AdminMessagesPage';
 import { AboutPage } from '../features/static/AboutPage';
 import { ContactPage } from '../features/static/ContactPage';
+import { ProtectedRoute } from '../shared/components/ProtectedRoute';
 
 export const router = createBrowserRouter([
   {
@@ -75,6 +76,10 @@ export const router = createBrowserRouter([
   },
   {
     path: '/admin/messages',
-    element: <AdminMessagesPage />,
+    element: (
+      <ProtectedRoute adminOnly>
+        <AdminMessagesPage />
+      </ProtectedRoute>
+    ),
   },
 ]);
