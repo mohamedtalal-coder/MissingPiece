@@ -23,13 +23,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const savedUser = localStorage.getItem('mp_user');
     const savedToken = localStorage.getItem('token');
+    
     if (savedUser && savedToken) {
       try {
+        // Decode JWT to check expiry
+        const payloadBase64 = savedToken.split('.')[1];
+        if (payloadBase64) {
+          const payload = JSON.parse(atob(payloadBase64));
+          const isExpired = payload.exp && payload.exp * 1000 < Date.now();
+          
+          if (isExpired) {
+            localStorage.removeItem('mp_user');
+            localStorage.removeItem('token');
+            setUser(null);
+            return;
+          }
+        }
+        
         setUser(JSON.parse(savedUser));
-      } catch {
+      } catch (e) {
         setUser(null);
+        localStorage.removeItem('mp_user');
+        localStorage.removeItem('token');
       }
     }
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'token' && !e.newValue) {
+        setUser(null);
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const login = (token: string, userData: User) => {
@@ -38,10 +63,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('token', token); // نفس المفتاح اللي بيقرأه client.ts
   };
 
-  const logout = () => {
+  const logout = async () => {
     setUser(null);
     localStorage.removeItem('mp_user');
     localStorage.removeItem('token');
+    // We import authApi locally to avoid circular dependencies if authApi imports apiClient which uses token
+    import('./authApi').then(({ authApi }) => {
+      authApi.logout().catch(console.error);
+    });
   };
 
   return (

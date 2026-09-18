@@ -16,8 +16,13 @@ const productSchema = new Schema(
   { timestamps: true }
 );
 
-productSchema.index({ name: 'text', description: 'text' });
+// Weighted text index: name matches rank higher than description/slug.
+productSchema.index(
+  { name: "text", description: "text", slug: "text" },
+  { weights: { name: 10, slug: 5, description: 1 }, name: "product_text_search" }
+);
 productSchema.index({ isActive: 1, category: 1, price: 1 });
 productSchema.index({ isActive: 1, price: 1 });
+productSchema.index({ isActive: 1, createdAt: -1 });
 
 export const Product = model("Product", productSchema);

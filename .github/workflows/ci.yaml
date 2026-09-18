@@ -48,7 +48,7 @@ jobs:
           MONGOMS_VERSION: 7.0.14
 
   frontend:
-    name: Frontend (lint & build)
+    name: Frontend (lint, build & test)
     runs-on: ubuntu-latest
     defaults:
       run:

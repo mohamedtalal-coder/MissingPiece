@@ -35,6 +35,11 @@ class ApiClient {
           localStorage.removeItem('token');
           window.location.href = '/login';
         }
+        if (error.response?.status === 429) {
+          console.warn('Rate limit exceeded. Please try again later.');
+          // A global toast could be dispatched here if event listener is set up
+          window.dispatchEvent(new CustomEvent('api-rate-limit'));
+        }
         return Promise.reject(error);
       }
     );

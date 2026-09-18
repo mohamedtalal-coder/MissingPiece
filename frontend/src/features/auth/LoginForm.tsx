@@ -1,93 +1,136 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../../shared/context/LanguageContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { authApi } from './authApi';
 import { useAuth } from './AuthContext';
-import { Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
+import { Button } from '../../shared/components/ui/Button';
+import { Input } from '../../shared/components/ui/Input';
+import { Icon } from '../../shared/components/ui/Icon';
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function sanitize(value: string, max: number): string {
+  return value.replace(/[<>]/g, '').trim().slice(0, max);
+}
 
 export const LoginForm: React.FC = () => {
-  const { t } = useLanguage() as any;
+  const { t, language } = useLanguage() as any;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const from =
+    typeof location.state?.from?.pathname === 'string' && location.state.from.pathname.startsWith('/')
+      ? location.state.from.pathname
+      : '/';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setError('');
 
-    if (!email || !password) {
-      setError('Please fill in all required fields.');
+    const cleanEmail = sanitize(email, 254).toLowerCase();
+    const cleanPassword = password.slice(0, 128);
+
+    if (!cleanEmail || !cleanPassword) {
+      setError(t.auth?.requiredFields || 'Please fill in all required fields.');
+      return;
+    }
+    if (!EMAIL_RE.test(cleanEmail)) {
+      setError(t.auth?.invalidEmail || 'Please enter a valid email address.');
+      return;
+    }
+    if (cleanPassword.length < 8) {
+      setError(t.auth?.passwordLength || 'Password must be at least 8 characters.');
       return;
     }
 
     try {
       setLoading(true);
-      const data = await authApi.login({ email, password });
+      const data = await authApi.login({ email: cleanEmail, password: cleanPassword });
       login(data.token, data.user);
-      navigate('/');
+      navigate(from, { replace: true });
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid email or password.');
+      setError(err.response?.data?.message || t.auth?.invalidCredentials || 'Invalid email or password.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-space-lg animate-fade-in" noValidate>
       {error && (
-        <div className="p-3.5 rounded-md bg-rose-950/40 border border-rose-800/50 text-rose-300 text-xs text-center">
+        <div
+          className="p-3.5 rounded-md bg-error-container/30 border border-error/30 text-error text-center font-body-sm text-body-sm animate-shake"
+          role="alert"
+        >
           {error}
         </div>
       )}
 
-      <div className="space-y-1.5">
-        <label className="text-xs font-medium text-primary">{t.auth?.email || "Email Address"}</label>
-        <div className="relative">
-          <Mail className="absolute left-3.5 top-3 w-4 h-4 text-primary" />
-          <input 
-            type="email" 
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="name@example.com"
-            className="w-full bg-surface border border-border rounded-md ps-10 pe-4 py-2.5 text-xs text-white focus:outline-none focus:border-border"
-            required
-          />
-        </div>
-      </div>
+      <div className="space-y-space-md">
+        <Input
+          type="email"
+          label={t.auth?.email || 'Email Address'}
+          icon="mail"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="name@example.com"
+          required
+          maxLength={254}
+          autoComplete="email"
+          autoCapitalize="none"
+        />
 
-      <div className="space-y-1.5">
-        <label className="text-xs font-medium text-primary">{t.auth?.password || "Password"}</label>
         <div className="relative">
-          <Lock className="absolute left-3.5 top-3 w-4 h-4 text-primary" />
-          <input 
-            type="password" 
+          <Input
+            type={showPassword ? 'text' : 'password'}
+            label={t.auth?.password || 'Password'}
+            icon="lock"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            className="w-full bg-surface border border-border rounded-md ps-10 pe-4 py-2.5 text-xs text-white focus:outline-none focus:border-border"
             required
+            maxLength={128}
+            autoComplete="current-password"
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className={`absolute right-space-md top-[34px] text-on-surface-variant hover:text-on-surface focus:outline-none ${
+              language === 'ar' ? 'left-space-md right-auto' : ''
+            }`}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+          >
+            <Icon name={showPassword ? 'eye_off' : 'eye'} size={18} />
+          </button>
         </div>
       </div>
 
-      <button 
-        type="submit" 
-        disabled={loading}
-        className="w-full py-3 rounded-md bg-primary from-primary to-primary text-white text-xs font-medium hover:from-primary hover:to-primary transition-all flex justify-center items-center gap-2 shadow-lg shadow-subtle"
+      <Button
+        type="submit"
+        fullWidth
+        isLoading={loading}
+        icon={language === 'ar' ? 'chevron_left' : 'chevron_right'}
+        iconPosition="right"
       >
-        {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-        <span>{t.auth?.signIn || "Sign In"}</span>
-        {!loading && <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />}
-      </button>
+        {t.auth?.signIn || 'Sign In'}
+      </Button>
 
-      <p className="text-center text-xs text-primary pt-2">
-        Don't have an account?{' '}
-        <Link to="/register" className="text-primary hover:text-primary font-medium underline">
-          Register here
+      <p className="text-center font-body-sm text-body-sm text-on-surface-variant pt-2">
+        {t.auth?.noAccount || "Don't have an account?"}{' '}
+        <Link
+          to="/register"
+          state={location.state}
+          className="text-primary hover:text-primary-container font-medium underline transition-colors"
+        >
+          {t.auth?.registerHere || 'Register here'}
         </Link>
       </p>
     </form>

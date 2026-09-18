@@ -31,4 +31,12 @@ export const authApi = {
     const response = await apiClient.post<{ success: boolean; data: AuthResponse }>('/auth/login', credentials);
     return response.data.data;
   },
+
+  logout: async () => {
+    try {
+      await apiClient.post('/auth/logout');
+    } catch (e) {
+      console.warn("Logout request failed", e);
+    }
+  }
 };

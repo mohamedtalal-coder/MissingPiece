@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../../shared/context/LanguageContext';
 import { Icon } from '../../../shared/components/ui/Icon';
+import { SearchInput } from '../../../shared/components/ui/SearchInput';
 
 interface ProductFiltersProps {
   categories: string[];
@@ -13,6 +14,7 @@ interface ProductFiltersProps {
   onPriceChange: (min: number, max: number) => void;
   sortBy: string;
   onSortChange: (sort: string) => void;
+  priceCeiling?: number;
 }
 
 export const ProductFilters: React.FC<ProductFiltersProps> = ({
@@ -25,154 +27,101 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
   maxPrice,
   onPriceChange,
   sortBy,
-  onSortChange
+  onSortChange,
+  priceCeiling = 2000,
 }) => {
   const { t } = useLanguage() as any;
-  const [localSearch, setLocalSearch] = useState(searchTerm);
-  const [localMin, setLocalMin] = useState(minPrice);
   const [localMax, setLocalMax] = useState(maxPrice);
-  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-  const categoryRef = useRef<HTMLDivElement>(null);
 
-  // Debounce Search
+  useEffect(() => {
+    setLocalMax(maxPrice);
+  }, [maxPrice]);
+
+  // Debounce price only — SearchInput already debounces search
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (localSearch.length === 0 || localSearch.length >= 3) {
-        onSearchChange(localSearch);
-      }
+      onPriceChange(minPrice, localMax);
     }, 400);
     return () => clearTimeout(timer);
-  }, [localSearch, onSearchChange]);
-
-  // Debounce Price
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (localMin <= localMax) {
-        onPriceChange(localMin, localMax);
-      }
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [localMin, localMax, onPriceChange]);
-
-  // Close category dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (categoryRef.current && !categoryRef.current.contains(event.target as Node)) {
-        setIsCategoryOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localMax, minPrice]);
 
   return (
-    <div className="flex flex-col gap-6 w-full">
-      {/* Top Row: Search and Sort */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="relative w-full md:w-96">
-          <Icon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 text-primary" />
-          <input 
-            type="text" 
-            placeholder="Search puzzles..." 
-            value={localSearch}
-            onChange={(e) => setLocalSearch(e.target.value)}
-            className="w-full bg-surface border border-border rounded-md ps-10 pe-4 py-2.5 text-sm md:text-base text-primary placeholder-purple-300/40 focus:outline-none focus:border-border focus:ring-1 focus:ring-purple-400 transition-all shadow-inner"
+    <section className="bg-surface-container-low rounded-lg p-space-md lg:p-space-lg mb-space-xl shadow-xl flex flex-col gap-space-md relative z-20 animate-fade-in">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-space-md">
+        <div className="flex-1 w-full md:max-w-md">
+          <SearchInput
+            value={searchTerm}
+            onChange={onSearchChange}
+            placeholder={t.productFilters?.search || 'Search puzzles...'}
+            debounceMs={300}
+            className="w-full"
           />
-          {localSearch && (
-            <button 
-              onClick={() => setLocalSearch('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-primary hover:text-primary transition-colors"
+        </div>
+
+        <div className="flex flex-wrap items-center gap-space-sm w-full md:w-auto justify-start md:justify-end">
+          <div className="relative min-w-[160px]">
+            <label htmlFor="catalog-category" className="sr-only">
+              Category
+            </label>
+            <select
+              id="catalog-category"
+              value={selectedCategory}
+              onChange={(e) => onCategoryChange(e.target.value)}
+              className="w-full bg-surface-container-high text-on-surface text-label-md px-3.5 py-2.5 rounded appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all pr-9 border border-outline-variant/20"
             >
-              <Icon name="close" className="text-sm" />
-            </button>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2 w-full md:w-auto bg-surface border border-border rounded-md px-4 py-2">
-          <Icon name="sort" className="text-primary" />
-          <select 
-            value={sortBy}
-            onChange={(e) => onSortChange(e.target.value)}
-            className="bg-transparent border-none text-sm font-medium text-primary focus:outline-none cursor-pointer appearance-none [&>option]:bg-background [&>option]:text-primary pe-2"
-          >
-            <option value="newest">{t.productList?.newest || "Newest Arrivals"}</option>
-            <option value="price_asc">Price: Low to High</option>
-            <option value="price_desc">Price: High to Low</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Bottom Row: Category Dropdown & Price Slider */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 w-full">
-        
-        {/* Category Dropdown */}
-        <div className="relative w-full md:w-64" ref={categoryRef}>
-          <button
-            onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-            className="w-full flex items-center justify-between bg-surface border border-border rounded-md px-4 py-2.5 text-sm text-primary hover:bg-surface transition-colors"
-          >
-            <span className="truncate">{selectedCategory || 'All Categories'}</span>
-            <Icon name={isCategoryOpen ? 'expand_less' : 'expand_more'} className="text-primary flex-shrink-0 ms-2" />
-          </button>
-          
-          {isCategoryOpen && (
-            <div className="absolute top-full left-0 mt-2 w-full bg-background border border-border rounded-md shadow-xl overflow-hidden z-20">
-              <button
-                onClick={() => { onCategoryChange(''); setIsCategoryOpen(false); }}
-                className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${selectedCategory === '' ? 'bg-surface text-primary' : 'text-primary hover:bg-surface hover:text-primary'}`}
-              >
-                All Categories
-              </button>
-              {categories.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => { onCategoryChange(cat); setIsCategoryOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors truncate ${selectedCategory === cat ? 'bg-surface text-primary' : 'text-primary hover:bg-surface hover:text-primary'}`}
-                >
+              <option value="">{t.productFilters?.allCategories || 'All Categories'}</option>
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
                   {cat}
-                </button>
+                </option>
               ))}
-            </div>
-          )}
-        </div>
-
-        {/* Price Slider */}
-        <div className="w-full md:w-72 space-y-3 bg-surface px-4 py-3 rounded-md border border-border">
-          <div className="flex justify-between items-center text-xs text-primary">
-            <span>{t.productList?.priceRange || "Price Range"}</span>
-            <span className="font-semibold text-primary">${localMin} - ${localMax}</span>
-          </div>
-          
-          <div className="relative h-1.5 w-full bg-surface rounded-md">
-            {/* Active track highlight */}
-            <div 
-              className="absolute h-full bg-surface rounded-md"
-              style={{ 
-                left: `${(localMin / 200) * 100}%`, 
-                right: `${100 - (localMax / 200) * 100}%` 
-              }}
-            ></div>
-            
-            <input 
-              type="range" 
-              min="0" 
-              max="200" 
-              value={localMin}
-              onChange={(e) => setLocalMin(Math.min(Number(e.target.value), localMax))}
-              className="absolute w-full top-0 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:bg-surface [&::-webkit-slider-thumb]:rounded-md [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:bg-surface [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:rounded-md"
+            </select>
+            <Icon
+              name="expand_more"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-outline text-[18px] pointer-events-none"
             />
-            <input 
-              type="range" 
-              min="0" 
-              max="200" 
+          </div>
+
+          <div className="flex items-center gap-2 bg-surface-container-high px-3.5 py-2 rounded border border-outline-variant/20">
+            <label htmlFor="catalog-price" className="font-label-caps text-label-caps text-outline uppercase">
+              {t.productFilters?.price || 'Price:'}
+            </label>
+            <input
+              id="catalog-price"
+              type="range"
+              min={0}
+              max={priceCeiling}
               value={localMax}
-              onChange={(e) => setLocalMax(Math.max(Number(e.target.value), localMin))}
-              className="absolute w-full top-0 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:bg-surface [&::-webkit-slider-thumb]:rounded-md [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:bg-surface [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:rounded-md"
+              onChange={(e) => setLocalMax(Number(e.target.value))}
+              className="w-20 accent-primary cursor-pointer h-1.5 bg-surface-container-lowest rounded-lg"
+            />
+            <span className="font-label-md text-label-md text-primary font-mono tabular-nums">
+              {t.productFilters?.upTo || 'Up to'} ${localMax}
+            </span>
+          </div>
+
+          <div className="relative min-w-[170px]">
+            <label htmlFor="catalog-sort" className="sr-only">
+              Sort
+            </label>
+            <select
+              id="catalog-sort"
+              value={sortBy}
+              onChange={(e) => onSortChange(e.target.value)}
+              className="w-full bg-surface-container-high text-on-surface text-label-md px-3.5 py-2.5 rounded appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all pr-9 border border-outline-variant/20"
+            >
+              <option value="newest">{t.productFilters?.newest || 'Newest Arrivals'}</option>
+              <option value="price_asc">{t.productFilters?.priceLowToHigh || 'Price: Low to High'}</option>
+              <option value="price_desc">{t.productFilters?.priceHighToLow || 'Price: High to Low'}</option>
+            </select>
+            <Icon
+              name="sort"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-outline text-[18px] pointer-events-none"
             />
           </div>
         </div>
-
       </div>
-    </div>
+    </section>
   );
 };

@@ -146,6 +146,7 @@ export async function validateCartItems(
       valid: true,
       product: {
         name: product.name,
+        slug: product.slug,
         price: product.price,
         image: product.images?.[0],
         stock: product.stock,

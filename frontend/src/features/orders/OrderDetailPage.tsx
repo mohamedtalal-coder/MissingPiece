@@ -1,208 +1,372 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Package, Clock, CheckCircle2, XCircle, ArrowLeft, RotateCcw, AlertTriangle } from 'lucide-react';
-import { useLanguage } from '../../shared/context/LanguageContext';
+import { useParams, Link, useNavigate, useSearchParams, Navigate } from 'react-router-dom';
+import { useToast } from '../../shared/context/ToastContext';
+import { useAuth } from '../auth/AuthContext';
+import { useCart } from '../cart/CartContext';
+import { cartApi } from '../cart/cartApi';
 import { ordersApi, type Order } from './ordersApi';
+import {
+  atelierStatusLabel,
+  buildProvenanceTimeline,
+  orderShortId,
+  progressPercent,
+  registryReference,
+} from './orderStatus';
+import { MissingPieceClaimModal } from './MissingPieceClaimModal';
+import { Icon } from '../../shared/components/ui/Icon';
+import { Button } from '../../shared/components/ui/Button';
+import { PriceDisplay } from '../../shared/components/ui/PriceDisplay';
+import { StatusBadge } from '../../shared/components/ui/StatusBadge';
+import { useReducedMotion } from '../../shared/hooks/useReducedMotion';
+
+function DetailSkeleton() {
+  return (
+    <div className="max-w-[1360px] mx-auto px-margin-mobile lg:px-margin py-space-lg space-y-6" aria-busy="true">
+      <div className="h-8 w-64 rounded animate-shimmer" />
+      <div className="h-40 w-full rounded-2xl animate-shimmer" />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="lg:col-span-8 h-64 rounded-xl animate-shimmer" />
+        <div className="lg:col-span-4 h-64 rounded-xl animate-shimmer" />
+      </div>
+    </div>
+  );
+}
 
 export function OrderDetailPage() {
-  const { t } = useLanguage() as any;
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { showToast } = useToast();
+  const { isAuthenticated } = useAuth();
+  const { refreshCart } = useCart();
+  const reducedMotion = useReducedMotion();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [reorderError, setReorderError] = useState<string | null>(null);
+  const [claimOpen, setClaimOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [reordering, setReordering] = useState(false);
 
-  const fetchOrder = useCallback(async () => {
+  useEffect(() => {
+    const paymentStatus = searchParams.get('payment');
     if (!id) return;
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await ordersApi.getOrderById(id);
-      setOrder(data);
-    } catch (err: any) {
-      console.error(err);
-      if (err.response?.status === 403 || err.response?.status === 401) {
-        setError('You do not have permission to view this order.');
-      } else if (err.response?.status === 404) {
-        setError('Order not found.');
-      } else {
-        setError('Failed to load order details.');
-      }
-    } finally {
-      setLoading(false);
+    if (paymentStatus === 'success') {
+      showToast({ message: 'Payment successful. Your commission is registered.', type: 'success' });
+      window.history.replaceState({}, '', `/orders/${id}`);
+    } else if (paymentStatus === 'cancelled') {
+      showToast({ message: 'Payment cancelled.', type: 'error' });
+      window.history.replaceState({}, '', `/orders/${id}`);
     }
-  }, [id]);
+  }, [searchParams, id, showToast]);
+
+  const fetchOrder = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!id) return;
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await ordersApi.getOrderById(id);
+        if (signal?.aborted) return;
+        setOrder(data);
+      } catch (err: unknown) {
+        const e = err as { name?: string; code?: string; response?: { status?: number } };
+        if (e.name === 'CanceledError' || e.name === 'AbortError' || e.code === 'ERR_CANCELED') return;
+        if (e.response?.status === 403 || e.response?.status === 401) {
+          setError('You do not have permission to view this order.');
+        } else if (e.response?.status === 404) {
+          setError('Order not found.');
+        } else {
+          setError('Failed to load order details.');
+        }
+      } finally {
+        if (!signal?.aborted) setLoading(false);
+      }
+    },
+    [id]
+  );
 
   useEffect(() => {
-    fetchOrder();
-  }, [fetchOrder]);
+    if (!isAuthenticated || !id) return;
+    const controller = new AbortController();
+    fetchOrder(controller.signal);
+    return () => controller.abort();
+  }, [fetchOrder, isAuthenticated, id]);
 
-  const handleReorder = async () => {
+  const copyRegistry = async () => {
     if (!order) return;
+    const ref = registryReference(order._id);
     try {
-      setReordering(true);
-      setReorderError(null);
-      // Create new order with past items (backend computes prices)
-      const newOrderData = {
-        items: order.items.map(item => ({
-          product: item.productId || item.product,
-          quantity: item.quantity
-        })),
-        shippingAddress: order.shippingAddress
-      };
-      
-      const newOrder = await ordersApi.createOrder(newOrderData as any);
-      
-      // Navigate to the newly created order
-      navigate(`/orders/${newOrder._id}`);
-    } catch (err: any) {
-      console.error('Reorder failed', err);
-      // Show error if items are out of stock or price changed (if backend validates this)
-      setReorderError(err.response?.data?.message || 'Failed to reorder. Some items may be out of stock.');
+      await navigator.clipboard.writeText(ref);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      showToast({ message: 'Could not copy reference', type: 'error' });
+    }
+  };
+
+  const handleReorderToCart = async () => {
+    if (!order || reordering) return;
+    setReordering(true);
+    try {
+      const payloads = order.items
+        .map((item) => ({
+          productId: String(item.productId || item.product || ''),
+          quantity: Math.min(Math.max(1, item.quantity), 10),
+        }))
+        .filter((i) => i.productId && /^[a-f\d]{24}$/i.test(i.productId));
+
+      if (payloads.length === 0) {
+        showToast({ message: 'Could not re-add items. Browse the catalog instead.', type: 'info' });
+        navigate('/products');
+        return;
+      }
+
+      const validated = await cartApi.validateCart(payloads);
+      if (validated.length === 0) {
+        showToast({ message: 'Those editions are no longer available.', type: 'error' });
+        return;
+      }
+
+      for (const item of validated) {
+        await cartApi.addItem(item.productId, Math.min(item.quantity, item.stock, 10));
+      }
+
+      await refreshCart();
+      showToast({ message: 'Available items added to bag', type: 'success' });
+      navigate('/cart');
+    } catch {
+      showToast({ message: 'Some items could not be re-added (stock may have changed).', type: 'error' });
     } finally {
       setReordering(false);
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    if (status === 'pending') return t.orderHistory?.pending || 'Pending';
-    if (status === 'paid') return t.orderHistory?.paid || 'Paid';
-    if (status === 'shipped') return t.orderHistory?.shipped || 'Shipped';
-    if (status === 'delivered') return t.orderHistory?.delivered || 'Delivered';
-    if (status === 'cancelled') return t.orderHistory?.cancelled || 'Cancelled';
-    return status;
-  };
-
-  if (loading) {
-    return <div className="p-8 text-center text-[#cbd5e1]">Loading order details...</div>;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: id ? `/orders/${id}` : '/orders' }} />;
   }
+
+  if (loading) return <DetailSkeleton />;
 
   if (error || !order) {
     return (
-      <div className="max-w-3xl mx-auto px-8 py-12 text-center space-y-4">
-        <div className="text-red-400 p-6 bg-red-500/10 border border-red-500/30 rounded-md">
-          {error || 'Order not found.'}
-        </div>
-        <Link to="/orders" className="inline-flex items-center gap-2 text-[#c084fc] hover:text-[#e9d5ff] transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Back to My Orders
-        </Link>
+      <div className="max-w-xl mx-auto px-margin-mobile py-space-2xl text-center animate-fade-in">
+        <Icon name="error" className="text-[40px] text-error mx-auto mb-3" />
+        <h1 className="font-headline-sm text-headline-sm text-on-surface mb-4">
+          {error || 'Commission not found.'}
+        </h1>
+        <Button as="link" to="/orders" icon="arrow_back">
+          Return to Ledger
+        </Button>
       </div>
     );
   }
 
-  return (
-    <div className="max-w-4xl mx-auto px-8 py-12 font-sans space-y-8 text-white">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
-        <div>
-          <Link to="/orders" className="inline-flex items-center gap-2 text-[#cbd5e1] hover:text-white transition-colors mb-4 text-sm">
-            <ArrowLeft className="w-4 h-4" /> Back to Orders
-          </Link>
-          <h1 className="text-2xl font-serif font-bold">
-            Order <span className="text-[#c084fc]">#{order._id}</span>
-          </h1>
-          <p className="text-xs text-[#cbd5e1] mt-1">
-            Placed on {new Date(order.createdAt).toLocaleDateString()} at {new Date(order.createdAt).toLocaleTimeString()}
-          </p>
-        </div>
+  const timeline = buildProvenanceTimeline(order.status);
+  const shortId = orderShortId(order._id);
+  const registry = registryReference(order._id);
+  const canClaim = order.status === 'delivered' || order.status === 'shipped';
 
-        <div className="flex flex-col items-end gap-3">
-          <span
-            className={`text-sm px-4 py-1.5 rounded-md font-semibold flex items-center gap-2 ${
-              order.status === 'pending'
-                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                : order.status === 'delivered'
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                : order.status === 'cancelled'
-                ? 'bg-red-500/20 text-red-300 border border-red-500/30'
-                : order.status === 'paid'
-                ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-            }`}
-          >
-            {order.status === 'pending' && <Clock className="w-4 h-4" />}
-            {order.status === 'delivered' && <CheckCircle2 className="w-4 h-4" />}
-            {order.status === 'cancelled' && <XCircle className="w-4 h-4" />}
-            {(order.status === 'paid' || order.status === 'shipped') && <Package className="w-4 h-4" />}
-            <span>{getStatusLabel(order.status)}</span>
-          </span>
-          
-          <button
-            onClick={handleReorder}
-            disabled={reordering}
-            className="flex items-center gap-2 bg-[#7e22ce] hover:bg-[#a855f7] text-white px-4 py-2 rounded-md font-medium text-sm transition-colors shadow-[0_0_15px_rgba(168,85,247,0.4)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-          >
-            <RotateCcw className="w-4 h-4" />
-            {reordering ? 'Processing...' : 'Reorder Items'}
-          </button>
-        </div>
+  return (
+    <div className="w-full max-w-[1360px] mx-auto px-margin-mobile lg:px-margin py-space-lg pb-space-2xl">
+      <div className={`mb-space-lg ${reducedMotion ? '' : 'animate-slide-up'}`}>
+        <Link
+          to="/orders"
+          className="inline-flex items-center gap-1.5 text-sm text-on-surface-variant hover:text-on-surface transition-colors mb-space-sm"
+        >
+          <Icon name="arrow_back" size={16} />
+          Back to Archive
+        </Link>
       </div>
 
-      {reorderError && (
-        <div className="bg-red-500/10 border border-red-500/40 text-red-300 text-sm p-4 rounded-md flex items-center gap-3">
-          <AlertTriangle className="w-5 h-5 shrink-0" />
-          <span>{reorderError}</span>
-        </div>
-      )}
+      {/* Provenance header */}
+      <section
+        className={`p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-surface-container via-surface-container-low to-surface-container-lowest border border-outline-variant/40 shadow-2xl space-y-6 mb-space-xl ${
+          reducedMotion ? '' : 'animate-fade-in'
+        }`}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-xs uppercase tracking-widest text-primary-container">
+                Atelier Provenance Ledger
+              </span>
+              <StatusBadge status={order.status} type="order" />
+              <span className="text-xs text-on-surface-variant">{atelierStatusLabel(order.status)}</span>
+            </div>
+            <h1 className="font-headline-lg text-headline-lg sm:text-display-lg-mobile text-on-surface mt-1">
+              Order #{shortId}
+            </h1>
+            <p className="text-xs text-on-surface-variant mt-1">
+              Commissioned{' '}
+              {new Date(order.createdAt).toLocaleString(undefined, {
+                dateStyle: 'long',
+                timeStyle: 'short',
+              })}
+            </p>
+          </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-background border border-border rounded-md shadow-[0_0_20px_rgba(126,34,206,0.15)] overflow-hidden">
-            <h2 className="text-base font-serif font-bold p-4 border-b border-border bg-surfaceElevated/30">Order Items</h2>
-            <div className="divide-y divide-border">
+          <div className="flex flex-wrap items-center gap-3">
+            {canClaim && (
+              <Button type="button" variant="outline" icon="warning" onClick={() => setClaimOpen(true)}>
+                Report Missing Piece
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="secondary"
+              icon="replay"
+              isLoading={reordering}
+              disabled={reordering}
+              onClick={handleReorderToCart}
+            >
+              Re-add to Bag
+            </Button>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-xl bg-surface-container-lowest border border-outline-variant/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2 text-on-surface-variant min-w-0">
+            <Icon name="security" size={16} className="text-primary-container shrink-0" />
+            <span className="text-outline shrink-0">Registry reference:</span>
+            <span className="text-on-surface font-semibold truncate">{registry}</span>
+          </div>
+          <button
+            type="button"
+            onClick={copyRegistry}
+            className="text-primary-container hover:text-primary flex items-center gap-1 transition-colors shrink-0"
+          >
+            <Icon name={copied ? 'check' : 'copy'} size={14} />
+            {copied ? 'Copied' : 'Copy'}
+          </button>
+        </div>
+
+        {/* Timeline */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-headline-sm text-sm text-on-surface uppercase tracking-wider">
+              Fulfillment stepper
+            </h2>
+            <span className="text-xs text-outline tabular-nums">{progressPercent(order.status)}%</span>
+          </div>
+          <div className="h-1.5 rounded-full bg-surface-container-highest mb-6 overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-primary-container to-primary transition-all duration-700"
+              style={{ width: `${progressPercent(order.status)}%` }}
+            />
+          </div>
+          <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {timeline.map((step, idx) => (
+              <li key={step.id} className="space-y-3">
+                <div
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${
+                    step.current
+                      ? 'border-primary-container bg-primary-container text-on-primary-container shadow-[0_0_15px_rgba(212,163,115,0.35)]'
+                      : step.completed
+                        ? 'border-primary/40 bg-primary/10 text-primary'
+                        : 'border-outline-variant/40 bg-surface-container text-outline'
+                  }`}
+                >
+                  {step.completed || (step.current && order.status === 'delivered') ? (
+                    <Icon name="check" size={18} />
+                  ) : (
+                    <span className="text-xs font-bold">{idx + 1}</span>
+                  )}
+                </div>
+                <div>
+                  <h3
+                    className={`font-headline-sm text-xs font-bold ${
+                      step.current ? 'text-primary' : step.completed ? 'text-on-surface' : 'text-outline'
+                    }`}
+                  >
+                    {step.title}
+                  </h3>
+                  <p className="text-[11px] text-outline leading-relaxed mt-1">{step.description}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+        <div className="lg:col-span-8 space-y-space-lg">
+          <section className="bg-surface-container-low rounded-xl p-space-lg border border-outline-variant/10">
+            <h2 className="font-headline-sm text-title-editorial text-on-surface border-b border-outline-variant/20 pb-space-sm mb-space-md flex items-center gap-2">
+              <Icon name="inventory_2" className="text-primary" size={20} />
+              Archival pieces
+            </h2>
+            <ul className="space-y-3">
               {order.items.map((item, index) => (
-                <div key={index} className="flex gap-4 p-4">
-                  <div className="w-20 h-20 bg-surfaceElevated rounded-md border border-border flex-shrink-0 overflow-hidden">
+                <li
+                  key={index}
+                  className="flex items-center gap-space-md p-space-sm rounded-lg hover:bg-surface-container transition-colors"
+                >
+                  <div className="w-20 h-24 bg-surface-container-highest rounded-lg shrink-0 overflow-hidden">
                     {item.imageUrl ? (
-                      <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                      <img src={item.imageUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-[#cbd5e1]">
-                        <Package className="w-8 h-8" />
+                      <div className="w-full h-full flex items-center justify-center text-outline">
+                        <Icon name="image" size={24} />
                       </div>
                     )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold truncate text-white">{item.title || 'Product'}</h3>
-                    <p className="text-xs text-[#cbd5e1] mt-1">Qty: {item.quantity}</p>
-                    <p className="text-sm text-[#c084fc] font-bold mt-2">${item.price?.toFixed(2)}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-label-caps text-label-caps text-primary uppercase">Precision Cut</p>
+                    <h3 className="font-headline-sm text-headline-sm text-on-surface truncate">
+                      {item.title || 'Masterwork'}
+                    </h3>
+                    <p className="text-sm text-on-surface-variant">Qty {item.quantity}</p>
                   </div>
-                </div>
+                  <PriceDisplay
+                    amount={(item.price || 0) * item.quantity}
+                    size="sm"
+                    className="text-primary shrink-0"
+                  />
+                </li>
               ))}
-            </div>
-          </div>
+            </ul>
+          </section>
         </div>
 
-        <div className="space-y-6">
-          <div className="bg-background border border-border rounded-md shadow-[0_0_20px_rgba(126,34,206,0.15)] p-5">
-            <h2 className="text-base font-serif font-bold border-b border-border pb-3 mb-4">Summary</h2>
+        <aside className="lg:col-span-4 space-y-space-lg sticky top-28">
+          <section className="bg-surface-container-low rounded-xl p-space-lg border border-outline-variant/10">
+            <h2 className="font-headline-sm text-sm text-on-surface border-b border-outline-variant/20 pb-space-sm mb-space-md flex items-center gap-2">
+              <Icon name="receipt_long" className="text-primary" size={18} />
+              Ledger summary
+            </h2>
             <div className="space-y-3 text-sm">
-              <div className="flex justify-between text-[#cbd5e1]">
-                <span>Subtotal</span>
-                <span>${order.total.toFixed(2)}</span>
+              <div className="flex justify-between text-on-surface-variant">
+                <span>Total paid</span>
+                <PriceDisplay amount={order.total} size="sm" className="text-on-surface" />
               </div>
-              <div className="flex justify-between text-[#cbd5e1]">
-                <span>Shipping</span>
-                <span>$0.00</span>
-              </div>
-              <div className="border-t border-border pt-3 flex justify-between font-bold text-lg text-white">
-                <span>Total</span>
-                <span className="text-[#c084fc]">${order.total.toFixed(2)}</span>
+              <div className="border-t border-outline-variant/20 pt-3 flex justify-between items-baseline">
+                <span className="font-label-md uppercase tracking-wider font-semibold text-on-surface">
+                  Commission total
+                </span>
+                <PriceDisplay amount={order.total} size="lg" className="text-primary" />
               </div>
             </div>
-          </div>
+          </section>
 
-          <div className="bg-background border border-border rounded-md shadow-[0_0_20px_rgba(126,34,206,0.15)] p-5">
-            <h2 className="text-base font-serif font-bold border-b border-border pb-3 mb-4">Shipping Address</h2>
-            <div className="text-sm text-[#cbd5e1] leading-relaxed space-y-1">
-              <p>{order.shippingAddress.street}</p>
-              <p>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}</p>
+          <section className="bg-surface-container-low rounded-xl p-space-lg border border-outline-variant/10">
+            <h2 className="font-headline-sm text-sm text-on-surface border-b border-outline-variant/20 pb-space-sm mb-space-md flex items-center gap-2">
+              <Icon name="local_shipping" className="text-primary" size={18} />
+              Delivery destination
+            </h2>
+            <address className="not-italic text-sm text-on-surface-variant leading-relaxed">
+              <p className="text-on-surface font-medium mb-1">{order.shippingAddress.street}</p>
+              <p>
+                {order.shippingAddress.city}, {order.shippingAddress.state}{' '}
+                {order.shippingAddress.zipCode}
+              </p>
               <p>{order.shippingAddress.country}</p>
-            </div>
-          </div>
-        </div>
+            </address>
+          </section>
+        </aside>
       </div>
+
+      <MissingPieceClaimModal isOpen={claimOpen} onClose={() => setClaimOpen(false)} order={order} />
     </div>
   );
 }

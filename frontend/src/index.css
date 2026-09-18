@@ -1,72 +1,298 @@
 @import "tailwindcss";
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 
-:root {
-  /* Light mode palette (Premium puzzle boutique) */
-  --color-background: #F9F7F3; /* Warm off-white */
-  --color-surface: #FFFFFF;
-  --color-surface-elevated: #F2EFE9;
-  --color-border: #E5E0D8;
-  --color-text: #2C3E50;
-  --color-text-muted: #7F8C8D;
-  --color-primary: #D4A373; /* warm brass, #d4a373 */
-  --color-success: #27AE60;
-  --color-warning: #F39C12;
-  --color-error: #E74C3C;
-  --color-focus: #3498DB;
-}
+@theme {
+  --color-surface-container-high: #272a31;
+  --color-inverse-on-surface: #2e3037;
+  --color-primary: #f2be8c;
+  --color-on-error-container: #ffdad6;
+  --color-on-secondary-fixed-variant: #4f3b7a;
+  --color-on-primary-fixed: #2c1600;
+  --color-error: #ffb4ab;
+  --color-surface-tint: #f0bd8b;
+  --color-on-background: #e1e2eb;
+  --color-secondary-container: #4f3b7a;
+  --color-on-secondary-container: #c1aaf1;
+  --color-inverse-primary: #7d562d;
+  --color-on-tertiary-fixed-variant: #633e16;
+  --color-tertiary: #f4bd8a;
+  --color-tertiary-fixed-dim: #f2bc89;
+  --color-on-primary: #482904;
+  --color-on-error: #690005;
+  --color-on-tertiary: #492902;
+  --color-primary-container: #d4a373;
+  --color-surface-bright: #363940;
+  --color-error-container: #93000a;
+  --color-primary-fixed: #ffdcbd;
+  --color-secondary: #d2bcff;
+  --color-on-secondary: #382462;
+  --color-surface-container-highest: #32353c;
+  --color-outline-variant: #50453b;
+  --color-secondary-fixed: #eaddff;
+  --color-on-secondary-fixed: #230c4c;
+  --color-surface-container: #1d2026;
+  --color-primary-fixed-dim: #f0bd8b;
+  --color-on-tertiary-container: #5c3810;
+  --color-secondary-fixed-dim: #d2bcff;
+  --color-surface: #101319;
+  --color-on-primary-fixed-variant: #623f18;
+  --color-surface-dim: #101319;
+  --color-surface-container-low: #191c22;
+  --color-on-surface-variant: #d4c4b7;
+  --color-on-surface: #e1e2eb;
+  --color-surface-container-lowest: #0b0e14;
+  --color-background: #101319;
+  --color-tertiary-fixed: #ffdcbe;
+  --color-tertiary-container: #d6a271;
+  --color-on-tertiary-fixed: #2d1600;
+  --color-inverse-surface: #e1e2eb;
+  --color-outline: #9c8e82;
+  --color-surface-variant: #32353c;
+  --color-on-primary-container: #5b3912;
 
-html.dark {
-  /* Dark mode palette */
-  --color-background: #101319; /* dark canvas #101319 */
-  --color-surface: #161B26; /* surfaces #161B26 */
-  --color-surface-elevated: #1E2532;
-  --color-border: #333A47;
-  --color-text: #E2E8F0;
-  --color-text-muted: #94A3B8;
-  --color-primary: #D4A373; /* warm brass, #d4a373 */
-  --color-success: #10B981;
-  --color-warning: #F59E0B;
-  --color-error: #EF4444;
-  --color-focus: #3B82F6;
+  --radius-DEFAULT: 0.125rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.5rem;
+  --radius-full: 0.75rem;
+
+  --spacing-margin-mobile: 1.25rem;
+  --spacing-space-lg: 1.75rem;
+  --spacing-space-2xl: 5rem;
+  --spacing-gutter: 1.5rem;
+  --spacing-margin: 3rem;
+  --spacing-space-xl: 3rem;
+  --spacing-space-md: 1rem;
+  --spacing-gutter-mobile: 1rem;
+  --spacing-space-sm: 0.5rem;
+  --spacing-space-xs: 0.25rem;
+
+  --font-headline-sm: "Playfair Display", serif;
+  --font-headline-md: "Playfair Display", serif;
+  --font-label-caps: "Plus Jakarta Sans", sans-serif;
+  --font-body-lg: "Plus Jakarta Sans", sans-serif;
+  --font-body-sm: "Plus Jakarta Sans", sans-serif;
+  --font-label-md: "Plus Jakarta Sans", sans-serif;
+  --font-body-md: "Plus Jakarta Sans", sans-serif;
+  --font-headline-lg: "Playfair Display", serif;
+  --font-title-editorial: "Playfair Display", serif;
+  --font-display-lg-mobile: "Playfair Display", serif;
+  --font-display-lg: "Playfair Display", serif;
 }
 
 @layer base {
-  html {
-    background-color: var(--color-background);
-    transition: background-color 0.2s ease-in-out;
-  }
-
-  body {
+  html, body {
     margin: 0;
-    background-color: var(--color-background);
-    color: var(--color-text);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-    overflow-x: hidden;
-    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    padding: 0;
   }
-
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
-    font-weight: 600;
+  body {
+    overscroll-behavior: none;
+    background-color: var(--color-surface);
+    color: var(--color-on-surface);
+    font-family: var(--font-body-md);
+    -webkit-font-smoothing: antialiased;
   }
+  main > :first-child { margin-top: 0 !important; }
+  main > :last-child { margin-bottom: 0 !important; }
 }
 
-/* Scrollbar styling for premium feel */
 ::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
-
 ::-webkit-scrollbar-track {
-  background: var(--color-background);
+  background: var(--color-surface);
 }
-
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 0; /* Restrained geometric */
+  background: var(--color-surface-container-high);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-container);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-muted);
+/* Custom utility classes mimicking the Tailwind 3.x config from Stitch */
+@utility text-headline-sm {
+  font-size: 1.25rem;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  font-weight: 600;
+}
+@utility text-headline-md {
+  font-size: 1.75rem;
+  line-height: 1.3;
+  letter-spacing: 0em;
+  font-weight: 500;
+}
+@utility text-label-caps {
+  font-size: 0.6875rem;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+}
+@utility text-body-lg {
+  font-size: 1.125rem;
+  line-height: 1.65;
+  letter-spacing: -0.005em;
+  font-weight: 400;
+}
+@utility text-body-sm {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  font-weight: 400;
+}
+@utility text-label-md {
+  font-size: 0.875rem;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+  font-weight: 500;
+}
+@utility text-body-md {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  letter-spacing: 0em;
+  font-weight: 400;
+}
+@utility text-headline-lg {
+  font-size: 2.25rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  font-weight: 500;
+}
+@utility text-title-editorial {
+  font-size: 1.125rem;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+}
+@utility text-display-lg-mobile {
+  font-size: 2.25rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+@utility text-display-lg {
+  font-size: 3.5rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  .animate-slide-up {
+    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .animate-slide-down {
+    animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .animate-shimmer {
+    background: linear-gradient(
+      110deg,
+      var(--color-surface-container-high) 25%,
+      var(--color-surface-container-highest) 37%,
+      var(--color-surface-container-high) 63%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+  }
+
+  .motion-fade,
+  .motion-up,
+  .motion-down {
+    opacity: 0;
+    transition:
+      opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
+  .motion-up {
+    transform: translateY(1.25rem);
+  }
+  .motion-down {
+    transform: translateY(-1.25rem);
+  }
+  .motion-fade.is-visible,
+  .motion-up.is-visible,
+  .motion-down.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .hero-kenburns {
+    animation: kenburns 22s ease-in-out infinite alternate;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
+
+  @keyframes kenburns {
+    from { transform: scale(1.02); }
+    to { transform: scale(1.1); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-slide-down,
+  .animate-shimmer,
+  .hero-kenburns {
+    animation: none !important;
+  }
+  .motion-fade,
+  .motion-up,
+  .motion-down {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
 }

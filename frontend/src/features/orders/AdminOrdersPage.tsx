@@ -1,204 +1,204 @@
-import { useState, useEffect } from 'react';
-import { ShieldCheck, Package, RefreshCw } from 'lucide-react';
-import { useLanguage } from '../../shared/context/LanguageContext';
+import { useState, useEffect, useCallback } from 'react';
+import { useToast } from '../../shared/context/ToastContext';
+import { Button } from '../../shared/components/ui/Button';
+import { StatusBadge } from '../../shared/components/ui/StatusBadge';
+import { PriceDisplay } from '../../shared/components/ui/PriceDisplay';
+import { EmptyState } from '../../shared/components/ui/EmptyState';
+import { AdminAtelierNav } from '../../shared/components/layout/AdminAtelierNav';
+import { ordersApi, type Order } from './ordersApi';
+
+function TableSkeleton() {
+  return (
+    <div className="p-6 space-y-3" aria-busy="true" aria-label="Loading orders">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="h-14 rounded-lg animate-shimmer" />
+      ))}
+    </div>
+  );
+}
 
 export function AdminOrdersPage() {
-  const { t } = useLanguage();
-  const [orders, setOrders] = useState<any[]>([]);
+  const toast = useToast();
+
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const limit = 10;
+
+  const fetchOrders = useCallback(
+    async (currentPage: number) => {
+      try {
+        setLoading(true);
+        const data = await ordersApi.getAdminOrders(currentPage, limit);
+        setOrders(data.items);
+        setTotalPages(data.totalPages);
+      } catch (err) {
+        console.error('Failed to fetch orders', err);
+        toast.showToast({ message: 'Failed to fetch orders', type: 'error' });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [toast],
+  );
 
   useEffect(() => {
-    const savedOrders = JSON.parse(
-      localStorage.getItem('allOrders') || '[]'
-    );
+    fetchOrders(page);
+  }, [page, fetchOrders]);
 
-    if (savedOrders.length === 0) {
-      const initialOrders = [
-        {
-          id: 'ORD-9821',
-          user: 'Salma Yehia',
-          total: 155.0,
-          status: 'Pending',
-          date: '2026-06-12',
-          address: 'Cairo, Egypt',
-        },
-        {
-          id: 'ORD-8410',
-          user: 'Ahmed Ali',
-          total: 210.0,
-          status: 'Delivered',
-          date: '2026-05-20',
-          address: 'Giza, Egypt',
-        },
-      ];
-
-      localStorage.setItem(
-        'allOrders',
-        JSON.stringify(initialOrders)
+  const handleStatusChange = async (orderId: string, newStatus: string) => {
+    if (pendingId) return;
+    setPendingId(orderId);
+    try {
+      await ordersApi.updateOrderStatus(orderId, newStatus);
+      toast.showToast({ message: `Order updated to ${newStatus}`, type: 'success' });
+      setOrders((prev) =>
+        prev.map((order) =>
+          order._id === orderId ? { ...order, status: newStatus as Order['status'] } : order,
+        ),
       );
-
-      setOrders(initialOrders);
-    } else {
-      setOrders(savedOrders);
+    } catch (err) {
+      console.error('Failed to update status', err);
+      toast.showToast({ message: 'Failed to update status', type: 'error' });
+    } finally {
+      setPendingId(null);
     }
-  }, []);
-
-  const handleStatusChange = (
-    orderId: string,
-    newStatus: string
-  ) => {
-    const updatedOrders = orders.map((order) => {
-      if (order.id === orderId) {
-        return { ...order, status: newStatus };
-      }
-
-      return order;
-    });
-
-    setOrders(updatedOrders);
-    localStorage.setItem(
-      'allOrders',
-      JSON.stringify(updatedOrders)
-    );
-
-    alert(
-      `Order ${orderId} ${t.adminOrders.statusUpdated} ${getStatusLabel(
-        newStatus
-      )}!`
-    );
-  };
-
-  const getStatusLabel = (status: string) => {
-    if (status === 'Pending') return t.orderHistory.pending;
-    if (status === 'Processing') return t.orderHistory.processing;
-    if (status === 'Delivered') return t.orderHistory.delivered;
-    if (status === 'Cancelled') return t.orderHistory.cancelled;
-
-    return status;
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-8 py-12 font-sans text-[var(--text-main)] space-y-8">
-      <div className="flex items-center justify-between border-b border-border pb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-md bg-[var(--bg-card)] border border-border flex items-center justify-center shadow-[0_0_15px_rgba(126,34,206,0.3)]">
-            <ShieldCheck className="w-6 h-6 text-[#c084fc]" />
-          </div>
+    <div className="w-full max-w-[1360px] mx-auto px-margin-mobile lg:px-margin py-space-lg pb-space-2xl">
+      <AdminAtelierNav />
 
-          <div>
-            <h1 className="text-2xl font-serif font-bold text-[var(--text-main)]">
-              {t.adminOrders.title}
-            </h1>
-
-            <p className="text-xs text-[var(--text-muted)]">
-              {t.adminOrders.subtitle}
-            </p>
-          </div>
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8">
+        <div>
+          <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest">
+            Dispatch &amp; Fulfillment
+          </span>
+          <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight mt-1">
+            Order Management
+          </h1>
+          <p className="font-body-md text-body-md text-on-surface-variant mt-1.5 max-w-2xl">
+            Track commissions, process shipments, and manage white-glove deliveries.
+          </p>
         </div>
-
-        <button
-          onClick={() => {
-            const current = JSON.parse(
-              localStorage.getItem('allOrders') || '[]'
-            );
-
-            setOrders(current);
-          }}
-          className="flex items-center gap-2 bg-[#7e22ce]/20 border border-border text-[#c084fc] text-xs px-4 py-2.5 rounded-md hover:bg-[#7e22ce]/30 transition-colors cursor-pointer"
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          <span>{t.adminOrders.refresh}</span>
-        </button>
+        <Button onClick={() => fetchOrders(page)} variant="secondary" icon="refresh" disabled={loading}>
+          Sync Ledgers
+        </Button>
       </div>
 
-      <div className="bg-[var(--bg-card)] border border-border rounded-md p-6 shadow-[0_0_20px_rgba(126,34,206,0.15)] overflow-x-auto">
-        {orders.length > 0 ? (
-          <table className="w-full text-left text-xs text-[var(--text-muted)]">
-            <thead>
-              <tr className="border-b border-border text-[var(--text-main)]">
-                <th className="pb-3 px-3">{t.adminOrders.orderId}</th>
-                <th className="pb-3 px-3">{t.adminOrders.customer}</th>
-                <th className="pb-3 px-3">{t.adminOrders.date}</th>
-                <th className="pb-3 px-3">{t.adminOrders.address}</th>
-                <th className="pb-3 px-3">{t.adminOrders.total}</th>
-                <th className="pb-3 px-3">{t.adminOrders.status}</th>
-                <th className="pb-3 px-3 text-right">
-                  {t.adminOrders.actions}
-                </th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-[#7e22ce]/20">
-              {orders.map((order) => (
-                <tr
-                  key={order.id}
-                  className="hover:bg-[#7e22ce]/5 transition-colors"
-                >
-                  <td className="py-4 px-3 text-[var(--text-main)] font-bold">
-                    {order.id}
-                  </td>
-
-                  <td className="py-4 px-3 font-semibold text-[var(--text-main)]">
-                    {order.user || 'Salma Yehia'}
-                  </td>
-
-                  <td className="py-4 px-3">
-                    {order.date}
-                  </td>
-
-                  <td className="py-4 px-3 truncate max-w-xs">
-                    {order.address || 'Cairo, Egypt'}
-                  </td>
-
-                  <td className="py-4 px-3 text-[#c084fc] font-bold">
-                    ${Number(order.total).toFixed(2)}
-                  </td>
-
-                  <td className="py-4 px-3">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md font-semibold ${
-                        order.status === 'Pending'
-                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                          : order.status === 'Processing'
-                          ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                          : order.status === 'Delivered'
-                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                          : 'bg-red-500/20 text-red-300 border border-red-500/30'
-                      }`}
-                    >
-                      {getStatusLabel(order.status)}
-                    </span>
-                  </td>
-
-                  <td className="py-4 px-3 text-right space-x-2">
-                    <button
-                      onClick={() =>
-                        handleStatusChange(order.id, 'Processing')
-                      }
-                      className="bg-blue-500/10 border border-blue-500/30 text-blue-300 px-3 py-1.5 rounded-md hover:bg-blue-500/20 cursor-pointer transition-colors"
-                    >
-                      {t.adminOrders.process}
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        handleStatusChange(order.id, 'Delivered')
-                      }
-                      className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 px-3 py-1.5 rounded-md hover:bg-emerald-500/20 cursor-pointer transition-colors"
-                    >
-                      {t.adminOrders.deliver}
-                    </button>
-                  </td>
+      <div className="bg-surface-container-low rounded-lg shadow-md border border-outline-variant/20 overflow-hidden flex flex-col">
+        <div className="overflow-x-auto">
+          {loading ? (
+            <TableSkeleton />
+          ) : orders.length > 0 ? (
+            <table className="w-full text-left text-body-sm font-body-sm border-collapse">
+              <thead>
+                <tr className="bg-surface-container text-on-surface-variant font-label-caps text-label-caps uppercase tracking-wider border-b border-outline-variant/20">
+                  <th className="py-3.5 px-4" scope="col">
+                    Commission ID
+                  </th>
+                  <th className="py-3.5 px-4" scope="col">
+                    Collector
+                  </th>
+                  <th className="py-3.5 px-4" scope="col">
+                    Date
+                  </th>
+                  <th className="py-3.5 px-4" scope="col">
+                    Destination
+                  </th>
+                  <th className="py-3.5 px-4" scope="col">
+                    Total Value
+                  </th>
+                  <th className="py-3.5 px-4" scope="col">
+                    Dispatch Status
+                  </th>
+                  <th className="py-3.5 pr-6 pl-4 text-right" scope="col">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <div className="text-center py-12 space-y-3">
-            <Package className="w-10 h-10 text-[#7e22ce] mx-auto opacity-50" />
+              </thead>
+              <tbody className="divide-y divide-outline-variant/20 text-on-surface">
+                {orders.map((order) => (
+                  <tr key={order._id} className="hover:bg-surface-container/60 transition-colors group">
+                    <td className="py-4 px-4 font-headline-sm text-body-md font-semibold">
+                      {order._id.substring(order._id.length - 8).toUpperCase()}
+                    </td>
+                    <td className="py-4 px-4 font-medium text-on-surface">
+                      {(order as Order & { user?: { name?: string } }).user?.name || 'Unknown'}
+                    </td>
+                    <td className="py-4 px-4 text-on-surface-variant">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="py-4 px-4 truncate max-w-[200px] text-on-surface-variant">
+                      {order.shippingAddress?.city}, {order.shippingAddress?.country}
+                    </td>
+                    <td className="py-4 px-4">
+                      <PriceDisplay amount={order.total} size="sm" className="font-medium" />
+                    </td>
+                    <td className="py-4 px-4">
+                      <StatusBadge type="order" status={order.status} />
+                    </td>
+                    <td className="py-4 pr-6 pl-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {order.status === 'paid' && (
+                          <Button
+                            onClick={() => handleStatusChange(order._id, 'shipped')}
+                            variant="secondary"
+                            size="sm"
+                            isLoading={pendingId === order._id}
+                            disabled={!!pendingId}
+                          >
+                            Process
+                          </Button>
+                        )}
+                        {order.status === 'shipped' && (
+                          <Button
+                            onClick={() => handleStatusChange(order._id, 'delivered')}
+                            size="sm"
+                            isLoading={pendingId === order._id}
+                            disabled={!!pendingId}
+                          >
+                            Deliver
+                          </Button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="py-20 text-center bg-surface-container-lowest/30">
+              <EmptyState
+                icon="package_2"
+                title="No commissions in the ledger"
+                description="There are currently no orders to display."
+              />
+            </div>
+          )}
+        </div>
 
-            <p className="text-[var(--text-muted)] text-xs">
-              {t.adminOrders.noOrders}
-            </p>
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-4 py-4 border-t border-outline-variant/20">
+            <Button
+              disabled={page === 1 || loading}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              variant="secondary"
+            >
+              Previous
+            </Button>
+            <span className="font-label-md text-label-md text-on-surface-variant">
+              Page {page} of {totalPages}
+            </span>
+            <Button
+              disabled={page === totalPages || loading}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              variant="secondary"
+            >
+              Next
+            </Button>
           </div>
         )}
       </div>

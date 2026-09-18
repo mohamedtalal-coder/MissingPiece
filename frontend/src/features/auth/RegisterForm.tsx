@@ -1,120 +1,163 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../../shared/context/LanguageContext';
-import { useNavigate, Link } from 'react-router-dom';
-import { UserPlus, Mail, Lock, User } from 'lucide-react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { authApi } from './authApi';
 import { useAuth } from './AuthContext';
+import { Button } from '../../shared/components/ui/Button';
+import { Input } from '../../shared/components/ui/Input';
+import { Icon } from '../../shared/components/ui/Icon';
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function sanitize(value: string, max: number): string {
+  return value.replace(/[<>]/g, '').trim().slice(0, max);
+}
 
 export function RegisterForm() {
-  const { t } = useLanguage() as any;
+  const { t, language } = useLanguage() as any;
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const from =
+    typeof location.state?.from?.pathname === 'string' && location.state.from.pathname.startsWith('/')
+      ? location.state.from.pathname
+      : '/';
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setError('');
+
+    const cleanName = sanitize(name, 80);
+    const cleanEmail = sanitize(email, 254).toLowerCase();
+    const cleanPassword = password.slice(0, 128);
+
+    if (!cleanName || !cleanEmail || !cleanPassword) {
+      setError(t.auth?.requiredFields || 'Please fill in all required fields.');
+      return;
+    }
+    if (cleanName.length < 2) {
+      setError(t.auth?.nameLength || 'Name must be at least 2 characters.');
+      return;
+    }
+    if (!EMAIL_RE.test(cleanEmail)) {
+      setError(t.auth?.invalidEmail || 'Please enter a valid email address.');
+      return;
+    }
+    if (cleanPassword.length < 8) {
+      setError(t.auth?.passwordLength || 'Password must be at least 8 characters long.');
+      return;
+    }
 
     try {
       setLoading(true);
-      const data = await authApi.register({ name, email, password });
+      const data = await authApi.register({ name: cleanName, email: cleanEmail, password: cleanPassword });
       login(data.token, data.user);
-      navigate('/');
+      navigate(from, { replace: true });
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError(
+        err.response?.data?.message || t.auth?.registrationFailed || 'Registration failed. Please try again.',
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0914] text-white flex items-center justify-center px-6 py-12 font-sans">
-      <div className="max-w-md w-full bg-background border border-[#221738] p-8 rounded-md space-y-6 shadow-xl">
-
-        <div className="text-center space-y-2">
-          <div className="w-12 h-12 bg-[#7e22ce]/20 border border-border rounded-md flex items-center justify-center mx-auto text-[#c084fc]">
-            <UserPlus className="w-6 h-6" />
-          </div>
-          <h1 className="text-2xl font-serif font-bold text-white tracking-wide">{t.auth?.createAccount || "Create Account"}</h1>
-          <p className="text-xs text-[#a1a1aa]">{t.auth?.registerSubtitle || "Join MissingPiece and start exploring luxury puzzles."}</p>
+    <form onSubmit={handleRegister} className="space-y-space-lg animate-fade-in" noValidate>
+      {error && (
+        <div
+          className="p-3.5 rounded-md bg-error-container/30 border border-error/30 text-error text-center font-body-sm text-body-sm animate-shake"
+          role="alert"
+        >
+          {error}
         </div>
+      )}
 
-        {error && (
-          <div className="p-3.5 rounded-md bg-rose-950/40 border border-rose-800/50 text-rose-300 text-xs text-center">
-            {error}
-          </div>
-        )}
+      <div className="space-y-space-md">
+        <Input
+          type="text"
+          label={t.auth?.name || 'Full Name'}
+          icon="person_outline"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Salma Yehia"
+          required
+          maxLength={80}
+          autoComplete="name"
+        />
 
-        <form onSubmit={handleRegister} className="space-y-4">
-          <div className="space-y-1">
-            <label className="text-[11px] text-[#d8b4fe] font-medium">{t.auth?.name || "Full Name"}</label>
-            <div className="relative">
-              <User className="w-4 h-4 absolute left-3 top-3 text-[#a1a1aa]" />
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Salma Yehia"
-                className="w-full bg-[#0b0914] border border-[#221738] rounded-md px-4 py-2.5 ps-10 text-xs text-white focus:outline-none focus:border-border"
-              />
-            </div>
-          </div>
+        <Input
+          type="email"
+          label={t.auth?.email || 'Email Address'}
+          icon="mail"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="salma@example.com"
+          required
+          maxLength={254}
+          autoComplete="email"
+          autoCapitalize="none"
+        />
 
-          <div className="space-y-1">
-            <label className="text-[11px] text-[#d8b4fe] font-medium">{t.auth?.email || "Email Address"}</label>
-            <div className="relative">
-              <Mail className="w-4 h-4 absolute left-3 top-3 text-[#a1a1aa]" />
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="salma@example.com"
-                className="w-full bg-[#0b0914] border border-[#221738] rounded-md px-4 py-2.5 ps-10 text-xs text-white focus:outline-none focus:border-border"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[11px] text-[#d8b4fe] font-medium">{t.auth?.password || "Password"}</label>
-            <div className="relative">
-              <Lock className="w-4 h-4 absolute left-3 top-3 text-[#a1a1aa]" />
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full bg-[#0b0914] border border-[#221738] rounded-md px-4 py-2.5 ps-10 text-xs text-white focus:outline-none focus:border-border"
-              />
-            </div>
-          </div>
-
+        <div className="relative">
+          <Input
+            type={showPassword ? 'text' : 'password'}
+            label={t.auth?.password || 'Password'}
+            icon="lock"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            required
+            maxLength={128}
+            autoComplete="new-password"
+          />
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-primary from-[#7e22ce] to-[#a855f7] text-white rounded-md text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer shadow-md shadow-subtle disabled:opacity-50"
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className={`absolute right-space-md top-[34px] text-on-surface-variant hover:text-on-surface focus:outline-none ${
+              language === 'ar' ? 'left-space-md right-auto' : ''
+            }`}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
-            {loading ? 'Creating account...' : 'Create Account'}
+            <Icon name={showPassword ? 'eye_off' : 'eye'} size={18} />
           </button>
-        </form>
-
-        <div className="text-center text-xs text-[#a1a1aa]">
-          Already have an account?{' '}
-          <Link to="/login" className="text-[#c084fc] hover:underline font-medium">
-            Sign In
-          </Link>
         </div>
-
+        <p className="font-body-sm text-body-sm text-outline -mt-2">
+          Use at least 8 characters.
+        </p>
       </div>
-    </div>
+
+      <Button
+        type="submit"
+        fullWidth
+        isLoading={loading}
+        icon={language === 'ar' ? 'chevron_left' : 'chevron_right'}
+        iconPosition="right"
+      >
+        {t.auth?.createAccount || 'Create Account'}
+      </Button>
+
+      <div className="text-center font-body-sm text-body-sm text-on-surface-variant pt-2">
+        {t.auth?.alreadyHaveAccount || 'Already have an account?'}{' '}
+        <Link
+          to="/login"
+          state={location.state}
+          className="text-primary hover:text-primary-container font-medium underline transition-colors"
+        >
+          {t.auth?.signIn || 'Sign In'}
+        </Link>
+      </div>
+    </form>
   );
 }
 

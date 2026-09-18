@@ -1,8 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../auth/AuthContext';
 import { useToast } from '../../../shared/context/ToastContext';
+
 import { reviewsApi, type Review } from '../reviewsApi';
 import { Icon } from '../../../shared/components/ui/Icon';
+import { StarRating } from '../../../shared/components/ui/StarRating';
+import { Pagination } from '../../../shared/components/ui/Pagination';
+import { Button } from '../../../shared/components/ui/Button';
+import { Spinner } from '../../../shared/components/ui/Spinner';
 
 interface ReviewsProps {
   productId: string;
@@ -114,18 +119,7 @@ export const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
               <form onSubmit={handleSubmit} className="flex flex-col gap-space-md">
                 <div className="flex flex-col gap-space-xs">
                   <label className="font-label-md text-label-md text-on-surface font-semibold">Rating</label>
-                  <div className="flex items-center gap-1 text-primary">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button 
-                        key={star} 
-                        type="button"
-                        className="hover:scale-110 transition-transform cursor-pointer"
-                        onClick={() => setRating(star)}
-                      >
-                        <Icon name={star <= rating ? 'star' : 'star_border'} />
-                      </button>
-                    ))}
-                  </div>
+                    <StarRating rating={rating} interactive={true} onChange={setRating} size="md" />
                 </div>
                 
                 <div className="flex flex-col gap-space-xs">
@@ -140,13 +134,14 @@ export const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
                 </div>
                 
                 <div className="flex items-center gap-3 mt-space-xs">
-                  <button 
+                  <Button 
                     type="submit" 
                     disabled={isSubmitting}
-                    className="flex-1 bg-primary-container text-on-primary-container hover:bg-primary hover:text-on-primary font-label-md text-label-md rounded py-2.5 transition-colors shadow-sm disabled:opacity-50"
+                    isLoading={isSubmitting}
+                    className="flex-1"
                   >
-                    {isSubmitting ? 'Submitting...' : editingReviewId ? 'Update Review' : 'Submit Review'}
-                  </button>
+                    {editingReviewId ? 'Update Review' : 'Submit Review'}
+                  </Button>
                   {editingReviewId && (
                     <button 
                       type="button" 
@@ -165,7 +160,9 @@ export const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
         
         <div className="lg:col-span-8 flex flex-col gap-space-md">
           {isLoading ? (
-             <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div></div>
+             <div className="flex justify-center p-8">
+               <Spinner />
+             </div>
           ) : reviews.length === 0 ? (
             <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-lg p-space-xl flex flex-col items-center justify-center text-center">
               <Icon name="chat_bubble_outline" className="text-4xl text-outline mb-space-sm" />
@@ -186,9 +183,7 @@ export const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
                       </div>
                     </div>
                     <div className="flex items-center text-primary text-[14px]">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Icon key={i} name={i < review.rating ? 'star' : 'star_border'} />
-                      ))}
+                      <StarRating rating={review.rating} />
                     </div>
                   </div>
                   {review.comment && (
@@ -198,10 +193,8 @@ export const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
               ))}
               
               {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-space-md">
-                  <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="p-2 bg-surface-container rounded disabled:opacity-50"><Icon name="chevron_left" /></button>
-                  <span className="font-label-md text-label-md text-on-surface">Page {page} of {totalPages}</span>
-                  <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)} className="p-2 bg-surface-container rounded disabled:opacity-50"><Icon name="chevron_right" /></button>
+                <div className="mt-space-md">
+                  <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
                 </div>
               )}
             </>

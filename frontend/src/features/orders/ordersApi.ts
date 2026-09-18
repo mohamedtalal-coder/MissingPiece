@@ -48,8 +48,18 @@ export const ordersApi = {
     return response.data.data;
   },
 
+  createCheckoutSession: async (orderId: string): Promise<{ url: string }> => {
+    const response = await apiClient.post<{ success: boolean; url: string }>('/payments/checkout-session', { orderId });
+    return { url: response.data.url };
+  },
+
   getMyOrders: async (page = 1, limit = 10): Promise<{ items: Order[]; total: number; page: number; limit: number; totalPages: number }> => {
     const response = await apiClient.get<{ success: boolean; items: Order[]; total: number; page: number; limit: number; totalPages: number }>('/orders', { params: { page, limit } });
+    return response.data;
+  },
+
+  getAdminOrders: async (page = 1, limit = 10): Promise<{ items: Order[]; total: number; page: number; limit: number; totalPages: number }> => {
+    const response = await apiClient.get<{ success: boolean; items: Order[]; total: number; page: number; limit: number; totalPages: number }>('/orders/admin/all', { params: { page, limit } });
     return response.data;
   },
 

@@ -1,184 +1,259 @@
-
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingBag, Sparkles } from 'lucide-react';
-import { useLanguage } from '../../shared/context/LanguageContext';
+import { Icon } from '../../shared/components/ui/Icon';
+import { Button } from '../../shared/components/ui/Button';
+import { Motion } from '../../shared/components/ui/Motion';
+import { ProductCard } from '../products/components/ProductCard';
+import { ProductCardSkeleton } from '../products/components/ProductCardSkeleton';
+import { productsApi, type Product } from '../products/productsApi';
+import { useReducedMotion } from '../../shared/hooks/useReducedMotion';
+
+const HERO_IMAGE =
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuDcG08k9yZVrEVfodbBg7iy8eZcVT0YRfrX7FPn3nGGmd9r8HZedc_M8fLwpGg_ihYKQcQ355P74xuOXWtvo66DNzkYC6k5vIEmTVmr2LTabxunSat27yA-3d0hjC4pjKP0hchELKct7ah2WAOAjwPTUOM6gqhJxaGPSIolEL76d_mwQHRmDkBig-AVA-c33_tMV_zXOyJXH-0WCPBROhHsdwVdYpyYTIoMskBlCU3eauVnHn68_6NnXA';
+
+const CATEGORIES = [
+  {
+    to: '/products?category=jigsaw',
+    icon: 'photo_library',
+    title: 'Classic Jigsaws',
+    blurb: 'Fine-art prints on museum-grade board with anti-glare finish.',
+  },
+  {
+    to: '/products?category=3d',
+    icon: 'account_balance',
+    title: 'Architectural 3D',
+    blurb: 'Kinetic interlocking structural sculptures engineered in birch.',
+  },
+  {
+    to: '/products?category=wooden',
+    icon: 'forest',
+    title: 'Wooden Puzzles',
+    blurb: 'Heirloom cherry and walnut whimsy pieces cut with zero splintering.',
+  },
+  {
+    to: '/products?category=mystery',
+    icon: 'search_insights',
+    title: 'Mystery Puzzles',
+    blurb: 'Image-less boxes with cipher narratives and mechanical compartments.',
+  },
+] as const;
+
+const STANDARDS = [
+  {
+    icon: 'precision_manufacturing',
+    title: 'Zero False Fits',
+    blurb: 'Micro-machined dies crafted uniquely. Two pieces only interlock if they belong.',
+  },
+  {
+    icon: 'texture',
+    title: 'Linen Emulsion',
+    blurb: 'Anti-glare eggshell emulsion designed for serene assembly under warm light.',
+  },
+  {
+    icon: 'security',
+    title: 'Lost Piece Guarantee',
+    blurb: 'If a piece is ever lost, we mill and mail the exact coordinate replacement for life.',
+  },
+  {
+    icon: 'eco',
+    title: 'Plastic-Free Vault',
+    blurb: 'Cloth-bound box with magnetic brass catch and organic cotton satchel.',
+  },
+] as const;
 
 export default function HomePage() {
-  const { t } = useLanguage();
+  const reducedMotion = useReducedMotion();
+  const [featured, setFeatured] = useState<Product[]>([]);
+  const [loadingFeatured, setLoadingFeatured] = useState(true);
+  const [featuredError, setFeaturedError] = useState<string | null>(null);
 
-  const categories = [
-    { name: t.home.categories.jigsaw, icon: '🖼️', count: `5 ${t.home.items}` },
-    { name: t.home.categories.threeD, icon: '🏛️', count: `5 ${t.home.items}` },
-    { name: t.home.categories.wooden, icon: '🪵', count: `5 ${t.home.items}` },
-    { name: t.home.categories.mystery, icon: '🔍', count: `5 ${t.home.items}` },
-  ];
+  useEffect(() => {
+    const controller = new AbortController();
+    setLoadingFeatured(true);
+    setFeaturedError(null);
 
-  const bestSellers = [
-    {
-      id: 1,
-      name: 'Sunset Meadow Jigsaw',
-      pieces: '1000 Pieces',
-      price: '$350.00',
-      image:
-        'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&auto=format&fit=crop&q=80',
-    },
-    {
-      id: 2,
-      name: 'Starry Night Galaxy',
-      pieces: '1000 Pieces',
-      price: '$450.00',
-      image:
-        'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&auto=format&fit=crop&q=80',
-    },
-    {
-      id: 3,
-      name: 'Alpine Snowy Village',
-      pieces: '1000 Pieces',
-      price: '$300.00',
-      image:
-        'https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&auto=format&fit=crop&q=80',
-    },
-  ];
+    productsApi
+      .getAll({ sort: 'newest', limit: 3, page: 1 }, controller.signal)
+      .then((data) => setFeatured(data.items))
+      .catch((err: { name?: string; code?: string }) => {
+        if (err?.name === 'CanceledError' || err?.name === 'AbortError' || err?.code === 'ERR_CANCELED') {
+          return;
+        }
+        setFeaturedError('Featured editions could not be loaded.');
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoadingFeatured(false);
+      });
+
+    return () => controller.abort();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] font-serif flex flex-col justify-between space-y-16 pb-16">
-      <div className="max-w-7xl mx-auto px-6 pt-10 w-full">
-        <div className="bg-[var(--bg-card)] border border-border rounded-md p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-10 shadow-[0_0_40px_rgba(126,34,206,0.2)]  relative overflow-hidden">
-          <div className="space-y-5 max-w-xl z-10">
-            <span className="inline-flex items-center gap-1.5 bg-[var(--bg-main)] border border-[#a855f7]/50 text-[var(--text-main)] text-xs px-3 py-1 rounded-md shadow-[0_0_10px_rgba(168,85,247,0.3)]">
-              <Sparkles className="w-3.5 h-3.5 text-[#c084fc]" />
-              {t.home.premiumCollection}
-            </span>
+    <>
+      {/* Full-bleed hero — brand + one message + CTAs */}
+      <section className="relative w-full min-h-[min(92vh,820px)] overflow-hidden bg-surface-container-lowest">
+        <div className="absolute inset-0" aria-hidden>
+          <img
+            src={HERO_IMAGE}
+            alt=""
+            className={`w-full h-full object-cover object-center opacity-45 ${reducedMotion ? '' : 'hero-kenburns'}`}
+            fetchPriority="high"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/85 to-surface/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-surface/50" />
+        </div>
 
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight text-[var(--text-main)] drop-shadow-md">
-              {t.home.heroTitle}
-            </h1>
-
-            <p className="text-xs md:text-sm font-sans text-[var(--text-muted)] leading-relaxed">
-              {t.home.heroDescription}
+        <div className="relative z-10 max-w-[1360px] mx-auto px-margin-mobile lg:px-margin flex flex-col justify-end min-h-[min(92vh,820px)] pb-space-2xl pt-28">
+          <div className={`max-w-2xl flex flex-col items-start gap-space-md ${reducedMotion ? '' : 'animate-slide-up'}`}>
+            <p className="font-headline-lg text-display-lg-mobile sm:text-display-lg text-on-surface tracking-tight">
+              MissingPiece
             </p>
-
-            <div>
-              <Link
-                to="/products"
-                className="inline-block bg-primary from-[#7e22ce] to-[#a855f7] text-white text-xs font-sans font-semibold px-7 py-3.5 rounded-md shadow-[0_0_20px_rgba(168,85,247,0.5)] hover:opacity-90 transition-opacity"
-              >
-                {t.home.exploreCollection}
-              </Link>
+            <h1 className="font-headline-md text-headline-lg sm:text-headline-lg text-on-surface/95 font-medium tracking-tight max-w-xl">
+              Every picture is <span className="italic text-primary font-normal">missing just one</span> piece.
+            </h1>
+            <p className="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
+              Heirloom wooden jigsaws engineered for quiet mastery and lifelong replacement of any lost piece.
+            </p>
+            <div className="flex flex-wrap items-center gap-space-md pt-space-xs">
+              <Button as="link" to="/products" size="lg" icon="arrow_forward" iconPosition="right">
+                Explore Collection
+              </Button>
+              <Button as="link" to="/about" variant="outline" size="lg">
+                Our Story
+              </Button>
             </div>
           </div>
-
-          <div className="w-full md:w-80 h-72 bg-[var(--bg-main)] rounded-md flex items-center justify-center shadow-[0_0_45px_rgba(168,85,247,0.5)] border-2 border-[#a855f7] relative overflow-hidden group animate-pulse">
-            <div className="absolute inset-0 bg-primary from-[#7e22ce]/20 to-transparent"></div>
-
-            <svg
-              className="w-40 h-40 drop-shadow-[0_0_20px_rgba(168,85,247,0.9)] group-hover:scale-110 transition-transform duration-500 z-10"
-              viewBox="0 0 24 24"
-              fill="none"
-            >
-              <path
-                d="M20.5 11H19V7.5C19 6.67 18.33 6 17.5 6H14V4.5C14 3.67 13.33 3 12.5 3H11.5C10.67 3 10 3.67 10 4.5V6H6.5C5.67 6 5 6.67 5 7.5V11H3.5C2.67 11 2 11.67 2 12.5V13.5C2 14.33 2.67 15 3.5 15H5V18.5C5 19.33 5.67 20 6.5 20H10V21.5C10 22.33 10.67 23 11.5 23H12.5C13.33 23 14 22.33 14 21.5V20H17.5C18.33 20 19 19.33 19 18.5V15H20.5C21.33 15 22 14.33 22 13.5V12.5C22 11.67 21.33 11 20.5 11Z"
-                fill="#7e22ce"
-                stroke="#0b0914"
-                strokeWidth="1.2"
-              />
-
-              <path
-                d="M12 3H11.5C10.67 3 10 3.67 10 4.5V6H14V4.5C14 3.67 13.33 3 12.5 3H12ZM19 7.5V11H20.5C21.33 11 22 11.67 22 12.5V13.5C22 14.33 21.33 15 20.5 15H19V18.5C19 19.33 18.33 20 17.5 20H14V21.5C14 22.33 13.33 23 12.5 23H12V12C12 10.34 13.34 9 15 9H19V7.5Z"
-                fill="#e9d5ff"
-                opacity="0.95"
-              />
-            </svg>
-          </div>
         </div>
-      </div>
+      </section>
 
-      <div className="max-w-7xl mx-auto px-6 space-y-6 w-full">
-        <div className="text-center space-y-1">
-          <h2 className="text-2xl font-bold text-[var(--text-main)] tracking-wide">
-            {t.home.shopByCategory}
-          </h2>
+      {/* Categories */}
+      <section className="w-full bg-surface py-space-2xl px-margin-mobile lg:px-margin" id="disciplines">
+        <div className="max-w-[1360px] mx-auto flex flex-col gap-space-xl">
+          <Motion className="flex flex-col items-center text-center gap-space-xs max-w-xl mx-auto">
+            <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest">
+              Explore by Style
+            </span>
+            <h2 className="font-headline-md text-headline-lg text-on-surface tracking-tight">Shop by Category</h2>
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              Mindful tactile engagement across four craftsmanship traditions.
+            </p>
+          </Motion>
 
-          <p className="text-xs text-[var(--text-muted)] font-sans">
-            {t.home.categoryDescription}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {categories.map((cat, idx) => (
-            <Link
-              to="/products"
-              key={idx}
-              className="bg-[var(--bg-card)] border border-border p-6 rounded-md text-center space-y-3 hover:border-[#a855f7] hover:shadow-[0_0_25px_rgba(168,85,247,0.3)] transition-all group"
-            >
-              <div className="w-14 h-14 bg-[var(--bg-main)] mx-auto rounded-md flex items-center justify-center text-2xl border border-border group-hover:scale-105 transition-transform">
-                {cat.icon}
-              </div>
-
-              <h3 className="text-sm font-bold text-[var(--text-main)]">
-                {cat.name}
-              </h3>
-
-              <p className="text-[11px] font-sans text-[#c084fc]">
-                {cat.count}
-              </p>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 space-y-6 w-full">
-        <div className="text-center space-y-1">
-          <h2 className="text-2xl font-bold text-[var(--text-main)] tracking-wide">
-            {t.home.bestSellers}
-          </h2>
-
-          <p className="text-xs text-[var(--text-muted)] font-sans">
-            {t.home.bestSellersDescription}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {bestSellers.map((product) => (
-            <div
-              key={product.id}
-              className="bg-[var(--bg-card)] border border-border p-5 rounded-md space-y-4 shadow-xl hover:border-[#a855f7] transition-all group"
-            >
-              <div className="w-full h-48 bg-[var(--bg-main)] rounded-md overflow-hidden border border-border relative">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <h3 className="text-xs font-bold text-[var(--text-main)]">
-                  {product.name}
-                </h3>
-
-                <p className="text-xs font-sans text-[var(--text-muted)]">
-                  {product.pieces}
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between pt-2 border-t border-border">
-                <span className="text-sm font-bold text-[var(--text-main)]">
-                  {product.price}
-                </span>
-
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-lg">
+            {CATEGORIES.map((cat, i) => (
+              <Motion key={cat.to} delayMs={i * 80} className="h-full">
                 <Link
-                  to="/products"
-                  className="bg-[#7e22ce]/30 border border-[#a855f7]/60 text-[var(--text-main)] text-xs px-3.5 py-2 rounded-md hover:bg-[#7e22ce]/50 transition-colors flex items-center gap-1.5"
+                  to={cat.to}
+                  className="group h-full flex flex-col justify-between bg-surface-container-low hover:bg-surface-container rounded-xl p-space-xl border border-outline-variant/20 transition-all duration-300 hover:-translate-y-1 hover:border-primary-container/40"
                 >
-                  <ShoppingBag className="w-3.5 h-3.5" />
-                  <span>{t.home.addToCart}</span>
+                  <div className="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary transition-transform duration-300 group-hover:scale-110">
+                    <Icon name={cat.icon} className="text-[20px]" />
+                  </div>
+                  <div className="pt-space-xl">
+                    <h3 className="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors">
+                      {cat.title}
+                    </h3>
+                    <p className="font-body-sm text-body-sm text-on-surface-variant mt-2">{cat.blurb}</p>
+                  </div>
                 </Link>
-              </div>
-            </div>
-          ))}
+              </Motion>
+            ))}
+          </div>
         </div>
-      </div>
-    </div>
+      </section>
+
+      {/* Featured from API */}
+      <section className="w-full bg-surface-container-lowest py-space-2xl px-margin-mobile lg:px-margin" id="catalog">
+        <div className="max-w-[1360px] mx-auto flex flex-col gap-space-2xl">
+          <Motion className="flex flex-col sm:flex-row sm:items-end justify-between gap-space-md">
+            <div className="flex flex-col gap-1">
+              <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest">
+                Selected Masterworks
+              </span>
+              <h2 className="font-headline-md text-headline-lg text-on-surface tracking-tight">
+                Latest from the Atelier
+              </h2>
+            </div>
+            <Button as="link" to="/products" variant="outline">
+              View All
+            </Button>
+          </Motion>
+
+          {featuredError ? (
+            <div
+              className="rounded-xl border border-error/30 bg-surface-container-low px-space-lg py-space-xl text-center"
+              role="alert"
+            >
+              <p className="font-body-md text-on-surface mb-space-md">{featuredError}</p>
+              <Button
+                type="button"
+                onClick={() => {
+                  setLoadingFeatured(true);
+                  setFeaturedError(null);
+                  productsApi
+                    .getAll({ sort: 'newest', limit: 3, page: 1 })
+                    .then((data) => setFeatured(data.items))
+                    .catch(() => setFeaturedError('Featured editions could not be loaded.'))
+                    .finally(() => setLoadingFeatured(false));
+                }}
+              >
+                Try Again
+              </Button>
+            </div>
+          ) : loadingFeatured ? (
+            <div
+              className="grid grid-cols-1 md:grid-cols-3 gap-space-lg"
+              aria-busy="true"
+              aria-label="Loading featured editions"
+            >
+              {Array.from({ length: 3 }).map((_, i) => (
+                <ProductCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : featured.length === 0 ? (
+            <p className="font-body-md text-on-surface-variant text-center py-space-xl">
+              New editions are being cut. Check the full collection soon.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
+              {featured.map((product, i) => (
+                <Motion key={product._id} delayMs={i * 90} className="h-full">
+                  <ProductCard product={product} />
+                </Motion>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Craft standards */}
+      <section className="w-full bg-surface py-space-2xl px-margin-mobile lg:px-margin" id="craft">
+        <div className="max-w-[1360px] mx-auto flex flex-col gap-space-2xl">
+          <Motion className="text-center max-w-2xl mx-auto flex flex-col items-center gap-space-xs">
+            <span className="font-label-caps text-label-caps text-primary tracking-widest uppercase">
+              The Atelier Standards
+            </span>
+            <h2 className="font-headline-md text-headline-lg text-on-surface tracking-tight">
+              The Anatomy of a MissingPiece
+            </h2>
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              Horological precision, tactile materials, and heirloom woodworking.
+            </p>
+          </Motion>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-lg">
+            {STANDARDS.map((item, i) => (
+              <Motion key={item.title} delayMs={i * 70}>
+                <div className="flex flex-col gap-space-md p-space-xl rounded-xl bg-surface-container-low border border-outline-variant/20 h-full">
+                  <Icon name={item.icon} className="text-primary text-[24px]" />
+                  <h3 className="font-headline-sm text-headline-sm text-on-surface">{item.title}</h3>
+                  <p className="font-body-sm text-body-sm text-on-surface-variant">{item.blurb}</p>
+                </div>
+              </Motion>
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

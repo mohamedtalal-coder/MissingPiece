@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useLanguage } from '../../../shared/context/LanguageContext';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import type { Product } from '../productsApi';
 import { useCart } from '../../cart/CartContext';
 import { useToast } from '../../../shared/context/ToastContext';
 import { useWishlist } from '../../../shared/WishlistContext';
 import { Icon } from '../../../shared/components/ui/Icon';
+import { PriceDisplay } from '../../../shared/components/ui/PriceDisplay';
+import { StarRating } from '../../../shared/components/ui/StarRating';
+import { useLanguage } from '../../../shared/context/LanguageContext';
 
 interface ProductCardProps {
   product: Product;
@@ -13,103 +15,155 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { t } = useLanguage() as any;
+  const navigate = useNavigate();
   const { addItem } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { showToast } = useToast();
-  
+
   const [isAdding, setIsAdding] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  
-  const isWishlisted = isInWishlist(product._id || product.slug); // fallback for safety
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
 
-  // Reset success state after a brief moment
+  const isWishlisted = isInWishlist(product._id || product.slug);
+  const imageSrc = product.images?.[0];
+
   useEffect(() => {
-    if (isSuccess) {
-      const timer = setTimeout(() => setIsSuccess(false), 2000);
-      return () => clearTimeout(timer);
-    }
+    if (!isSuccess) return;
+    const timer = setTimeout(() => setIsSuccess(false), 2000);
+    return () => clearTimeout(timer);
   }, [isSuccess]);
 
+  useEffect(() => {
+    setImageLoaded(false);
+    setImageFailed(false);
+  }, [imageSrc]);
+
   const handleAddToCart = async (e: React.MouseEvent) => {
-    e.preventDefault(); // prevent navigation
+    e.preventDefault();
+    e.stopPropagation();
     if (product.stock === 0 || isAdding) return;
-    
+
     setIsAdding(true);
     try {
       await addItem(product, 1);
       setIsSuccess(true);
-      showToast({ message: 'Added to cart successfully', type: 'success' });
-    } catch (err) {
-      showToast({ message: 'Failed to add item to cart', type: 'error' });
+      showToast({ message: 'Added to bag', type: 'success' });
+    } catch {
+      showToast({ message: 'Could not add to bag', type: 'error' });
     } finally {
       setIsAdding(false);
     }
   };
 
   const handleToggleWishlist = async (e: React.MouseEvent) => {
-    e.preventDefault(); // prevent navigation
+    e.preventDefault();
+    e.stopPropagation();
     await toggleWishlist(product);
   };
 
   return (
-    <Link to={`/products/${product.slug}`} className="group block relative w-full overflow-hidden rounded-md bg-surface border border-border shadow-lg hover:shadow-[0_0_25px_rgba(168,85,247,0.3)] hover:border-border hover:-translate-y-1 transition-all duration-300 ">
-      {/* Image container */}
-      <div className="relative aspect-[4/5] overflow-hidden bg-black/40">
-        <img
-          src={product.images?.[0] ?? '/placeholder.png'}
-          alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-          loading="lazy"
-        />
-        
-        {/* Wishlist Button */}
-        <button 
+    <article
+      onClick={() => navigate(`/products/${product.slug}`)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          navigate(`/products/${product.slug}`);
+        }
+      }}
+      role="link"
+      tabIndex={0}
+      className="product-card group flex flex-col h-full bg-surface-container-low rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 cursor-pointer border border-transparent hover:border-outline-variant/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+    >
+      <div className="relative w-full aspect-[4/5] bg-surface-container-lowest overflow-hidden">
+        {!imageLoaded && !imageFailed && <div className="absolute inset-0 animate-shimmer" aria-hidden />}
+        {imageSrc && !imageFailed ? (
+          <img
+            src={imageSrc}
+            alt={product.name}
+            className={`w-full h-full object-cover object-center group-hover:scale-105 transition-all duration-700 ease-out ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            loading="lazy"
+            decoding="async"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageFailed(true)}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-outline">
+            <Icon name="inventory_2" size={32} />
+          </div>
+        )}
+
+        <button
           onClick={handleToggleWishlist}
-          className="absolute top-3 right-3 p-2.5 rounded-md bg-black/40  text-white/70 hover:text-red-400 hover:bg-black/60 transition-all duration-300 shadow-sm z-10 hover:scale-110 cursor-pointer"
-          aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          className={`wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full backdrop-blur flex items-center justify-center transition-transform hover:scale-110 z-10 ${
+            isWishlisted
+              ? 'bg-surface-container-lowest/80 text-error'
+              : 'bg-surface-container-lowest/80 text-on-surface-variant hover:text-primary'
+          }`}
+          aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+          type="button"
         >
-          <Icon name={isWishlisted ? 'favorite' : 'favorite_border'} className={`text-xl transition-colors ${isWishlisted ? 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)] fill-current' : ''}`} />
+          <Icon
+            name={isWishlisted ? 'favorite' : 'favorite_border'}
+            size={18}
+            fill={isWishlisted ? 'currentColor' : 'none'}
+          />
         </button>
 
         {product.stock === 0 && (
-          <div className="absolute inset-0 bg-black/60 flex items-center justify-center ">
-            <span className="bg-red-500/80 text-white px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(239,68,68,0.5)]">{t.productDetail?.outOfStock || "Out of Stock"}</span>
+          <div className="absolute inset-0 bg-surface/60 flex items-center justify-center z-10">
+            <span className="bg-error text-on-error px-4 py-1.5 rounded text-xs font-bold uppercase tracking-widest">
+              {t.productDetail?.outOfStock || 'Out of Stock'}
+            </span>
           </div>
         )}
       </div>
 
-      {/* Content */}
-      <div className="p-5 flex flex-col gap-3">
+      <div className="p-4 flex flex-col flex-1 justify-between gap-3">
         <div>
-          <h3 className="text-lg font-semibold text-primary truncate group-hover:text-primary transition-colors drop-shadow-sm">
+          <span className="font-label-caps text-label-caps text-outline uppercase tracking-wider">
+            {product.category?.replace(/-/g, ' ')}
+          </span>
+          <h3 className="font-headline-sm text-headline-sm text-on-surface leading-snug group-hover:text-primary transition-colors mt-0.5 mb-1 truncate">
             {product.name}
           </h3>
-          <p className="text-sm text-primary truncate capitalize mt-0.5">
-            {product.category?.replace('-', ' ')}
-          </p>
+          {product.averageRating !== undefined && (
+            <StarRating rating={product.averageRating} count={product.reviewCount} />
+          )}
         </div>
-        
-        <div className="flex items-center justify-between mt-auto pt-2">
-          <p className="text-xl text-primary font-bold tracking-tight">
-            ${product.price?.toFixed(2)}
-          </p>
+
+        <div className="pt-2 flex items-center justify-between border-t border-outline-variant/10 mt-1">
+          <PriceDisplay amount={product.price} size="md" />
           <button
             onClick={handleAddToCart}
             disabled={product.stock === 0 || isAdding || isSuccess}
+            type="button"
             className={`
-              flex items-center justify-center px-4 py-2 rounded-md text-sm font-semibold transition-all duration-300 min-w-[110px] shadow-md cursor-pointer
-              ${product.stock === 0 
-                ? 'bg-surface text-primary cursor-not-allowed border border-border' 
-                : isSuccess 
-                  ? 'bg-green-500 text-white shadow-[0_0_15px_rgba(34,197,94,0.5)]'
-                  : 'bg-surface text-white hover:bg-surface hover:shadow-[0_0_15px_rgba(168,85,247,0.5)] active:scale-95'
+              add-to-cart-btn px-3.5 py-1.5 rounded font-label-md text-label-md transition-colors flex items-center gap-1.5 shadow-sm
+              ${
+                product.stock === 0
+                  ? 'bg-surface-container-high text-outline cursor-not-allowed'
+                  : isSuccess
+                    ? 'bg-primary text-on-primary'
+                    : 'bg-primary-container text-on-primary-container hover:bg-primary'
               }
             `}
           >
-            {isAdding ? 'Adding...' : isSuccess ? <Icon name="check" className="text-xl drop-shadow-md" /> : 'Add to cart'}
+            {isAdding ? (
+              <Icon name="refresh" className="animate-spin" size={16} />
+            ) : isSuccess ? (
+              <Icon name="check" size={16} />
+            ) : (
+              <Icon name="shopping_bag" size={16} />
+            )}
+            <span className="hidden sm:inline-block">
+              {isSuccess ? t.productCard?.added || 'Added' : t.productCard?.add || 'Add to Cart'}
+            </span>
           </button>
         </div>
       </div>
-    </Link>
+    </article>
   );
 };

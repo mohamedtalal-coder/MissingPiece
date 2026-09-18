@@ -82,3 +82,17 @@ export const updateOrderStatus = async (req: Request, res: Response, next: NextF
     next(error);
   }
 };
+
+/**
+ * Get all orders (Admin only)
+ * GET /api/orders/admin/all
+ */
+export const getAllOrdersAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const query = paginationSchema.parse(req.query);
+    const result = await orderService.getAllOrdersAdmin(query);
+    res.status(200).json({ success: true, ...result });
+  } catch (error) {
+    next(error);
+  }
+};

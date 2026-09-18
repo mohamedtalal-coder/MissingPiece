@@ -59,8 +59,8 @@ export const productsApi = {
     return response.data.categories;
   },
 
-  getBySlug: async (slug: string): Promise<Product> => {
-    const response = await apiClient.get<{ success: boolean; product: Product }>(`/products/${slug}`);
+  getBySlug: async (slug: string, signal?: AbortSignal): Promise<Product> => {
+    const response = await apiClient.get<{ success: boolean; product: Product }>(`/products/${slug}`, { signal });
     return response.data.product;
   },
 

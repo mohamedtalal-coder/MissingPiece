@@ -1,18 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, AlertCircle, Edit2 } from 'lucide-react';
 import { useLanguage } from '../../shared/context/LanguageContext';
+import { useToast } from '../../shared/context/ToastContext';
 import { productsApi, type Product, type CreateProductInput } from './productsApi';
+import { Icon } from '../../shared/components/ui/Icon';
+import { Button } from '../../shared/components/ui/Button';
+import { PriceDisplay } from '../../shared/components/ui/PriceDisplay';
+import { AdminAtelierNav } from '../../shared/components/layout/AdminAtelierNav';
+import { useScrollLock } from '../../shared/hooks/useScrollLock';
+
+function sanitize(value: string, max: number): string {
+  return value.replace(/[<>]/g, '').trim().slice(0, max);
+}
+
+function isSafeHttpUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return u.protocol === 'https:' || u.protocol === 'http:';
+  } catch {
+    return false;
+  }
+}
+
+function TableSkeleton() {
+  return (
+    <div className="p-6 space-y-3" aria-busy="true" aria-label="Loading inventory">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="h-14 rounded-lg animate-shimmer" />
+      ))}
+    </div>
+  );
+}
 
 export const AdminProductsPage: React.FC = () => {
-  const { t } = useLanguage();
+  const { t } = useLanguage() as any;
+  const { showToast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
-  
-  // Form state
+  const [formError, setFormError] = useState('');
+  const [search, setSearch] = useState('');
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
@@ -21,13 +52,15 @@ export const AdminProductsPage: React.FC = () => {
   const [imageUrl, setImageUrl] = useState('');
   const [isActive, setIsActive] = useState(true);
 
+  useScrollLock(showModal);
+
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
       const result = await productsApi.getAdminAll({ limit: 50 });
       setProducts(result.items);
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Failed to fetch products');
     } finally {
       setIsLoading(false);
@@ -38,34 +71,72 @@ export const AdminProductsPage: React.FC = () => {
     fetchProducts();
   }, []);
 
+  const validateForm = (): CreateProductInput | null => {
+    const cleanName = sanitize(name, 120);
+    const cleanDesc = sanitize(description, 2000);
+    const priceNum = Number(price);
+    const stockNum = Math.floor(Number(stock));
+    const cleanImage = sanitize(imageUrl, 500);
+
+    if (cleanName.length < 2) {
+      setFormError('Title must be at least 2 characters.');
+      return null;
+    }
+    if (cleanDesc.length < 10) {
+      setFormError('Description must be at least 10 characters.');
+      return null;
+    }
+    if (!Number.isFinite(priceNum) || priceNum <= 0 || priceNum > 100000) {
+      setFormError('Enter a valid price greater than 0.');
+      return null;
+    }
+    if (!Number.isFinite(stockNum) || stockNum < 0 || stockNum > 10000) {
+      setFormError('Stock must be an integer between 0 and 10000.');
+      return null;
+    }
+    if (cleanImage && !isSafeHttpUrl(cleanImage)) {
+      setFormError('Image URL must be a valid http(s) link.');
+      return null;
+    }
+
+    return {
+      name: cleanName,
+      description: cleanDesc,
+      price: priceNum,
+      stock: stockNum,
+      category: sanitize(category, 80) || 'Jigsaw Puzzles',
+      isActive,
+      images: cleanImage
+        ? [cleanImage]
+        : ['https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=500&auto=format&fit=crop&q=60'],
+    };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
-    
+    setFormError('');
+    const input = validateForm();
+    if (!input) return;
+
     setIsSubmitting(true);
     try {
-      const input: CreateProductInput = {
-        name,
-        description,
-        price: Number(price),
-        stock: Number(stock),
-        category,
-        isActive,
-        images: imageUrl ? [imageUrl] : ['https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=500&auto=format&fit=crop&q=60']
-      };
-      
       if (editingProductId) {
         const updated = await productsApi.update(editingProductId, input);
-        setProducts(products.map(p => p._id === editingProductId ? updated : p));
+        setProducts((prev) => prev.map((p) => (p._id === editingProductId ? updated : p)));
+        showToast({ message: 'Edition updated', type: 'success' });
       } else {
         const created = await productsApi.create(input);
-        setProducts([created, ...products]);
+        setProducts((prev) => [created, ...prev]);
+        showToast({ message: 'Edition created', type: 'success' });
       }
-      
       setShowModal(false);
       resetForm();
-    } catch (err) {
-      alert(`Failed to ${editingProductId ? 'update' : 'create'} product`);
+    } catch {
+      showToast({
+        message: `Failed to ${editingProductId ? 'update' : 'create'} product`,
+        type: 'error',
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -78,14 +149,15 @@ export const AdminProductsPage: React.FC = () => {
     setStock(product.stock.toString());
     setCategory(product.category);
     setImageUrl(product.images?.[0] || '');
-    setIsActive(product.isActive !== false); // default to true if undefined
-    
+    setIsActive(product.isActive !== false);
     setEditingProductId(product._id);
+    setFormError('');
     setShowModal(true);
   };
 
   const handleAddNewClick = () => {
     resetForm();
+    setFormError('');
     setShowModal(true);
   };
 
@@ -97,248 +169,356 @@ export const AdminProductsPage: React.FC = () => {
     setImageUrl('');
     setIsActive(true);
     setEditingProductId(null);
+    setCategory('Jigsaw Puzzles');
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm(t.adminProducts.deleteConfirm || 'Are you sure you want to delete this product?')) return;
-    
+    if (!window.confirm(t.adminProducts?.deleteConfirm || 'Delete this product?')) return;
+    setPendingDeleteId(id);
     try {
       await productsApi.delete(id);
-      setProducts(products.filter(p => p._id !== id));
-    } catch (err) {
-      alert('Failed to delete product');
+      setProducts((prev) => prev.filter((p) => p._id !== id));
+      showToast({ message: 'Edition removed', type: 'info' });
+    } catch {
+      showToast({ message: 'Failed to delete product', type: 'error' });
+    } finally {
+      setPendingDeleteId(null);
     }
   };
 
+  const filtered = products.filter((p) => {
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || p._id.toLowerCase().includes(q);
+  });
+
+  const totalStock = products.reduce((acc, p) => acc + p.stock, 0);
+  const lowStock = products.filter((p) => p.stock > 0 && p.stock <= 5).length;
+  const outOfStock = products.filter((p) => p.stock === 0).length;
+
   return (
-    <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] py-12 px-6">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border pb-4">
-          <div>
-            <h1 className="text-3xl font-serif text-[var(--text-main)]">
-              {t.adminProducts.title}
-            </h1>
-            <p className="text-xs text-[var(--text-muted)] mt-1">
-              {t.adminProducts.description}
-            </p>
-          </div>
-          <button 
-            onClick={handleAddNewClick}
-            className="px-4 py-2.5 rounded-md bg-surface hover:bg-surface text-white text-sm font-medium transition-all flex items-center gap-2 shadow-lg shadow-subtle cursor-pointer"
-          >
-            <Plus className="w-5 h-5" />
-            <span>{t.adminProducts.addNew}</span>
-          </button>
+    <div className="w-full max-w-[1360px] mx-auto px-margin-mobile lg:px-margin py-space-lg pb-space-2xl">
+      <AdminAtelierNav />
+
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8">
+        <div>
+          <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest">
+            Atelier Vault &amp; Stock
+          </span>
+          <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight mt-1">
+            Product Management &amp; Inventory
+          </h1>
+          <p className="font-body-md text-body-md text-on-surface-variant mt-1.5 max-w-2xl">
+            Manage artisan puzzle editions and workshop inventory.
+          </p>
         </div>
+        <Button onClick={handleAddNewClick} icon="add">
+          Add New Puzzle Edition
+        </Button>
+      </div>
 
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-md flex items-center gap-3">
-            <AlertCircle className="w-5 h-5" />
-            <span>{error}</span>
-          </div>
-        )}
+      {error && (
+        <div className="bg-error-container/20 border border-error/40 text-error p-4 rounded-md flex items-center justify-between gap-3 mb-6">
+          <span>{error}</span>
+          <Button type="button" size="sm" onClick={fetchProducts}>
+            Retry
+          </Button>
+        </div>
+      )}
 
-        {showModal && (
-          <div className="fixed inset-0 bg-black/70  flex justify-center items-center z-50 p-4">
-            <div className="bg-[var(--bg-card)] border border-border p-6 rounded-md w-full max-w-lg space-y-6">
-              <h3 className="text-xl font-serif text-[var(--text-main)]">
-                {editingProductId ? 'Edit Product' : t.adminProducts.createProduct}
-              </h3>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <input 
-                  type="text" 
-                  placeholder={t.adminProducts.productTitle}
-                  value={name} 
-                  onChange={(e) => setName(e.target.value)} 
-                  className="w-full bg-[var(--bg-main)] border border-border rounded-md px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-border" 
-                  required 
-                />
-                <textarea 
-                  placeholder={t.adminProducts.productDescription}
-                  value={description} 
-                  onChange={(e) => setDescription(e.target.value)} 
-                  className="w-full bg-[var(--bg-main)] border border-border rounded-md px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-border" 
-                  rows={3}
-                  required
-                />
-                <div className="grid grid-cols-2 gap-4">
-                  <input 
-                    type="number" 
-                    placeholder={t.adminProducts.price}
-                    step="0.01"
-                    min="0"
-                    value={price} 
-                    onChange={(e) => setPrice(e.target.value)} 
-                    className="w-full bg-[var(--bg-main)] border border-border rounded-md px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-border" 
-                    required 
-                  />
-                  <input 
-                    type="number" 
-                    placeholder={t.adminProducts.stock}
-                    min="0"
-                    value={stock} 
-                    onChange={(e) => setStock(e.target.value)} 
-                    className="w-full bg-[var(--bg-main)] border border-border rounded-md px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-border" 
-                    required 
-                  />
-                </div>
-
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full bg-[var(--bg-main)] border border-border rounded-md px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-border"
-                >
-                  <option value="Jigsaw Puzzles">
-                    {t.adminProducts.categories.jigsaw}
-                  </option>
-                  <option value="3D Puzzles">
-                    {t.adminProducts.categories.threeD}
-                  </option>
-                  <option value="Wooden Puzzles">
-                    {t.adminProducts.categories.wooden}
-                  </option>
-                  <option value="Mystery Puzzles">
-                    {t.adminProducts.categories.mystery}
-                  </option>
-                </select>
-                <input 
-                  type="text" 
-                  placeholder={t.adminProducts.imageUrl}
-                  value={imageUrl} 
-                  onChange={(e) => setImageUrl(e.target.value)} 
-                  className="w-full bg-[var(--bg-main)] border border-border rounded-md px-4 py-3 text-sm text-[var(--text-main)] focus:outline-none focus:border-border" 
-                />
-                
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="isActive"
-                    checked={isActive}
-                    onChange={(e) => setIsActive(e.target.checked)}
-                    className="w-4 h-4 bg-[var(--bg-main)] border-border rounded text-blue-600 focus:ring-blue-500"
-                  />
-                  <label htmlFor="isActive" className="text-sm text-[var(--text-main)] cursor-pointer">
-                    Active Product (Visible to customers)
-                  </label>
-                </div>
-
-                <div className="flex justify-end gap-3 pt-4">
-                  <button 
-                    type="button" 
-                    onClick={() => {
-                      setShowModal(false);
-                      resetForm();
-                    }}
-                    className="px-5 py-2.5 rounded-md bg-[var(--bg-main)] border border-border text-sm text-[var(--text-muted)] hover:border-border hover:text-[var(--text-main)] cursor-pointer"
-                  >
-                    {t.common.cancel}
-                  </button>
-
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="px-5 py-2.5 rounded-md bg-surface hover:bg-surface text-sm text-white font-medium disabled:opacity-50 cursor-pointer"
-                  >
-                    {isSubmitting 
-                      ? 'Saving...' 
-                      : editingProductId ? 'Update Product' : t.adminProducts.saveProduct
-                    }
-                  </button>
-                </div>
-              </form>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        {[
+          { label: 'Total Editions', value: products.length },
+          { label: 'Units in Vault', value: totalStock },
+          { label: 'Low Stock', value: lowStock, danger: true },
+          { label: 'Out of Stock', value: outOfStock },
+        ].map((stat) => (
+          <div
+            key={stat.label}
+            className="bg-surface-container-low p-4 rounded shadow-sm border border-outline-variant/20"
+          >
+            <span className={`font-label-caps text-label-caps uppercase tracking-wider ${stat.danger ? 'text-error' : 'text-outline'}`}>
+              {stat.label}
+            </span>
+            <div className={`font-headline-md text-headline-md mt-2 font-medium ${stat.danger ? 'text-error' : 'text-on-surface'}`}>
+              {isLoading ? '—' : stat.value}
             </div>
           </div>
-        )}
+        ))}
+      </div>
 
-        <div className="bg-[var(--bg-card)] border border-border rounded-md overflow-hidden">
-          <div className="overflow-x-auto">
-            {isLoading ? (
-              <div className="flex justify-center p-12">
-                <div className="animate-spin rounded-md h-10 w-10 border-t-2 border-b-2 border-border"></div>
-              </div>
-            ) : (
-              <table className="w-full text-left border-collapse text-sm">
-                <thead>
-                  <tr className="border-b border-border bg-[var(--bg-main)]/60 text-[var(--text-muted)]">
-                    <th className="p-5 font-semibold">{t.adminProducts.product}</th>
-                    <th className="p-5 font-semibold">{t.adminProducts.category}</th>
-                    <th className="p-5 font-semibold">{t.common.price}</th>
-                    <th className="p-5 font-semibold">{t.common.quantity}</th>
-                    <th className="p-5 font-semibold">Status</th>
-                    <th className="p-5 font-semibold">Rating</th>
-                    <th className="p-5 font-semibold">Reviews</th>
-                    <th className="p-5 font-semibold text-right">{t.adminProducts.actions}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-purple-900/30">
-                  {products.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="p-8 text-center text-primary">
-                        No products found in the database.
-                      </td>
-                    </tr>
-                  ) : (
-                    products.map((product) => (
-                      <tr key={product._id} className="hover:bg-surface transition-colors">
-                        <td className="p-5 flex items-center gap-4">
-                          <img 
-                            src={product.images?.[0] || 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=500&auto=format&fit=crop&q=60'} 
-                            alt={product.name} 
-                            className="w-12 h-12 object-cover rounded-md border border-border" 
-                          />
-                          <span className="font-medium text-white">{product.name}</span>
-                        </td>
-                        <td className="p-5 text-primary">{product.category}</td>
-                        <td className="p-5 text-primary font-semibold">${product.price.toFixed(2)}</td>
-                        <td className="p-5">
-                          <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${
-                            product.stock > 10 ? 'bg-green-500/10 text-green-400' :
-                            product.stock > 0 ? 'bg-yellow-500/10 text-yellow-400' :
-                            'bg-red-500/10 text-red-400'
-                          }`}>
-                            {product.stock}
-                          </span>
-                        </td>
-                        <td className="p-5">
-                          <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${
-                            product.isActive ? 'bg-green-500/10 text-green-400' : 'bg-gray-500/10 text-gray-400'
-                          }`}>
-                            {product.isActive ? 'Active' : 'Inactive'}
-                          </span>
-                        </td>
-                        <td className="p-5 text-primary">
-                          {product.averageRating ? product.averageRating.toFixed(1) : '-'}
-                        </td>
-                        <td className="p-5 text-primary">
-                          {product.reviewCount || 0}
-                        </td>
-                        <td className="p-5 text-right space-x-2 whitespace-nowrap">
-                          <button 
-                            onClick={() => handleEditClick(product)}
-                            className="p-2.5 text-blue-400 hover:bg-blue-950/40 rounded-md transition-colors cursor-pointer"
-                            title="Edit Product"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => handleDelete(product._id)}
-                            className="p-2.5 text-rose-400 hover:bg-rose-950/40 rounded-md transition-colors cursor-pointer"
-                            title="Delete Product"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            )}
-          </div>
+      <div className="bg-surface-container-low rounded-lg p-4 mb-6 border border-outline-variant/20">
+        <div className="relative max-w-md">
+          <Icon name="search" className="absolute left-3.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none" size={18} />
+          <label htmlFor="admin-product-search" className="sr-only">
+            Search products
+          </label>
+          <input
+            id="admin-product-search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-surface-container text-on-surface placeholder:text-outline text-sm pl-10 pr-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-primary/40"
+            placeholder="Search by title, category, or id…"
+            type="search"
+          />
         </div>
       </div>
+
+      <div className="bg-surface-container-low rounded-lg shadow-md border border-outline-variant/20 overflow-hidden">
+        <div className="overflow-x-auto">
+          {isLoading ? (
+            <TableSkeleton />
+          ) : (
+            <table className="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr className="bg-surface-container text-on-surface-variant font-label-caps text-label-caps uppercase tracking-wider border-b border-outline-variant/20">
+                  <th className="py-3.5 px-4">Puzzle Edition</th>
+                  <th className="py-3.5 px-4">Category</th>
+                  <th className="py-3.5 px-4">Price</th>
+                  <th className="py-3.5 px-4">Stock</th>
+                  <th className="py-3.5 px-4">State</th>
+                  <th className="py-3.5 pr-6 pl-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-outline-variant/20">
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-12 text-center text-on-surface-variant">
+                      No editions match.
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map((product) => (
+                    <tr key={product._id} className="hover:bg-surface-container/60 transition-colors">
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-3.5">
+                          <div className="w-12 h-14 bg-surface-container-high rounded shrink-0 overflow-hidden">
+                            <img
+                              className="w-full h-full object-cover"
+                              src={product.images?.[0] || ''}
+                              alt=""
+                              loading="lazy"
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <span className="font-headline-sm text-sm text-on-surface truncate block">
+                              {product.name}
+                            </span>
+                            <span className="text-[10px] text-outline uppercase tracking-wider">
+                              {product._id.slice(-8).toUpperCase()}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-on-surface-variant">{product.category}</td>
+                      <td className="py-4 px-4">
+                        <PriceDisplay amount={product.price} size="sm" />
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className={product.stock <= 5 ? 'text-error font-medium' : 'text-on-surface'}>
+                          {product.stock}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider ${
+                            product.isActive
+                              ? 'bg-surface-container-highest text-primary'
+                              : 'bg-surface-container-high text-outline'
+                          }`}
+                        >
+                          {product.isActive ? 'Active' : 'Archived'}
+                        </span>
+                      </td>
+                      <td className="py-4 pr-6 pl-4 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            onClick={() => handleEditClick(product)}
+                            variant="ghost"
+                            size="sm"
+                            icon="edit"
+                            aria-label="Edit"
+                          />
+                          <Button
+                            onClick={() => handleDelete(product._id)}
+                            variant="ghost"
+                            size="sm"
+                            icon="delete"
+                            isLoading={pendingDeleteId === product._id}
+                            className="text-error"
+                            aria-label="Delete"
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+
+      {showModal && (
+        <div
+          className="fixed inset-0 bg-surface-container-lowest/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => !isSubmitting && (setShowModal(false), resetForm())}
+        >
+          <div
+            className="bg-surface-container-low max-w-lg w-full rounded-lg p-6 shadow-2xl border border-outline-variant/30 animate-scale-in max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="admin-product-modal-title"
+          >
+            <div className="flex items-start justify-between pb-4 border-b border-outline-variant/20">
+              <div>
+                <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest">
+                  {editingProductId ? 'Edit' : 'Create'} Edition
+                </span>
+                <h2 id="admin-product-modal-title" className="font-headline-sm text-headline-sm text-on-surface mt-1">
+                  {editingProductId ? 'Update Puzzle Details' : 'New Artisan Puzzle'}
+                </h2>
+              </div>
+              <Button
+                onClick={() => {
+                  setShowModal(false);
+                  resetForm();
+                }}
+                variant="ghost"
+                icon="close"
+                disabled={isSubmitting}
+              />
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4 py-4" noValidate>
+              {formError && (
+                <p className="text-sm text-error" role="alert">
+                  {formError}
+                </p>
+              )}
+              <div>
+                <label className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5" htmlFor="ap-name">
+                  Puzzle Title *
+                </label>
+                <input
+                  id="ap-name"
+                  type="text"
+                  maxLength={120}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full bg-surface-container text-on-surface text-sm px-3.5 py-2.5 rounded focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5" htmlFor="ap-desc">
+                  Description *
+                </label>
+                <textarea
+                  id="ap-desc"
+                  maxLength={2000}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full bg-surface-container text-on-surface text-sm px-3.5 py-2.5 rounded focus:outline-none focus:ring-2 focus:ring-primary/40 min-h-[100px]"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5" htmlFor="ap-price">
+                    Price ($) *
+                  </label>
+                  <input
+                    id="ap-price"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    max="100000"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    className="w-full bg-surface-container text-on-surface text-sm px-3.5 py-2.5 rounded focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5" htmlFor="ap-stock">
+                    Stock *
+                  </label>
+                  <input
+                    id="ap-stock"
+                    type="number"
+                    min="0"
+                    max="10000"
+                    step="1"
+                    value={stock}
+                    onChange={(e) => setStock(e.target.value)}
+                    className="w-full bg-surface-container text-on-surface text-sm px-3.5 py-2.5 rounded focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5" htmlFor="ap-cat">
+                  Category *
+                </label>
+                <select
+                  id="ap-cat"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full bg-surface-container text-on-surface text-sm px-3.5 py-2.5 rounded focus:outline-none focus:ring-2 focus:ring-primary/40"
+                >
+                  <option value="Jigsaw Puzzles">Jigsaw Puzzles</option>
+                  <option value="3D Puzzles">3D Architectural</option>
+                  <option value="Wooden Puzzles">Wooden Puzzles</option>
+                  <option value="Mystery Puzzles">Mystery Atelier</option>
+                </select>
+              </div>
+              <div>
+                <label className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5" htmlFor="ap-img">
+                  Cover Image URL
+                </label>
+                <input
+                  id="ap-img"
+                  type="url"
+                  maxLength={500}
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  className="w-full bg-surface-container text-on-surface text-sm px-3.5 py-2.5 rounded focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  placeholder="https://…"
+                />
+              </div>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isActive}
+                  onChange={(e) => setIsActive(e.target.checked)}
+                  className="w-5 h-5 rounded accent-primary"
+                />
+                <span className="text-sm text-on-surface-variant">Visible in public storefront</span>
+              </label>
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-outline-variant/20">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setShowModal(false);
+                    resetForm();
+                  }}
+                  variant="ghost"
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isSubmitting} isLoading={isSubmitting}>
+                  {editingProductId ? 'Save Changes' : 'Create Edition'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
+export default AdminProductsPage;

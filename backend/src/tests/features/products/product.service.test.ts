@@ -59,6 +59,32 @@ describe("Product Service", () => {
       expect(res3.items.length).toBe(1); // P3 included
       expect(res3.items[0]!.name).toBe("P3");
     });
+
+    it("ranks name matches above description-only matches via text index", async () => {
+      await Product.create([
+        {
+          name: "Quiet Landscape",
+          slug: "quiet-landscape",
+          description: "Features an oak motif in the border",
+          price: 40,
+          category: "cat1",
+          stock: 5,
+        },
+        {
+          name: "Oak Atlas Edition",
+          slug: "oak-atlas-edition",
+          description: "A cartographic commission",
+          price: 90,
+          category: "cat1",
+          stock: 5,
+        },
+      ]);
+      await Product.syncIndexes();
+
+      const res = await listProducts({ page: 1, limit: 10, search: "oak" });
+      expect(res.items.length).toBe(2);
+      expect(res.items[0]!.name).toBe("Oak Atlas Edition");
+    });
   });
 
   describe("createProduct & updateProduct", () => {

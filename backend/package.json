@@ -8,6 +8,7 @@
     "build": "tsc",
     "lint": "eslint .",
     "start": "node dist/server.js",
+    "seed": "tsx src/scripts/seed.ts",
     "test": "node --experimental-vm-modules node_modules/.bin/jest --testPathIgnorePatterns=dist --forceExit",
     "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch --testPathIgnorePatterns=dist"
   },

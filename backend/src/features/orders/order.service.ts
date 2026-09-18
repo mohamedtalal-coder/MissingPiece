@@ -111,6 +111,23 @@ export async function getMyOrders(userId: string, params: ListOrdersParams) {
   return { items, total, page: params.page, limit: params.limit, totalPages: Math.ceil(total / params.limit) };
 }
 
+export async function getAllOrdersAdmin(params: ListOrdersParams) {
+  const skip = (params.page - 1) * params.limit;
+
+  const [items, total] = await Promise.all([
+    Order.find({})
+      .populate("user", "name email")
+      .populate("items.product", "name images price")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(params.limit)
+      .lean(),
+    Order.countDocuments({}),
+  ]);
+
+  return { items, total, page: params.page, limit: params.limit, totalPages: Math.ceil(total / params.limit) };
+}
+
 export async function getOrderById(orderId: string, userId: string, isAdmin: boolean) {
   const filter: Record<string, unknown> = { _id: orderId };
   
