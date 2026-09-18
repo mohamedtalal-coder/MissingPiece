@@ -58,85 +58,177 @@ export function ForgotPasswordPage() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#0b0914] flex items-center justify-center p-4 font-sans">
-      <div className="max-w-md w-full bg-[#130e21] border border-[#7e22ce]/60 p-8 rounded-3xl shadow-[0_0_50px_rgba(126,34,206,0.4)] space-y-6 text-white relative">
+    <div style={{
+      width: '100%',
+      minHeight: '80vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#0b0914',
+      padding: '40px 20px',
+      boxSizing: 'border-box'
+    }}>
+      <div style={{
+        width: '100%',
+        maxWidth: '420px',
+        backgroundColor: '#130e21',
+        border: '1px solid rgba(126, 34, 206, 0.6)',
+        padding: '32px',
+        borderRadius: '24px',
+        boxShadow: '0 0 50px rgba(126, 34, 206, 0.4)',
+        color: '#ffffff',
+        fontFamily: 'sans-serif'
+      }}>
         
-        <div className="text-center space-y-2">
-          <div className="w-12 h-12 bg-[#18112c] border border-[#a855f7] rounded-2xl mx-auto flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.5)]">
-            <KeyRound className="w-6 h-6 text-[#c084fc]" />
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <div style={{
+            width: '48px',
+            height: '48px',
+            backgroundColor: '#18112c',
+            border: '1px solid #a855f7',
+            borderRadius: '16px',
+            margin: '0 auto 12px auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 0 15px rgba(168, 85, 247, 0.5)'
+          }}>
+            <KeyRound style={{ width: '24px', height: '24px', color: '#c084fc' }} />
           </div>
-          <h1 className="text-2xl font-serif font-bold text-white">Reset Password</h1>
-          <p className="text-xs text-[#cbd5e1]">
+          <h1 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '6px', fontFamily: 'serif' }}>Reset Password</h1>
+          <p style={{ fontSize: '12px', color: '#cbd5e1' }}>
             {step === 1 ? 'Enter your email to recover your account' : 'Enter your new secure password'}
           </p>
         </div>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/40 text-red-300 text-xs p-3 rounded-xl flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div style={{
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            border: '1px solid rgba(239, 68, 68, 0.4)',
+            color: '#fca5a5',
+            fontSize: '12px',
+            padding: '12px',
+            borderRadius: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '16px'
+          }}>
+            <AlertCircle style={{ width: '16px', height: '16px', flexShrink: 0 }} />
             <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-xs p-3 rounded-xl flex items-center gap-2">
-            <CheckCircle className="w-4 h-4 shrink-0" />
+          <div style={{
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            border: '1px solid rgba(16, 185, 129, 0.4)',
+            color: '#6ee7b7',
+            fontSize: '12px',
+            padding: '12px',
+            borderRadius: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '16px'
+          }}>
+            <CheckCircle style={{ width: '16px', height: '16px', flexShrink: 0 }} />
             <span>{success}</span>
           </div>
         )}
 
         {step === 1 ? (
-          <form onSubmit={handleCheckEmail} className="space-y-4 text-xs">
-            <div className="space-y-1.5">
-              <label className="text-[#e9d5ff]">Email Address</label>
-              <div className="relative">
-                <Mail className="w-4 h-4 text-[#c084fc] absolute left-3 top-3" />
+          <form onSubmit={handleCheckEmail} style={{ display: 'flex', flexDirection: 'column', gap: '16px', fontSize: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ color: '#e9d5ff' }}>Email Address</label>
+              <div style={{ position: 'relative' }}>
+                <Mail style={{ width: '16px', height: '16px', color: '#c084fc', position: 'absolute', left: '12px', top: '12px' }} />
                 <input 
                   type="email" 
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="salma@example.com" 
-                  className="w-full bg-[#0b0914] border border-[#7e22ce]/40 rounded-xl px-10 py-2.5 text-white focus:outline-none focus:border-[#a855f7]"
+                  style={{
+                    width: '100%',
+                    backgroundColor: '#0b0914',
+                    border: '1px solid rgba(126, 34, 206, 0.4)',
+                    borderRadius: '12px',
+                    padding: '10px 10px 10px 38px',
+                    color: '#ffffff',
+                    outline: 'none',
+                    fontSize: '12px',
+                    boxSizing: 'border-box'
+                  }}
                 />
               </div>
             </div>
 
             <button 
               type="submit" 
-              className="w-full bg-gradient-to-r from-[#7e22ce] to-[#a855f7] text-white font-semibold py-3 rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.4)] cursor-pointer"
+              style={{
+                width: '100%',
+                background: 'linear-gradient(to right, #7e22ce, #a855f7)',
+                color: '#ffffff',
+                fontWeight: 'bold',
+                padding: '12px',
+                borderRadius: '12px',
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 0 20px rgba(168, 85, 247, 0.4)'
+              }}
             >
               Verify Email
             </button>
           </form>
         ) : (
-          <form onSubmit={handleResetPassword} className="space-y-4 text-xs">
-            <div className="space-y-1.5">
-              <label className="text-[#e9d5ff]">New Password</label>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-[#c084fc] absolute left-3 top-3" />
+          <form onSubmit={handleResetPassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px', fontSize: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ color: '#e9d5ff' }}>New Password</label>
+              <div style={{ position: 'relative' }}>
+                <Lock style={{ width: '16px', height: '16px', color: '#c084fc', position: 'absolute', left: '12px', top: '12px' }} />
                 <input 
                   type="password" 
                   required
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="••••••••" 
-                  className="w-full bg-[#0b0914] border border-[#7e22ce]/40 rounded-xl px-10 py-2.5 text-white focus:outline-none focus:border-[#a855f7]"
+                  style={{
+                    width: '100%',
+                    backgroundColor: '#0b0914',
+                    border: '1px solid rgba(126, 34, 206, 0.4)',
+                    borderRadius: '12px',
+                    padding: '10px 10px 10px 38px',
+                    color: '#ffffff',
+                    outline: 'none',
+                    fontSize: '12px',
+                    boxSizing: 'border-box'
+                  }}
                 />
               </div>
             </div>
 
             <button 
               type="submit" 
-              className="w-full bg-gradient-to-r from-[#7e22ce] to-[#a855f7] text-white font-semibold py-3 rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.4)] cursor-pointer"
+              style={{
+                width: '100%',
+                background: 'linear-gradient(to right, #7e22ce, #a855f7)',
+                color: '#ffffff',
+                fontWeight: 'bold',
+                padding: '12px',
+                borderRadius: '12px',
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 0 20px rgba(168, 85, 247, 0.4)'
+              }}
             >
               Update Password
             </button>
           </form>
         )}
 
-        <div className="text-center text-xs text-[#cbd5e1]">
-          Remember your password? <Link to="/login" className="text-[#c084fc] hover:underline">Sign In</Link>
+        <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '12px', color: '#cbd5e1' }}>
+          Remember your password? <Link to="/login" style={{ color: '#c084fc', textDecoration: 'underline' }}>Sign In</Link>
         </div>
 
       </div>

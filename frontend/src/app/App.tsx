@@ -14,7 +14,7 @@ import { ProfilePage } from '../features/account/ProfilePage';
 import { AdminOrdersPage } from '../features/orders/AdminOrdersPage';
 import { Truck, Shield, Clock } from 'lucide-react';
 import { useLanguage } from '../shared/context/LanguageContext';
-import ForgotPasswordPage from '../features/auth/ForgotPasswordPage';
+import { ForgotPasswordPage } from '../features/auth/ForgotPasswordPage';
 
 export function App() {
   const { t } = useLanguage();
@@ -39,6 +39,7 @@ export function App() {
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage/>} />
             </Routes>
           </main>
         </div>
