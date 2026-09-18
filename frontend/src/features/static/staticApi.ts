@@ -13,8 +13,13 @@ export const staticApi = {
     return response.data;
   },
 
-  getContactMessages: async () => {
-    const response = await apiClient.get<{ success: boolean; items: any[] }>('/contact');
-    return response.data.items;
+  getContactMessages: async (params?: { page?: number; limit?: number; status?: string }) => {
+    const response = await apiClient.get<{ success: boolean; items: any[]; total: number; page: number; limit: number; totalPages: number }>('/contact', { params });
+    return response.data;
   },
+
+  updateMessageStatus: async (id: string | number, status: 'unread' | 'read' | 'resolved') => {
+    const response = await apiClient.patch<{ success: boolean; message?: string }>(`/contact/${id}/status`, { status });
+    return response.data;
+  }
 };
