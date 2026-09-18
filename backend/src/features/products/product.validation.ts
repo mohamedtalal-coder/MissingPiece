@@ -21,8 +21,8 @@ export const listProductsQuerySchema = z
 export const createProductSchema = z.object({
   name: z.string().trim().min(1).max(200),
   description: z.string().trim().max(5000).optional(),
-  price: z.number().nonnegative(),
-  stock: z.number().int().nonnegative().default(0),
+ price: z.coerce.number().nonnegative(),
+stock: z.coerce.number().int().nonnegative().default(0),
   category: z.string().trim().min(1).max(100),
   images: z.array(imageUrl).max(10).default([]),
 });
