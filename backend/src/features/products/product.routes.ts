@@ -11,6 +11,7 @@ import {
   updateProductHandler,
   deleteProductHandler,
 } from "./product.controller.js";
+import { uploadImages } from "../../shared/middleware/upload.js";
 
 const router = Router();
 
@@ -21,8 +22,20 @@ router.get("/:slug", productReadLimiter, getProductHandler);
 
 // Admin
 router.get("/admin/all", requireAuth, requireAdmin, listAllProductsAdminHandler);
-router.post("/", requireAuth, requireAdmin, createProductHandler);
-router.patch("/:id", requireAuth, requireAdmin, updateProductHandler);
+router.post(
+  "/",
+  requireAuth,
+  requireAdmin,
+  uploadImages.array("images", 10),
+  createProductHandler
+);
+router.patch(
+  "/:id",
+  requireAuth,
+  requireAdmin,
+  uploadImages.array("images", 10),
+  updateProductHandler
+);
 router.delete("/:id", requireAuth, requireAdmin, deleteProductHandler);
 
 export default router;

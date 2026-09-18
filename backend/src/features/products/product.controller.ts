@@ -6,6 +6,7 @@ import {
   updateProductSchema,
 } from "./product.validation.js";
 import * as productService from "./product.service.js";
+import { uploadImage } from "../../shared/utils/cloudinary.js";
 
 export async function listProductsHandler(req: Request, res: Response, next: NextFunction) {
   try {
@@ -52,23 +53,48 @@ export async function getProductHandler(req: Request, res: Response, next: NextF
 
 export async function createProductHandler(req: Request, res: Response, next: NextFunction) {
   try {
-    const input = createProductSchema.parse(req.body);
+    const files = (req.files as Express.Multer.File[] | undefined) ?? [];
+
+    const images = await Promise.all(
+      files.map((file) => uploadImage(file.buffer))
+    );
+
+    const input = createProductSchema.parse({
+      ...req.body,
+      images,
+    });
+
     const product = await productService.createProduct(input);
+
     res.status(201).json({ success: true, product });
   } catch (err) {
     next(err);
   }
 }
-
 export async function updateProductHandler(req: Request, res: Response, next: NextFunction) {
   try {
-    const input = updateProductSchema.parse(req.body);
-    const product = await productService.updateProduct(req.params["id"] as string, input);
+    const files = (req.files as Express.Multer.File[] | undefined) ?? [];
+
+    const images = files.length > 0
+      ? await Promise.all(files.map((file) => uploadImage(file.buffer)))
+      : undefined;
+
+    const input = updateProductSchema.parse({
+      ...req.body,
+      ...(images ? { images } : {}),
+    });
+
+    const product = await productService.updateProduct(
+      req.params["id"] as string,
+      input
+    );
+
     if (!product) {
       const err: AppError = new Error("Product not found");
       err.statusCode = 404;
       throw err;
     }
+
     res.json({ success: true, product });
   } catch (err) {
     next(err);
