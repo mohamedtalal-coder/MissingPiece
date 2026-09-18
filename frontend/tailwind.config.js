@@ -10,18 +10,19 @@ export default {
       colors: {
         background: 'var(--color-background)',
         surface: 'var(--color-surface)',
-        surfaceHover: 'var(--color-surface-hover)',
+        surfaceElevated: 'var(--color-surface-elevated)',
         border: 'var(--color-border)',
         primary: 'var(--color-primary)',
-        primaryHover: 'var(--color-primary-hover)',
-        textMain: 'var(--color-text-main)',
+        text: 'var(--color-text)',
         textMuted: 'var(--color-text-muted)',
         error: 'var(--color-error)',
         success: 'var(--color-success)',
+        warning: 'var(--color-warning)',
+        focus: 'var(--color-focus)',
       },
       fontFamily: {
-        serif: ['Cinzel', 'serif'],
-        sans: ['Plus Jakarta Sans', 'sans-serif'],
+        serif: ['"Playfair Display"', 'serif'],
+        sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', '"Open Sans"', '"Helvetica Neue"', 'sans-serif'],
       },
       borderRadius: {
         DEFAULT: '0.25rem', // Restrained geometric detail, not giant rounded containers

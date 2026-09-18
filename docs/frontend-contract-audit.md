@@ -1,116 +1,119 @@
 # Frontend Contract Audit
 
-## 1. Cart
-**Backend Endpoints:**
-- `GET /api/cart`
-- `POST /api/cart/items`
-- `PATCH /api/cart/items/:productId`
-- `DELETE /api/cart/items/:productId`
-- `POST /api/cart/merge`
-- `POST /api/cart/validate`
+## Products
+* **Real Backend Endpoints:**
+  - `GET /api/products` (public, filterable/sortable)
+  - `GET /api/products/categories`
+  - `GET /api/products/:slug`
+  - `GET /api/products/admin/all` (admin, includes inactive)
+  - `POST/PATCH/DELETE /api/products` (admin)
+* **Real Shape:**
+  Product fields: `name`, `slug`, `description`, `price`, `images[]`, `category`, `stock`, `isActive`, `averageRating`, `reviewCount`.
+* **Mismatches in Frontend:**
+  - There is NO `SKU` field, NO `material/wood-type` field, and NO `piece-count` field on the backend product model. Any frontend UI elements expecting these are blocked.
 
-**Backend Request/Response Shape:**
-- Cart Item Model: `{ productId: ObjectId, quantity: Number }`
-- Validations:
-  - Add item: `{ productId: objectId, quantity: quantity.default(1) }`
-  - Update item: `{ quantity: quantity }`
-  - Validate / Merge: `{ items: [{ productId: objectId, quantity: quantity }] }`
-- Response Envelope: `{ success: true, items: [...] }`
+## Cart
+* **Real Backend Endpoints:**
+  - `GET /cart`
+  - `POST /cart/items`
+  - `PATCH /cart/items/:productId`
+  - `DELETE /cart/items/:productId`
+  - `POST /cart/merge`
+  - `POST /cart/validate` (public)
+  (All other routes require auth)
+* **Real Shape:**
+  - Request for Add: `{ productId, quantity }`
+  - Request for Merge: `{ items: [{ productId, quantity }] }`
+  - Response shape: `{ success, items: [...] }`
+* **Mismatches in Frontend:**
+  - No guest cart is persisted server-side; it must be held in local state and merged via `/cart/merge` upon login. 
 
-**Frontend Mismatches:**
-- `mergeCart` frontend passes `items` as `CartItemDto[]` which contains `{ productId, quantity }`. This seems to match, but we must ensure `items` array is passed. The frontend `cartApi.validateCart` expects `response.data.items` to have properties like `.valid` and `.product.name`, `.product.price`, etc., but we need to ensure the backend actually returns this rich object or if it just returns basic cart items.
+## Wishlist
+* **Real Backend Endpoints:**
+  - `GET /wishlist`
+  - `POST /wishlist/:productId`
+  - `DELETE /wishlist/:productId`
+  (All auth-required)
+* **Real Shape:**
+  - Backed by `User.wishlist: ObjectId[]`
+* **Mismatches in Frontend:**
+  - None explicitly noted, but the frontend expects `data: Product[]`. The backend must populate the `ObjectId[]` to match this, or the frontend needs to handle resolving IDs.
 
-## 2. Wishlist
-**Backend Endpoints:**
-- `GET /api/wishlist`
-- `POST /api/wishlist/:productId`
-- `DELETE /api/wishlist/:productId`
+## Reviews
+* **Real Backend Endpoints:**
+  - `GET /api/reviews?product=&page=&limit=` (public)
+  - `POST/PATCH/DELETE /api/reviews` (auth; PATCH/DELETE owner-or-admin)
+* **Real Shape:**
+  - `createReviewSchema`: `{product: ObjectId, rating: int 1-5, comment: string <=1000, default ""}`
+  - List response: `{success, items, total, page, limit, totalPages}`
+  - Single: `{success, review}`
+* **Mismatches in Frontend:**
+  - The backend enforces one review per user per product via a unique index. A second POST must be handled gracefully as "edit your existing review," not a generic error.
 
-**Backend Request/Response Shape:**
-- No body expected for POST/DELETE (uses URL params).
-- The wishlist in the DB is an array of Product IDs: `wishlist: [{ type: Schema.Types.ObjectId, ref: "Product", default: [] }]`.
-- Response Envelope: `{ success: true, data: wishlist }`
+## Discounts
+* **Real Backend Endpoints:**
+  - `POST /api/discounts/validate` (public, rate-limited)
+  - `POST/GET/PATCH/DELETE /api/discounts` (admin only)
+* **Real Shape:**
+  - Validate Body: `{code: string, items: [{product: ObjectId, quantity: int>=1}]}`
+* **Mismatches in Frontend:**
+  - Validation recomputes pricing server-side.
 
-**Frontend Mismatches:**
-- Frontend models `WishlistItem` as an object: `{ _id: string, user: string, product: Product, addedAt: string }`.
-- Backend actually stores it as just an array of ObjectIds (which may be populated to `Product` objects, but it's an array of Products, NOT a separate collection object with `_id`, `user`, `addedAt`).
+## Orders
+* **Real Backend Endpoints:**
+  - `POST /api/orders` (auth)
+  - `GET /api/orders` (auth, own orders only — NO "list all orders" endpoint for admins)
+  - `GET /api/orders/:id` (owner or admin)
+  - `PATCH /api/orders/:id/status` (admin only)
+* **Real Shape:**
+  - Status enum EXACTLY: `pending | paid | shipped | delivered | cancelled`
+  - `createOrderSchema`: `{items: [{product, quantity 1-100}] (1-50 items), shippingAddress: {street, city, state, zipCode, country}, discountCode?}`
+* **Mismatches in Frontend (frontend/src/features/orders/ordersApi.ts):**
+  - **Payment Method:** Invents a `paymentMethod` field, which does not exist in the schema.
+  - **Status Enum:** Uses a wrong status enum (missing "paid", misspells cancelled).
+  - **Address Fields:** Uses `postalCode` instead of `zipCode` + `state`.
+  - **Phantom Endpoints:** Calls two endpoints that do not exist: `PUT /orders/:id/cancel` and `GET /admin/orders`.
+  - *Note: These are to be fixed in Phase 3.*
 
-## 3. Products
-**Backend Endpoints:**
-- `GET /api/products`
-- `GET /api/products/categories`
-- `GET /api/products/:slug`
-- `GET /api/products/:slug/reviews`
-- `POST /api/products/:slug/reviews`
+## Payments
+* **Real Backend Endpoints:**
+  - `POST /api/payments/checkout-session` (auth)
+* **Real Shape:**
+  - Body: `{orderId}` ONLY
+  - Response: `{success, url}` (Redirect browser to url)
+* **Mismatches in Frontend:**
+  - Return URLs (`/orders/:id?payment=success|cancelled`) must trigger a re-fetch of the order to check the Stripe webhook status. Never trust the query param synchronously.
 
-**Backend Request/Response Shape:**
-- `listProductsQuerySchema`: `{ page, limit, cursor, category, minPrice, maxPrice, sort, search }`
-- Response Envelope (List): `{ success: true, ...paginatedResult }` (i.e. `{ success: true, items, total, page, limit, totalPages }`)
-- Response Envelope (Single): `{ success: true, product }`
+## Account
+* **Real Backend Endpoints:**
+  - `GET /api/account/profile`
+  - `PUT /api/account/profile`
+* **Real Shape:**
+  - `updateProfileSchema`: `{name?, email?, addresses?: Address[] max 10}`
+  - Address: `{street, city, state, zipCode, country}`
+* **Mismatches in Frontend:**
+  - NO password-change endpoint exists.
+  - NO notification-preferences field exists anywhere on the User model.
+  - Any UI for "Security & Keys" or "Atelier Preferences" is blocked.
 
-**Frontend Mismatches:**
-- Frontend list response matches structurally (it assumes it gets `{ success, ...ProductListResult }`).
-- Wait, the frontend `productsApi.getAll` expects `{ success, items, total, page, limit, totalPages, nextCursor }`, which likely aligns.
+## Contact
+* **Real Backend Endpoints:**
+  - `POST /api/contact` (public)
+  - `GET /api/contact` (admin only)
+  - `PATCH /api/contact/:id/status` (admin only)
+* **Real Shape:**
+  - POST Body: `{name, email, subject, message}`
+  - Status enum: `unread | read | resolved`
+* **Mismatches in Frontend:**
+  - This is a FLAT one-shot message inbox. There is no reply field, no conversation thread, no attachments, and no linkage to orders. Two-way support ticket UIs are blocked.
 
-## 4. Auth
-**Backend Endpoints:**
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `POST /api/auth/logout`
+## Auth
+* **Real Backend Endpoints:**
+  - `POST /auth/register`
+  - `POST /auth/login`
+  - `POST /auth/logout`
 
-**Backend Request/Response Shape:**
-- `registerSchema`: `{ name, email, password }`
-- `loginSchema`: `{ email, password }`
-- Response Envelope: `{ success: true, message: string, data: { token, user } }`
-
-**Frontend Mismatches:**
-- Frontend `authApi.register` and `login` return `response.data`, expecting `response.data` to be `{ token, user }`. However, the backend returns `{ success: true, message: string, data: { token, user } }`.
-- This means the frontend actually receives `{ success: true, message: string, data: {...} }` and incorrectly types it as `AuthResponse`.
-
-## 5. Account
-**Backend Endpoints:**
-- `GET /api/account/profile`
-- `PUT /api/account/profile`
-
-**Backend Request/Response Shape:**
-- `updateProfileSchema`: `{ name?: string, email?: string, addresses?: addressSchema[] }`
-- `addressSchema`: `{ street, city, state, zipCode, country }`
-- Response Envelope: `{ success: true, data: user }`
-
-**Frontend Mismatches:**
-- Frontend expects `apiClient.get<UserProfile>('/account/profile')` to return `response.data` directly as the user profile, but backend returns `{ success: true, data: user }`.
-- Frontend `updateProfile` passes `{ name: string, address: Address }`. However, the backend `updateProfileSchema` expects `addresses` (array), not a single `address` field!
-
-## 6. Contact
-**Backend Endpoints:**
-- `POST /api/contact`
-- `GET /api/contact`
-- `PATCH /api/contact/:id/status`
-
-**Backend Request/Response Shape:**
-- `contactSchema`: `{ name, email, subject, message }`
-- Response Envelope (POST): `{ success: true, message: "Message sent successfully" }`
-- Response Envelope (GET): `{ success: true, items, total, page, limit, totalPages }`
-
-**Frontend Mismatches:**
-- Frontend `sendMessage` passes `ContactMessageDto` which misses the `subject` field required by backend.
-- Frontend `getContactMessages` calls `GET /admin/messages` (which doesn't exist). The real backend route is `GET /contact`.
-- Response envelopes are completely mismatched (frontend assumes it gets the data directly instead of the `{ success, ... }` envelope).
-
-## 7. Orders (Revisited from 0.5)
-**Backend Endpoints:**
-- `POST /api/orders`
-- `GET /api/orders`
-- `GET /api/orders/:id`
-- `PATCH /api/orders/:id/status`
-
-**Frontend Mismatches:**
-- Frontend has `paymentMethod` field, not supported by backend.
-- Status enum casing and spelling mismatch.
-- `ShippingAddress.postalCode` vs `zipCode`.
-- `cancelOrder` calls non-existent `PUT /orders/:id/cancel`.
-- `getAllOrders` calls non-existent `GET /admin/orders`.
-- Missing success envelope in response handling.
-
-## Conclusion
-Most frontend API implementations fail to account for the backend's standard `{ success: true, data }` or `{ success: true, items }` envelope, incorrectly assuming Axios's `response.data` is the entity directly. The wishlist and account models are fundamentally mismatched with backend schemas (e.g. `addresses` array vs single `address`). Missing required fields (e.g., `subject` in contact). Admin endpoints are pointing to fabricated paths.
+## General
+* **Real Shape:**
+  - Error envelope everywhere: `{success: false, message, errors?: [{path, message}]}`
+  - `400` for Zod validation, `409` for duplicate key.
