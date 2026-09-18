@@ -9,6 +9,7 @@ import { RegisterPage } from '../features/auth/RegisterPage';
 import { ProfilePage } from '../features/account/ProfilePage';
 import { CheckoutPage } from '../features/orders/CheckoutPage';
 import { OrderHistoryPage } from '../features/orders/OrderHistoryPage';
+import { OrderDetailPage } from '../features/orders/OrderDetailPage';
 import { AdminProductsPage } from '../features/products/AdminProductsPage';
 import { AdminOrdersPage } from '../features/orders/AdminOrdersPage';
 import { AdminMessagesPage } from '../features/static/AdminMessagesPage';
@@ -56,6 +57,10 @@ export const router = createBrowserRouter([
   {
     path: '/orders',
     element: <OrderHistoryPage />,
+  },
+  {
+    path: '/orders/:id',
+    element: <OrderDetailPage />,
   },
   {
     path: '/about',

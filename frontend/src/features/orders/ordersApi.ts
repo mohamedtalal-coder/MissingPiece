@@ -48,9 +48,14 @@ export const ordersApi = {
     return response.data.data;
   },
 
-  getMyOrders: async (page = 1, limit = 10): Promise<{ items: Order[], totalPages: number }> => {
-    const response = await apiClient.get<{ success: boolean; items: Order[], totalPages: number }>('/orders', { params: { page, limit } });
-    return { items: response.data.items, totalPages: response.data.totalPages };
+  getMyOrders: async (page = 1, limit = 10): Promise<{ items: Order[]; total: number; page: number; limit: number; totalPages: number }> => {
+    const response = await apiClient.get<{ success: boolean; items: Order[]; total: number; page: number; limit: number; totalPages: number }>('/orders', { params: { page, limit } });
+    return response.data;
+  },
+
+  getOrderById: async (id: string): Promise<Order> => {
+    const response = await apiClient.get<{ success: boolean; data: Order }>(`/orders/${id}`);
+    return response.data.data;
   },
 
   cancelOrder: async (orderId: string): Promise<Order> => {
