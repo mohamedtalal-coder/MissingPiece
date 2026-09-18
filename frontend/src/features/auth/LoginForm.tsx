@@ -111,6 +111,14 @@ export const LoginForm: React.FC = () => {
             <Icon name={showPassword ? 'eye_off' : 'eye'} size={18} />
           </button>
         </div>
+        <div className="flex justify-end mt-1">
+          <Link
+            to="/forgot-password"
+            className="text-sm font-medium text-primary hover:text-primary-container transition-colors"
+          >
+            {t.auth?.forgotPassword || 'Forgot Password?'}
+          </Link>
+        </div>
       </div>
 
       <Button

@@ -20,6 +20,7 @@ import { WishlistPage } from '../features/wishlist/WishlistPage';
 
 import { LoginPage } from '../features/auth/LoginPage';
 import { RegisterPage } from '../features/auth/RegisterPage';
+import { ForgotPasswordPage } from '../features/auth/ForgotPasswordPage';
 
 import { ProfilePage } from '../features/account/ProfilePage';
 
@@ -87,6 +88,7 @@ export function App() {
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
                 <Route
                   path="/admin/products"
