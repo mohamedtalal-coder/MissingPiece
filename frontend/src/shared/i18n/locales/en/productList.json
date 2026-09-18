@@ -1,0 +1,42 @@
+{
+  "title": "Explore Puzzles Collection",
+  "description": "Discover master-crafted puzzles designed to challenge and inspire.",
+  "items": "Items",
+  "searchPlaceholder": "Search puzzles...",
+  "allCategories": "All Categories",
+  "sortByPrice": "Sort by Price",
+  "lowToHigh": "Price: Low to High",
+  "highToLow": "Price: High to Low",
+  "maxPrice": "Max",
+  "noProducts": "No products found matching your criteria.",
+  "outOfStock": "Out of Stock",
+  "add": "Add",
+  "categories": {
+    "jigsaw": "Jigsaw Puzzles",
+    "threeD": "3D Puzzles",
+    "wooden": "Wooden Puzzles",
+    "mystery": "Mystery Puzzles"
+  },
+  "products": {
+    "mysticNebula": "Mystic Nebula 1000pcs",
+    "emeraldForest": "Emerald Forest Panorama",
+    "sunsetMeadow": "Sunset Meadow Jigsaw",
+    "starryNight": "Starry Night Galaxy",
+    "oceanDeep": "Ocean Deep Secrets",
+    "cyberpunkTokyo": "Cyberpunk Tokyo 3D",
+    "medievalCastle": "Medieval Castle Fortress",
+    "eiffelTower": "Eiffel Tower Masterpiece",
+    "spaceShuttle": "Space Shuttle Explorer",
+    "pyramids": "Ancient Pyramids of Giza",
+    "worldMap": "Vintage World Map",
+    "clockwork": "Mechanical Clockwork Gear",
+    "wildlifeSafari": "Wildlife Safari Wooden",
+    "mandala": "Mandala Art Wooden Puzzle",
+    "pirateShip": "Antique Pirate Ship",
+    "holmes": "Detective Holmes Case #1",
+    "escapeManor": "Escape Room Manor",
+    "crimeScene": "Crime Scene Investigation",
+    "secretAgent": "Secret Agent Cipher",
+    "pharaohVault": "Pharaoh’s Secret Vault"
+  }
+}

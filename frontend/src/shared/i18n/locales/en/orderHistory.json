@@ -1,0 +1,12 @@
+{
+  "title": "Order History",
+  "subtitle": "Track your past and active luxury puzzle orders",
+  "placedOn": "Placed on:",
+  "cancelOrder": "Cancel Order",
+  "shippingAddress": "Shipping Address:",
+  "totalAmount": "Total Amount:",
+  "pending": "Pending",
+  "processing": "Processing",
+  "delivered": "Delivered",
+  "cancelled": "Cancelled"
+}

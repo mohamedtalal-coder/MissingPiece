@@ -1,0 +1,15 @@
+{
+  "title": "إتمام الطلب والدفع",
+  "subtitle": "أكمل طلب البازل الخاص بك بأمان",
+  "authenticationRequired": "تسجيل الدخول مطلوب",
+  "signInRequired": "يجب تسجيل الدخول للمتابعة وإتمام الطلب.",
+  "signInNow": "سجل الدخول الآن",
+  "shippingAddress": "عنوان الشحن",
+  "addressPlaceholder": "أدخل الشارع والمدينة",
+  "paymentMethod": "طريقة الدفع",
+  "cashOnDelivery": "الدفع عند الاستلام",
+  "confirmOrder": "تأكيد وإتمام الطلب",
+  "signInAlert": "من فضلك سجل الدخول لإتمام طلبك.",
+  "emptyCart": "السلة فارغة!",
+  "orderSuccess": "تم إنشاء الطلب بنجاح! تم تأكيد الدفع عند الاستلام."
+}

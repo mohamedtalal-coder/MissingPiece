@@ -1,0 +1,10 @@
+{
+  "title": "My Wishlist",
+  "subtitle": "Manage your favorite luxury puzzle items",
+  "empty": "Your wishlist is currently empty.",
+  "exploreCatalog": "Explore Catalog",
+  "moveToCart": "Move to Cart",
+  "remove": "Remove",
+  "movedToCart": "Moved to Cart",
+  "movedToCartSuccessfully": "moved to cart successfully!"
+}

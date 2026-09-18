@@ -36,7 +36,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               py-space-xs rounded font-body-sm text-body-sm text-on-surface 
               placeholder:text-on-surface-variant 
               focus:outline-none focus:bg-surface-bright focus:ring-1 focus:ring-primary shadow-sm
-              ${icon ? 'pl-10 pr-space-md' : 'px-space-md'}
+              ${icon ? 'ps-10 pr-space-md' : 'px-space-md'}
               ${error ? 'border border-error focus:ring-error focus:border-error' : 'border-none'}
               ${className}
             `}

@@ -1,8 +1,11 @@
 
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';import { useLanguage } from '../context/LanguageContext';
+
 import { Heart } from 'lucide-react';
 
 export function Footer() {
+  const { t } = useLanguage() as any;
+
   return (
     <footer className="w-full bg-[var(--bg-main)] border-t border-[var(--border-main)] text-[var(--text-main)] pt-16 pb-8 px-8 mt-auto shadow-[0_-4px_25px_rgba(126,34,206,0.15)]">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-[var(--border-main)]">
@@ -117,7 +120,7 @@ export function Footer() {
 
             <li className="flex items-center gap-2">
               <span className="text-[#c084fc]">✓</span>
-              <span>Fast Global Shipping</span>
+              <span>{t.footer?.shipping || "Fast Global Shipping"}</span>
             </li>
 
             <li className="flex items-center gap-2">

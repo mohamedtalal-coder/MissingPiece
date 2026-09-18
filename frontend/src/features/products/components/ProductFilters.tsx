@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLanguage } from '../../../shared/context/LanguageContext';
 import { Icon } from '../../../shared/components/ui/Icon';
 
 interface ProductFiltersProps {
@@ -26,6 +27,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
   sortBy,
   onSortChange
 }) => {
+  const { t } = useLanguage() as any;
   const [localSearch, setLocalSearch] = useState(searchTerm);
   const [localMin, setLocalMin] = useState(minPrice);
   const [localMax, setLocalMax] = useState(maxPrice);
@@ -72,7 +74,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
             placeholder="Search puzzles..." 
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
-            className="w-full bg-surface border border-border rounded-md pl-10 pr-4 py-2.5 text-sm md:text-base text-primary placeholder-purple-300/40 focus:outline-none focus:border-border focus:ring-1 focus:ring-purple-400 transition-all shadow-inner"
+            className="w-full bg-surface border border-border rounded-md ps-10 pe-4 py-2.5 text-sm md:text-base text-primary placeholder-purple-300/40 focus:outline-none focus:border-border focus:ring-1 focus:ring-purple-400 transition-all shadow-inner"
           />
           {localSearch && (
             <button 
@@ -89,9 +91,9 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
           <select 
             value={sortBy}
             onChange={(e) => onSortChange(e.target.value)}
-            className="bg-transparent border-none text-sm font-medium text-primary focus:outline-none cursor-pointer appearance-none [&>option]:bg-background [&>option]:text-primary pr-2"
+            className="bg-transparent border-none text-sm font-medium text-primary focus:outline-none cursor-pointer appearance-none [&>option]:bg-background [&>option]:text-primary pe-2"
           >
-            <option value="newest">Newest Arrivals</option>
+            <option value="newest">{t.productList?.newest || "Newest Arrivals"}</option>
             <option value="price_asc">Price: Low to High</option>
             <option value="price_desc">Price: High to Low</option>
           </select>
@@ -108,7 +110,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
             className="w-full flex items-center justify-between bg-surface border border-border rounded-md px-4 py-2.5 text-sm text-primary hover:bg-surface transition-colors"
           >
             <span className="truncate">{selectedCategory || 'All Categories'}</span>
-            <Icon name={isCategoryOpen ? 'expand_less' : 'expand_more'} className="text-primary flex-shrink-0 ml-2" />
+            <Icon name={isCategoryOpen ? 'expand_less' : 'expand_more'} className="text-primary flex-shrink-0 ms-2" />
           </button>
           
           {isCategoryOpen && (
@@ -135,7 +137,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
         {/* Price Slider */}
         <div className="w-full md:w-72 space-y-3 bg-surface px-4 py-3 rounded-md border border-border">
           <div className="flex justify-between items-center text-xs text-primary">
-            <span>Price Range</span>
+            <span>{t.productList?.priceRange || "Price Range"}</span>
             <span className="font-semibold text-primary">${localMin} - ${localMax}</span>
           </div>
           

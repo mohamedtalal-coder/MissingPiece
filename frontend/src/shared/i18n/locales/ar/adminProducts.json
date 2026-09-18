@@ -1,0 +1,23 @@
+{
+  "title": "مخزون المنتجات (الإدارة)",
+  "description": "إدارة منتجات المتجر وكميات المخزون",
+  "addNew": "إضافة منتج جديد",
+  "createProduct": "إنشاء منتج جديد",
+  "productTitle": "اسم المنتج",
+  "productDescription": "الوصف",
+  "price": "السعر ($)",
+  "stock": "المخزون",
+  "imageUrl": "رابط الصورة (اختياري)",
+  "saveProduct": "حفظ المنتج",
+  "product": "المنتج",
+  "category": "الفئة",
+  "actions": "الإجراءات",
+  "deleteProduct": "حذف المنتج",
+  "deleteConfirm": "هل أنت متأكد أنك تريد حذف هذا المنتج؟",
+  "categories": {
+    "jigsaw": "بازل الصور",
+    "threeD": "بازل ثلاثي الأبعاد",
+    "wooden": "البازل الخشبي",
+    "mystery": "بازل الغموض"
+  }
+}

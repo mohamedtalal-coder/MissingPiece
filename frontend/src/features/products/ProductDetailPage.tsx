@@ -9,7 +9,7 @@ import { useToast } from '../../shared/context/ToastContext';
 import { ProductCard } from './components/ProductCard';
 
 export function ProductDetailPage() {
-  const { t } = useLanguage();
+  const { t } = useLanguage() as any;
   const { slug } = useParams<{ slug: string }>();
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
@@ -122,7 +122,7 @@ export function ProductDetailPage() {
             to="/products"
             className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] bg-[var(--bg-card)] border border-border px-4 py-2 rounded-md transition-all"
           >
-            <ArrowLeft className="w-4 h-4 text-[#c084fc]" />
+            <ArrowLeft className="w-4 h-4 text-[#c084fc] rtl:rotate-180" />
             <span>{t.productDetail.backToCatalog}</span>
           </Link>
         </nav>
@@ -248,7 +248,7 @@ export function ProductDetailPage() {
 
         {relatedProducts.length > 0 && (
           <section className="pt-16 pb-12 border-t border-border">
-            <h2 className="text-2xl font-serif font-bold text-[var(--text-main)] mb-8">You May Also Like</h2>
+            <h2 className="text-2xl font-serif font-bold text-[var(--text-main)] mb-8">{t.productDetail?.related || "You May Also Like"}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
               {relatedProducts.map(relatedProduct => (
                 <ProductCard key={relatedProduct._id} product={relatedProduct} />

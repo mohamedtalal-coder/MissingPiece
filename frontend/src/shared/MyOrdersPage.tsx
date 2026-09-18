@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useLanguage } from './context/LanguageContext';
 import { Package, Clock } from 'lucide-react';
 
 export function MyOrdersPage() {
+  const { t } = useLanguage() as any;
+
   const [orders, setOrders] = useState<any[]>([]);
 
   useEffect(() => {
@@ -20,16 +23,16 @@ export function MyOrdersPage() {
       <div className="max-w-4xl mx-auto space-y-2">
         <div className="flex items-center gap-2 text-[#c084fc]">
           <Package className="w-6 h-6" />
-          <h1 className="text-2xl font-bold tracking-wide">My Orders</h1>
+          <h1 className="text-2xl font-bold tracking-wide">{t.orders?.myOrders || "My Orders"}</h1>
         </div>
-        <p className="text-xs text-[#a1a1aa] font-sans">Track your puzzle shipments and order history</p>
+        <p className="text-xs text-[#a1a1aa] font-sans">{t.orders?.trackHistory || "Track your puzzle shipments and order history"}</p>
       </div>
 
       <div className="max-w-4xl mx-auto">
         {orders.length === 0 ? (
           <div className="text-center py-20 bg-background border border-[#221738] rounded-md space-y-3 font-sans shadow-[0_0_30px_rgba(126,34,206,0.1)]">
             <Clock className="w-10 h-10 mx-auto text-[#7e22ce]" />
-            <p className="text-xs text-[#a1a1aa]">You haven't placed any orders yet.</p>
+            <p className="text-xs text-[#a1a1aa]">{t.orders?.noOrders || "You haven't placed any orders yet."}</p>
           </div>
         ) : (
           <div className="space-y-4 font-sans">

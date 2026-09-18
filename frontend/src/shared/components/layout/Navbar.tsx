@@ -1,9 +1,11 @@
 import React from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../../../features/cart/CartContext';
 import { Icon } from '../ui/Icon';
 
 export const Navbar: React.FC = () => {
+  const { t } = useLanguage() as any;
   const location = useLocation();
   const { cart } = useCart();
   const totalItems = cart.reduce((sum: number, item: any) => sum + item.quantity, 0);
@@ -29,7 +31,7 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center gap-space-lg">
             <Link to="/" className="flex items-center gap-space-sm group">
               <Icon name="spa" className="text-xl text-primary transition-transform group-hover:rotate-12" />
-              <span className="font-headline-sm text-headline-sm text-primary tracking-tight">Missing Piece</span>
+              <span className="font-headline-sm text-headline-sm text-primary tracking-tight">{t.nav?.home || "Missing Piece"}</span>
             </Link>
 
             <nav className="hidden md:flex items-center gap-space-lg ml-space-md">
@@ -67,7 +69,7 @@ export const Navbar: React.FC = () => {
               <input
                 type="search"
                 placeholder="Search home goods, ceramics..."
-                className="w-full bg-surface-container-low pl-10 pr-space-md py-space-xs rounded font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest transition-colors shadow-sm"
+                className="w-full bg-surface-container-low ps-10 pr-space-md py-space-xs rounded font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest transition-colors shadow-sm"
               />
             </div>
 
@@ -89,7 +91,7 @@ export const Navbar: React.FC = () => {
 
               <Link to="/account" className="flex items-center gap-space-xs p-space-xs rounded hover:bg-surface-container-high transition-colors text-on-surface-variant hover:text-on-surface">
                 <Icon name="account_circle" className="text-2xl" />
-                <span className="font-label-md text-label-md hidden lg:inline-block">Account</span>
+                <span className="font-label-md text-label-md hidden lg:inline-block">{t.nav?.profile || "Account"}</span>
               </Link>
             </div>
           </div>

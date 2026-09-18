@@ -1,0 +1,16 @@
+{
+  "back": "Back",
+  "search": "Search",
+  "loading": "Loading...",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "save": "Save",
+  "delete": "Delete",
+  "edit": "Edit",
+  "addToCart": "Add to Cart",
+  "remove": "Remove",
+  "price": "Price",
+  "quantity": "Quantity",
+  "total": "Total",
+  "status": "Status"
+}

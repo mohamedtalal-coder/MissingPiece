@@ -1,0 +1,15 @@
+{
+  "title": "Checkout & Payment",
+  "subtitle": "Complete your luxury puzzle order securely",
+  "authenticationRequired": "Authentication Required",
+  "signInRequired": "You must be signed in to proceed with checkout.",
+  "signInNow": "Sign In Now",
+  "shippingAddress": "Shipping Address",
+  "addressPlaceholder": "Enter your street and city",
+  "paymentMethod": "Payment Method",
+  "cashOnDelivery": "Cash on Delivery (COD)",
+  "confirmOrder": "Confirm & Place Order",
+  "signInAlert": "Please sign in to complete your order.",
+  "emptyCart": "Your cart is empty!",
+  "orderSuccess": "Order placed successfully! Cash on Delivery confirmed."
+}

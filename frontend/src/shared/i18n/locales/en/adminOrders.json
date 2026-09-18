@@ -1,0 +1,16 @@
+{
+  "title": "Admin Portal - Manage Orders",
+  "subtitle": "Review customer orders and update shipping statuses",
+  "refresh": "Refresh Orders",
+  "orderId": "Order ID",
+  "customer": "Customer",
+  "date": "Date",
+  "address": "Address",
+  "total": "Total",
+  "status": "Status",
+  "actions": "Actions",
+  "process": "Process",
+  "deliver": "Deliver",
+  "noOrders": "No orders placed yet.",
+  "statusUpdated": "status updated to"
+}

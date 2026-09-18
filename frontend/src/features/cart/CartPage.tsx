@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
+import { useLanguage } from '../../shared/context/LanguageContext';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from './CartContext';
 import { cartApi, type ValidatedCartItem } from './cartApi';
 
 export function CartPage() {
+  const { t } = useLanguage() as any;
+
   const { cart, updateQty, removeFromCart } = useCart();
   const [validated, setValidated] = useState<ValidatedCartItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,16 +36,16 @@ export function CartPage() {
           <ShoppingBag className="w-6 h-6 text-[#c084fc]" />
         </div>
         <div>
-          <h1 className="text-2xl font-serif font-bold">Shopping Cart</h1>
-          <p className="text-xs text-[#cbd5e1]">Review your selected luxury puzzle items</p>
+          <h1 className="text-2xl font-serif font-bold">{t.cart?.title || "Shopping Cart"}</h1>
+          <p className="text-xs text-[#cbd5e1]">{t.cart?.subtitle || "Review your selected luxury puzzle items"}</p>
         </div>
       </div>
 
       {loading ? (
-        <p className="text-xs text-[#cbd5e1] text-center py-16">Loading your cart...</p>
+        <p className="text-xs text-[#cbd5e1] text-center py-16">{t.common?.loading || "Loading your cart..."}</p>
       ) : cart.length === 0 ? (
         <div className="text-center py-16 bg-background border border-border rounded-md space-y-4">
-          <p className="text-sm text-[#cbd5e1]">Your cart is currently empty.</p>
+          <p className="text-sm text-[#cbd5e1]">{t.cart?.empty || "Your cart is currently empty."}</p>
           <Link to="/products" className="inline-block bg-[#7e22ce] text-white text-xs px-6 py-3 rounded-md font-semibold shadow-[0_0_15px_rgba(126,34,206,0.4)]">
             Explore Catalog
           </Link>
@@ -80,17 +83,17 @@ export function CartPage() {
           </div>
 
           <div className="bg-background border border-border p-6 rounded-md space-y-6 h-fit shadow-[0_0_20px_rgba(126,34,206,0.15)]">
-            <h3 className="font-serif font-bold text-base border-b border-border pb-3">Order Summary</h3>
+            <h3 className="font-serif font-bold text-base border-b border-border pb-3">{t.cart?.orderSummary || "Order Summary"}</h3>
             <div className="flex justify-between text-xs text-[#cbd5e1]">
-              <span>Subtotal</span>
+              <span>{t.cart?.subtotal || "Subtotal"}</span>
               <span className="text-white font-bold">${subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-xs text-[#cbd5e1]">
-              <span>Shipping</span>
-              <span className="text-emerald-400 font-semibold">Free</span>
+              <span>{t.cart?.shipping || "Shipping"}</span>
+              <span className="text-emerald-400 font-semibold">{t.cart?.free || "Free"}</span>
             </div>
             <div className="flex justify-between text-sm font-bold text-white border-t border-border pt-4">
-              <span>Total</span>
+              <span>{t.common?.total || "Total"}</span>
               <span className="text-[#c084fc]">${subtotal.toFixed(2)}</span>
             </div>
 
@@ -98,8 +101,8 @@ export function CartPage() {
               onClick={() => navigate('/checkout')}
               className="w-full bg-primary from-[#7e22ce] to-[#a855f7] text-white py-3 rounded-md text-xs font-semibold flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(168,85,247,0.4)] cursor-pointer"
             >
-              <span>Proceed to Checkout</span>
-              <ArrowRight className="w-4 h-4" />
+              <span>{t.cart?.proceedToCheckout || "Proceed to Checkout"}</span>
+              <ArrowRight className="w-4 h-4 rtl:rotate-180" />
             </button>
           </div>
         </div>

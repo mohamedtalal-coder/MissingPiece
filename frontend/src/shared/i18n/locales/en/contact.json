@@ -1,0 +1,23 @@
+{
+  "title": "Contact Us",
+  "subtitle": "Have questions or feedback? We would love to hear from you.",
+  "getInTouch": "Get in Touch",
+  "description": "Whether you need assistance with an ongoing order, shipping details, or custom puzzle inquiries, our team is always ready to assist.",
+  "name": "Your Name",
+  "email": "Email Address",
+  "message": "Message",
+  "yourMessage": "Your Message",
+  "sendMessage": "Send Message",
+  "messageSent": "Message Sent!",
+  "thankYou": "Thank you for reaching out. We will get back to you shortly.",
+  "fillAllFields": "Please fill out all fields.",
+  "sendSuccess": "Message sent successfully! We will get back to you soon.",
+  "sendError": "Failed to send message. Please try again.",
+  "namePlaceholder": "Salma Yehia",
+  "emailPlaceholder": "salma@example.com",
+  "messagePlaceholder": "Write your message here...",
+  "helpPlaceholder": "How can we help you?",
+  "supportEmail": "support@missingpiece.com",
+  "phone": "+20 100 123 4567",
+  "location": "Zagazig, Egypt"
+}

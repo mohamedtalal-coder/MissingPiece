@@ -1,0 +1,23 @@
+{
+  "title": "تواصل معنا",
+  "subtitle": "هل لديك أسئلة أو ملاحظات؟ يسعدنا أن نسمع منك.",
+  "getInTouch": "تواصل معنا",
+  "description": "سواء كنت بحاجة إلى مساعدة بخصوص طلب حالي، أو تفاصيل الشحن، أو استفسارات عن البازل المخصص، فريقنا مستعد دائمًا لمساعدتك.",
+  "name": "اسمك",
+  "email": "البريد الإلكتروني",
+  "message": "الرسالة",
+  "yourMessage": "رسالتك",
+  "sendMessage": "إرسال الرسالة",
+  "messageSent": "تم إرسال الرسالة!",
+  "thankYou": "شكرًا لتواصلك معنا. سنقوم بالرد عليك في أقرب وقت.",
+  "fillAllFields": "من فضلك املأ جميع الحقول.",
+  "sendSuccess": "تم إرسال الرسالة بنجاح! سنتواصل معك قريبًا.",
+  "sendError": "فشل إرسال الرسالة. حاول مرة أخرى.",
+  "namePlaceholder": "سلمى يحيى",
+  "emailPlaceholder": "salma@example.com",
+  "messagePlaceholder": "اكتب رسالتك هنا...",
+  "helpPlaceholder": "كيف يمكننا مساعدتك؟",
+  "supportEmail": "support@missingpiece.com",
+  "phone": "+20 100 123 4567",
+  "location": "الزقازيق، مصر"
+}

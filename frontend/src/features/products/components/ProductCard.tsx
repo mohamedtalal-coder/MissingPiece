@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../../../shared/context/LanguageContext';
 import { Link } from 'react-router-dom';
 import type { Product } from '../productsApi';
 import { useCart } from '../../cart/CartContext';
@@ -11,6 +12,7 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const { t } = useLanguage() as any;
   const { addItem } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { showToast } = useToast();
@@ -71,7 +73,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
         {product.stock === 0 && (
           <div className="absolute inset-0 bg-black/60 flex items-center justify-center ">
-            <span className="bg-red-500/80 text-white px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(239,68,68,0.5)]">Out of Stock</span>
+            <span className="bg-red-500/80 text-white px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(239,68,68,0.5)]">{t.productDetail?.outOfStock || "Out of Stock"}</span>
           </div>
         )}
       </div>

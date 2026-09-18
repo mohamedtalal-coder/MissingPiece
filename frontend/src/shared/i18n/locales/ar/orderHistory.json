@@ -1,0 +1,12 @@
+{
+  "title": "سجل الطلبات",
+  "subtitle": "تابع طلبات البازل السابقة والحالية",
+  "placedOn": "تم الطلب في:",
+  "cancelOrder": "إلغاء الطلب",
+  "shippingAddress": "عنوان الشحن:",
+  "totalAmount": "إجمالي المبلغ:",
+  "pending": "قيد الانتظار",
+  "processing": "قيد التجهيز",
+  "delivered": "تم التسليم",
+  "cancelled": "ملغي"
+}

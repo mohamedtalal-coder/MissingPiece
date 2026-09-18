@@ -1,0 +1,18 @@
+{
+  "premiumCollection": "Premium Collection 2026",
+  "heroTitle": "Every picture is missing just one piece",
+  "heroDescription": "Explore our unique curated collection of classic Jigsaw, 3D, Wooden, and Mystery puzzles designed to challenge your mind and elevate your space.",
+  "exploreCollection": "Explore Collection",
+  "shopByCategory": "Shop by Category",
+  "categoryDescription": "Choose your preferred puzzle style and start your journey.",
+  "bestSellers": "Best Sellers This Month",
+  "bestSellersDescription": "Most loved master-crafted puzzles chosen by our community.",
+  "items": "Items",
+  "addToCart": "Add to Cart",
+  "categories": {
+    "jigsaw": "Jigsaw Puzzles",
+    "threeD": "3D Puzzles",
+    "wooden": "Wooden Puzzles",
+    "mystery": "Mystery Puzzles"
+  }
+}

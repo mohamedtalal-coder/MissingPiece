@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../../shared/context/LanguageContext';
 import { User, MapPin, CheckCircle, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function ProfilePage() {
+  const { t } = useLanguage() as any;
+
   const [user, setUser] = useState({ name: '', email: '', location: '', avatar: '' });
   const [message, setMessage] = useState<string | null>(null);
 
@@ -70,15 +73,15 @@ export function ProfilePage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-background border border-border p-6 rounded-md space-y-6 shadow-[0_0_20px_rgba(126,34,206,0.15)]">
-          <h2 className="text-white font-serif font-bold text-base border-b border-border pb-3">Edit Profile Details</h2>
+          <h2 className="text-white font-serif font-bold text-base border-b border-border pb-3">{t.profile?.editDetails || "Edit Profile Details"}</h2>
           
           <form onSubmit={handleUpdate} className="space-y-4 text-xs">
             <div className="space-y-1.5">
-              <label className="text-[#e9d5ff]">Upload Profile Picture from Device</label>
+              <label className="text-[#e9d5ff]">{t.profile?.uploadPicture || "Upload Profile Picture from Device"}</label>
               <div className="flex items-center gap-3">
                 <label className="flex-1 bg-[#7e22ce]/20 border border-border text-[#c084fc] hover:bg-[#7e22ce]/30 py-2.5 px-4 rounded-md text-center cursor-pointer transition-colors flex items-center justify-center gap-2">
                   <Upload className="w-4 h-4" />
-                  <span>Choose Image File</span>
+                  <span>{t.profile?.chooseImage || "Choose Image File"}</span>
                   <input 
                     type="file" 
                     accept="image/*"
@@ -90,7 +93,7 @@ export function ProfilePage() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[#e9d5ff]">Full Name</label>
+              <label className="text-[#e9d5ff]">{t.profile?.fullName || "Full Name"}</label>
               <input 
                 type="text" 
                 value={user.name}
@@ -120,7 +123,7 @@ export function ProfilePage() {
 
         <div className="bg-background border border-border p-6 rounded-md space-y-6 shadow-[0_0_20px_rgba(126,34,206,0.15)] flex flex-col justify-between">
           <div className="space-y-4">
-            <h2 className="text-white font-serif font-bold text-base border-b border-border pb-3">Quick Navigation</h2>
+            <h2 className="text-white font-serif font-bold text-base border-b border-border pb-3">{t.profile?.quickNavigation || "Quick Navigation"}</h2>
             <p className="text-xs text-[#cbd5e1] leading-relaxed">
               You can now upload any picture from your PC as your profile avatar! It will update instantly across the entire website navbar.
             </p>

@@ -1,0 +1,23 @@
+{
+  "title": "Product Inventory (Admin)",
+  "description": "Manage store products and stock levels",
+  "addNew": "Add New Product",
+  "createProduct": "Create New Product",
+  "productTitle": "Product Title",
+  "productDescription": "Description",
+  "price": "Price ($)",
+  "stock": "Stock",
+  "imageUrl": "Image URL (optional)",
+  "saveProduct": "Save Product",
+  "product": "Product",
+  "category": "Category",
+  "actions": "Actions",
+  "deleteProduct": "Delete Product",
+  "deleteConfirm": "Are you sure you want to delete this product?",
+  "categories": {
+    "jigsaw": "Jigsaw Puzzles",
+    "threeD": "3D Puzzles",
+    "wooden": "Wooden Puzzles",
+    "mystery": "Mystery Puzzles"
+  }
+}

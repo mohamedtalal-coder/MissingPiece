@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../../shared/context/LanguageContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { UserPlus, Mail, Lock, User } from 'lucide-react';
 import { authApi } from './authApi';
 import { useAuth } from './AuthContext';
 
 export function RegisterForm() {
+  const { t } = useLanguage() as any;
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -38,8 +41,8 @@ export function RegisterForm() {
           <div className="w-12 h-12 bg-[#7e22ce]/20 border border-border rounded-md flex items-center justify-center mx-auto text-[#c084fc]">
             <UserPlus className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-serif font-bold text-white tracking-wide">Create Account</h1>
-          <p className="text-xs text-[#a1a1aa]">Join MissingPiece and start exploring luxury puzzles.</p>
+          <h1 className="text-2xl font-serif font-bold text-white tracking-wide">{t.auth?.createAccount || "Create Account"}</h1>
+          <p className="text-xs text-[#a1a1aa]">{t.auth?.registerSubtitle || "Join MissingPiece and start exploring luxury puzzles."}</p>
         </div>
 
         {error && (
@@ -50,7 +53,7 @@ export function RegisterForm() {
 
         <form onSubmit={handleRegister} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-[11px] text-[#d8b4fe] font-medium">Full Name</label>
+            <label className="text-[11px] text-[#d8b4fe] font-medium">{t.auth?.name || "Full Name"}</label>
             <div className="relative">
               <User className="w-4 h-4 absolute left-3 top-3 text-[#a1a1aa]" />
               <input
@@ -59,13 +62,13 @@ export function RegisterForm() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Salma Yehia"
-                className="w-full bg-[#0b0914] border border-[#221738] rounded-md px-4 py-2.5 pl-10 text-xs text-white focus:outline-none focus:border-border"
+                className="w-full bg-[#0b0914] border border-[#221738] rounded-md px-4 py-2.5 ps-10 text-xs text-white focus:outline-none focus:border-border"
               />
             </div>
           </div>
 
           <div className="space-y-1">
-            <label className="text-[11px] text-[#d8b4fe] font-medium">Email Address</label>
+            <label className="text-[11px] text-[#d8b4fe] font-medium">{t.auth?.email || "Email Address"}</label>
             <div className="relative">
               <Mail className="w-4 h-4 absolute left-3 top-3 text-[#a1a1aa]" />
               <input
@@ -74,13 +77,13 @@ export function RegisterForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="salma@example.com"
-                className="w-full bg-[#0b0914] border border-[#221738] rounded-md px-4 py-2.5 pl-10 text-xs text-white focus:outline-none focus:border-border"
+                className="w-full bg-[#0b0914] border border-[#221738] rounded-md px-4 py-2.5 ps-10 text-xs text-white focus:outline-none focus:border-border"
               />
             </div>
           </div>
 
           <div className="space-y-1">
-            <label className="text-[11px] text-[#d8b4fe] font-medium">Password</label>
+            <label className="text-[11px] text-[#d8b4fe] font-medium">{t.auth?.password || "Password"}</label>
             <div className="relative">
               <Lock className="w-4 h-4 absolute left-3 top-3 text-[#a1a1aa]" />
               <input
@@ -89,7 +92,7 @@ export function RegisterForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-[#0b0914] border border-[#221738] rounded-md px-4 py-2.5 pl-10 text-xs text-white focus:outline-none focus:border-border"
+                className="w-full bg-[#0b0914] border border-[#221738] rounded-md px-4 py-2.5 ps-10 text-xs text-white focus:outline-none focus:border-border"
               />
             </div>
           </div>

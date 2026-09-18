@@ -8,7 +8,7 @@ import { Icon } from '../../shared/components/ui/Icon';
 import { useLanguage } from '../../shared/context/LanguageContext';
 
 export function ProductListPage() {
-  const { t } = useLanguage();
+  const { t } = useLanguage() as any;
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   
@@ -116,7 +116,7 @@ export function ProductListPage() {
           <div className="flex flex-col items-center justify-center py-24 space-y-4 text-center bg-[var(--bg-card)] border border-border rounded-md">
             <Icon name="search_off" className="text-6xl text-[var(--text-muted)]" />
             <h3 className="text-2xl font-semibold text-[var(--text-main)]">{t.productList.noProducts}</h3>
-            <p className="text-lg text-[var(--text-muted)]">Try adjusting your filters or search term.</p>
+            <p className="text-lg text-[var(--text-muted)]">{t.productList?.noProducts || "Try adjusting your filters or search term."}</p>
             <button 
               onClick={() => {
                 setSearchTerm('');
