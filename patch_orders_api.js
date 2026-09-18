@@ -1,4 +1,5 @@
-import { apiClient } from '../../api/client';
+const fs = require('fs');
+let content = `import { apiClient } from '../../api/client';
 import type { CartItemDto } from '../cart/cartApi';
 
 export interface OrderItem {
@@ -63,3 +64,5 @@ export const ordersApi = {
     return response.data.data;
   },
 };
+`;
+fs.writeFileSync('frontend/src/features/orders/ordersApi.ts', content);

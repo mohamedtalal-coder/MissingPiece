@@ -22,7 +22,7 @@ export function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadProfile = async () => {
+  const loadProfile = React.useCallback(async () => {
     try {
       setLoading(true);
       const profile = await accountApi.getProfile();
@@ -43,11 +43,11 @@ export function ProfilePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadProfile();
-  }, []);
+  }, [loadProfile]);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();

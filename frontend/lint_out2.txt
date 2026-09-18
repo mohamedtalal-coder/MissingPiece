@@ -1,0 +1,364 @@
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/account/ProfilePage.tsx
+   8:34  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-explicit-any
+  49:5   warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/account/ProfilePage.tsx:49:5
+  47 |
+  48 |   useEffect(() => {
+> 49 |     loadProfile();
+     |     ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  50 |   }, [loadProfile]);
+  51 |
+  52 |   const handleUpdate = async (e: React.FormEvent) => {  react-hooks/set-state-in-effect
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/auth/AuthContext.tsx
+  28:9   warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/auth/AuthContext.tsx:28:9
+  26 |     if (savedUser && savedToken) {
+  27 |       try {
+> 28 |         setUser(JSON.parse(savedUser));
+     |         ^^^^^^^ Avoid calling setState() directly within an effect
+  29 |       } catch {
+  30 |         setUser(null);
+  31 |       }  react-hooks/set-state-in-effect
+  62:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          react-refresh/only-export-components
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/auth/LoginForm.tsx
+   9:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  32:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/auth/LoginPage.tsx
+  6:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/auth/RegisterForm.tsx
+   9:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  29:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/auth/RegisterPage.tsx
+  6:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/cart/CartContext.tsx
+    7:22  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-explicit-any
+   31:55  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-explicit-any
+   40:51  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-explicit-any
+   58:75  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-explicit-any
+   79:5   warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/cart/CartContext.tsx:79:5
+  77 |
+  78 |   useEffect(() => {
+> 79 |     fetchCart();
+     |     ^^^^^^^^^ Avoid calling setState() directly within an effect
+  80 |   }, [fetchCart]);
+  81 |
+  82 |   const addItem = async (product: any, qty: number) => {  react-hooks/set-state-in-effect
+   82:35  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-explicit-any
+  149:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-refresh/only-export-components
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/cart/CartPage.tsx
+   9:34  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-explicit-any
+  18:7   warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/cart/CartPage.tsx:18:7
+  16 |   useEffect(() => {
+  17 |     if (cart.length === 0) {
+> 18 |       setValidated([]);
+     |       ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  19 |       setLoading(false);
+  20 |       return;
+  21 |     }  react-hooks/set-state-in-effect
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/cart/cartApi.ts
+  17:69  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  21:70  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  25:71  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  29:72  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  33:70  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  37:70  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/orders/AdminOrdersPage.tsx
+   7:40  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-explicit-any
+  39:7   warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/orders/AdminOrdersPage.tsx:39:7
+  37 |       );
+  38 |
+> 39 |       setOrders(initialOrders);
+     |       ^^^^^^^^^ Avoid calling setState() directly within an effect
+  40 |     } else {
+  41 |       setOrders(savedOrders);
+  42 |     }  react-hooks/set-state-in-effect
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/orders/CheckoutPage.tsx
+  16:46  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-explicit-any
+  30:7   warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/orders/CheckoutPage.tsx:30:7
+  28 |   useEffect(() => {
+  29 |     if (!isAuthenticated) {
+> 30 |       setLoading(false);
+     |       ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  31 |       return;
+  32 |     }
+  33 |     loadCart();  react-hooks/set-state-in-effect
+  33:5   error    Error: Cannot access variable before it is declared
+
+`loadCart` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/orders/CheckoutPage.tsx:33:5
+  31 |       return;
+  32 |     }
+> 33 |     loadCart();
+     |     ^^^^^^^^ `loadCart` accessed before it is declared
+  34 |   }, [isAuthenticated]);
+  35 |
+  36 |   const loadCart = async () => {
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/orders/CheckoutPage.tsx:36:3
+  34 |   }, [isAuthenticated]);
+  35 |
+> 36 |   const loadCart = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 37 |     try {
+     | ^^^^^^^^^
+> 38 |       setLoading(true);
+     …
+     | ^^^^^^^^^
+> 46 |     }
+     | ^^^^^^^^^
+> 47 |   };
+     | ^^^^^ `loadCart` is declared here
+  48 |
+  49 |   const handleCheckout = async (e: React.FormEvent) => {
+  50 |     e.preventDefault();                                                   react-hooks/immutability
+  34:6   warning  React Hook useEffect has a missing dependency: 'loadCart'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        react-hooks/exhaustive-deps
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/orders/ordersApi.ts
+  39:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/products/AdminProductsPage.tsx
+   29:14  warning  'err' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+   37:5   warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/products/AdminProductsPage.tsx:37:5
+  35 |
+  36 |   useEffect(() => {
+> 37 |     fetchProducts();
+     |     ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  38 |   }, []);
+  39 |
+  40 |   const handleSubmit = async (e: React.FormEvent) => {  react-hooks/set-state-in-effect
+   65:14  warning  'err' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+  104:14  warning  'err' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/products/ProductDetailPage.tsx
+   12:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   66:16  warning  'err' is defined but never used           @typescript-eslint/no-unused-vars
+  105:14  warning  'err' is defined but never used           @typescript-eslint/no-unused-vars
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/products/ProductListPage.tsx
+  11:34  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-explicit-any
+  44:25  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-explicit-any
+  47:19  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-explicit-any
+  58:5   warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/products/ProductListPage.tsx:58:5
+  56 |
+  57 |   useEffect(() => {
+> 58 |     fetchCategories();
+     |     ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  59 |   }, []);
+  60 |
+  61 |   useEffect(() => {                                                                                           react-hooks/set-state-in-effect
+  63:5   warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/products/ProductListPage.tsx:63:5
+  61 |   useEffect(() => {
+  62 |     const controller = new AbortController();
+> 63 |     fetchProducts(controller.signal);
+     |     ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  64 |     return () => controller.abort();
+  65 |   }, [fetchProducts]);
+  66 |  react-hooks/set-state-in-effect
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/products/components/ProductCard.tsx
+  15:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  42:14  warning  'err' is defined but never used           @typescript-eslint/no-unused-vars
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/products/components/ProductFilters.tsx
+  30:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/static/AdminMessagesPage.tsx
+  37:5  warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/static/AdminMessagesPage.tsx:37:5
+  35 |
+  36 |   useEffect(() => {
+> 37 |     fetchMessages();
+     |     ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  38 |   }, []);
+  39 |
+  40 |   if (loading) {  react-hooks/set-state-in-effect
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/static/ContactForm.tsx
+  34:14  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/static/staticApi.ts
+  17:69  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/wishlist/WishlistPage.tsx
+   8:54  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  16:5   warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/features/wishlist/WishlistPage.tsx:16:5
+  14 |
+  15 |   useEffect(() => {
+> 16 |     loadWishlist();
+     |     ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  17 |     window.addEventListener('storage', loadWishlist);
+  18 |
+  19 |     return () => window.removeEventListener('storage', loadWishlist);  react-hooks/set-state-in-effect
+  22:29  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  24:14  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  31:38  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  36:14  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/shared/MyOrdersPage.tsx
+   9:34  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  31:7   warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/shared/MyOrdersPage.tsx:31:7
+  29 |   useEffect(() => {
+  30 |     if (!isAuthenticated) {
+> 31 |       setLoading(false);
+     |       ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  32 |       return;
+  33 |     }
+  34 |     loadOrders();  react-hooks/set-state-in-effect
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/shared/WishlistContext.tsx
+   8:18  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+   9:29  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+  20:54  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+  41:5   warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/shared/WishlistContext.tsx:41:5
+  39 |
+  40 |   useEffect(() => {
+> 41 |     fetchWishlist();
+     |     ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  42 |   }, [fetchWishlist]);
+  43 |
+  44 |   const toggleWishlist = async (product: any) => {  react-hooks/set-state-in-effect
+  44:42  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+  69:14  warning  'err' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+  87:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      react-refresh/only-export-components
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/shared/components/Footer.tsx
+  7:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/shared/components/Navbar.tsx
+  160:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  162:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/shared/components/layout/Footer.tsx
+  10:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/shared/components/layout/Navbar.tsx
+   8:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  11:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/shared/components/ui/Input.tsx
+  12:27  warning  React Hook "React.useId" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/shared/context/LanguageContext.tsx
+  46:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/shared/context/ThemeContext.tsx
+  34:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/mohamedtalal/Documents/MissingPiece/frontend/src/shared/context/ToastContext.tsx
+  77:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+✖ 75 problems (1 error, 74 warnings)
+
