@@ -21,6 +21,16 @@ export interface AuthResponse {
   };
 }
 
+export interface ForgotPasswordCredentials {
+  email: string;
+}
+
+export interface ResetPasswordCredentials {
+  email: string;
+  otp: string;
+  newPassword: string;
+}
+
 export const authApi = {
   register: async (credentials: RegisterCredentials) => {
     const response = await apiClient.post<{ success: boolean; data: AuthResponse }>('/auth/register', credentials);
@@ -32,6 +42,16 @@ export const authApi = {
     return response.data.data;
   },
 
+  forgotPassword: async (credentials: ForgotPasswordCredentials) => {
+    const response = await apiClient.post<{ success: boolean; message: string }>('/auth/forgot-password', credentials);
+    return response.data;
+  },
+
+  resetPassword: async (credentials: ResetPasswordCredentials) => {
+    const response = await apiClient.post<{ success: boolean; message: string }>('/auth/reset-password', credentials);
+    return response.data;
+  },
+
   logout: async () => {
     try {
       await apiClient.post('/auth/logout');
@@ -40,3 +60,4 @@ export const authApi = {
     }
   }
 };
+

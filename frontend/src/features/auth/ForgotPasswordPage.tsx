@@ -1,60 +1,77 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, CheckCircle, AlertCircle, KeyRound } from 'lucide-react';
+import { authApi } from './authApi';
 
 export function ForgotPasswordPage() {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [loading, setLoading] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleCheckEmail = (e: React.FormEvent) => {
+  const handleCheckEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSuccess(null);
+    setLoading(true);
 
-    const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-    const userExists = registeredUsers.some((u: any) => u.email === email);
+    try {
+      const response = await authApi.forgotPassword({ email });
 
-    if (!userExists) {
-      setError('This email address is not registered in our system.');
-      return;
+      setSuccess(response.message);
+      setStep(2);
+    } catch (error: any) {
+      setError(
+        error.response?.data?.message ||
+        'Something went wrong. Please try again.'
+      );
+    } finally {
+      setLoading(false);
     }
-
-    setStep(2);
   };
 
-  const handleResetPassword = (e: React.FormEvent) => {
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSuccess(null);
+    setLoading(true);
+
+    if (otp.length !== 6) {
+      setError('Please enter the 6-digit verification code.');
+      setLoading(false);
+      return;
+    }
 
     if (newPassword.length < 6) {
       setError('Password must be at least 6 characters long.');
+      setLoading(false);
       return;
     }
 
-    const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-    
-    const updatedUsers = registeredUsers.map((u: any) => {
-      if (u.email === email) {
-        return { ...u, password: newPassword };
-      }
-      return u;
-    });
+    try {
+      const response = await authApi.resetPassword({
+        email,
+        otp,
+        newPassword,
+      });
 
-    localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+      setSuccess(response.message + ' Redirecting to login...');
 
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (currentUser.email === email) {
-      currentUser.password = newPassword;
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+    } catch (error: any) {
+      setError(
+        error.response?.data?.message ||
+        'Invalid or expired reset code.'
+      );
+    } finally {
+      setLoading(false);
     }
-
-    setSuccess('Password updated successfully! Redirecting to login...');
-    setTimeout(() => {
-      navigate('/login');
-    }, 2000);
   };
 
   return (
@@ -79,7 +96,6 @@ export function ForgotPasswordPage() {
         color: '#ffffff',
         fontFamily: 'sans-serif'
       }}>
-        
         <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <div style={{
             width: '48px',
@@ -95,9 +111,20 @@ export function ForgotPasswordPage() {
           }}>
             <KeyRound style={{ width: '24px', height: '24px', color: '#c084fc' }} />
           </div>
-          <h1 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '6px', fontFamily: 'serif' }}>Reset Password</h1>
+
+          <h1 style={{
+            fontSize: '22px',
+            fontWeight: 'bold',
+            marginBottom: '6px',
+            fontFamily: 'serif'
+          }}>
+            Reset Password
+          </h1>
+
           <p style={{ fontSize: '12px', color: '#cbd5e1' }}>
-            {step === 1 ? 'Enter your email to recover your account' : 'Enter your new secure password'}
+            {step === 1
+              ? 'Enter your email to recover your account'
+              : 'Enter the code sent to your email and your new password'}
           </p>
         </div>
 
@@ -138,17 +165,34 @@ export function ForgotPasswordPage() {
         )}
 
         {step === 1 ? (
-          <form onSubmit={handleCheckEmail} style={{ display: 'flex', flexDirection: 'column', gap: '16px', fontSize: '12px' }}>
+          <form
+            onSubmit={handleCheckEmail}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+              fontSize: '12px'
+            }}
+          >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={{ color: '#e9d5ff' }}>Email Address</label>
+
               <div style={{ position: 'relative' }}>
-                <Mail style={{ width: '16px', height: '16px', color: '#c084fc', position: 'absolute', left: '12px', top: '12px' }} />
-                <input 
-                  type="email" 
+                <Mail style={{
+                  width: '16px',
+                  height: '16px',
+                  color: '#c084fc',
+                  position: 'absolute',
+                  left: '12px',
+                  top: '12px'
+                }} />
+
+                <input
+                  type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="salma@example.com" 
+                  placeholder="salma@example.com"
                   style={{
                     width: '100%',
                     backgroundColor: '#0b0914',
@@ -164,8 +208,9 @@ export function ForgotPasswordPage() {
               </div>
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
+              disabled={loading}
               style={{
                 width: '100%',
                 background: 'linear-gradient(to right, #7e22ce, #a855f7)',
@@ -174,25 +219,45 @@ export function ForgotPasswordPage() {
                 padding: '12px',
                 borderRadius: '12px',
                 border: 'none',
-                cursor: 'pointer',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.7 : 1,
                 boxShadow: '0 0 20px rgba(168, 85, 247, 0.4)'
               }}
             >
-              Verify Email
+              {loading ? 'Sending Code...' : 'Send Verification Code'}
             </button>
           </form>
         ) : (
-          <form onSubmit={handleResetPassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px', fontSize: '12px' }}>
+          <form
+            onSubmit={handleResetPassword}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+              fontSize: '12px'
+            }}
+          >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ color: '#e9d5ff' }}>New Password</label>
+              <label style={{ color: '#e9d5ff' }}>Verification Code</label>
+
               <div style={{ position: 'relative' }}>
-                <Lock style={{ width: '16px', height: '16px', color: '#c084fc', position: 'absolute', left: '12px', top: '12px' }} />
-                <input 
-                  type="password" 
+                <KeyRound style={{
+                  width: '16px',
+                  height: '16px',
+                  color: '#c084fc',
+                  position: 'absolute',
+                  left: '12px',
+                  top: '12px'
+                }} />
+
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
                   required
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="••••••••" 
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                  placeholder="Enter 6-digit code"
                   style={{
                     width: '100%',
                     backgroundColor: '#0b0914',
@@ -208,8 +273,43 @@ export function ForgotPasswordPage() {
               </div>
             </div>
 
-            <button 
-              type="submit" 
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ color: '#e9d5ff' }}>New Password</label>
+
+              <div style={{ position: 'relative' }}>
+                <Lock style={{
+                  width: '16px',
+                  height: '16px',
+                  color: '#c084fc',
+                  position: 'absolute',
+                  left: '12px',
+                  top: '12px'
+                }} />
+
+                <input
+                  type="password"
+                  required
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="••••••••"
+                  style={{
+                    width: '100%',
+                    backgroundColor: '#0b0914',
+                    border: '1px solid rgba(126, 34, 206, 0.4)',
+                    borderRadius: '12px',
+                    padding: '10px 10px 10px 38px',
+                    color: '#ffffff',
+                    outline: 'none',
+                    fontSize: '12px',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
               style={{
                 width: '100%',
                 background: 'linear-gradient(to right, #7e22ce, #a855f7)',
@@ -218,22 +318,37 @@ export function ForgotPasswordPage() {
                 padding: '12px',
                 borderRadius: '12px',
                 border: 'none',
-                cursor: 'pointer',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.7 : 1,
                 boxShadow: '0 0 20px rgba(168, 85, 247, 0.4)'
               }}
             >
-              Update Password
+              {loading ? 'Updating...' : 'Update Password'}
             </button>
           </form>
         )}
 
-        <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '12px', color: '#cbd5e1' }}>
-          Remember your password? <Link to="/login" style={{ color: '#c084fc', textDecoration: 'underline' }}>Sign In</Link>
+        <div style={{
+          textAlign: 'center',
+          marginTop: '20px',
+          fontSize: '12px',
+          color: '#cbd5e1'
+        }}>
+          Remember your password?{' '}
+          <Link
+            to="/login"
+            style={{
+              color: '#c084fc',
+              textDecoration: 'underline'
+            }}
+          >
+            Sign In
+          </Link>
         </div>
-
       </div>
     </div>
   );
 }
 
 export default ForgotPasswordPage;
+

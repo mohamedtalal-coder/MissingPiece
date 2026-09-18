@@ -12,15 +12,6 @@ function sanitize(value: string, max: number): string {
   return value.replace(/[<>]/g, '').trim().slice(0, max);
 }
 
-function isSafeHttpUrl(url: string): boolean {
-  try {
-    const u = new URL(url);
-    return u.protocol === 'https:' || u.protocol === 'http:';
-  } catch {
-    return false;
-  }
-}
-
 function TableSkeleton() {
   return (
     <div className="p-6 space-y-3" aria-busy="true" aria-label="Loading inventory">
@@ -49,7 +40,7 @@ export const AdminProductsPage: React.FC = () => {
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
   const [category, setCategory] = useState('Jigsaw Puzzles');
-  const [imageUrl, setImageUrl] = useState('');
+  const [images, setImages] = useState<File[]>([]);
   const [isActive, setIsActive] = useState(true);
 
   useScrollLock(showModal);
@@ -76,26 +67,34 @@ export const AdminProductsPage: React.FC = () => {
     const cleanDesc = sanitize(description, 2000);
     const priceNum = Number(price);
     const stockNum = Math.floor(Number(stock));
-    const cleanImage = sanitize(imageUrl, 500);
 
     if (cleanName.length < 2) {
       setFormError('Title must be at least 2 characters.');
       return null;
     }
+
     if (cleanDesc.length < 10) {
       setFormError('Description must be at least 10 characters.');
       return null;
     }
+
     if (!Number.isFinite(priceNum) || priceNum <= 0 || priceNum > 100000) {
       setFormError('Enter a valid price greater than 0.');
       return null;
     }
+
     if (!Number.isFinite(stockNum) || stockNum < 0 || stockNum > 10000) {
       setFormError('Stock must be an integer between 0 and 10000.');
       return null;
     }
-    if (cleanImage && !isSafeHttpUrl(cleanImage)) {
-      setFormError('Image URL must be a valid http(s) link.');
+
+    if (images.length > 10) {
+      setFormError('You can upload up to 10 images.');
+      return null;
+    }
+
+    if (!editingProductId && images.length === 0) {
+      setFormError('Please select at least one image.');
       return null;
     }
 
@@ -106,30 +105,71 @@ export const AdminProductsPage: React.FC = () => {
       stock: stockNum,
       category: sanitize(category, 80) || 'Jigsaw Puzzles',
       isActive,
-      images: cleanImage
-        ? [cleanImage]
-        : ['https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=500&auto=format&fit=crop&q=60'],
+      images,
     };
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []);
+
+    if (selectedFiles.length > 10) {
+      setFormError('You can upload up to 10 images.');
+      setImages([]);
+      return;
+    }
+
+    const invalidFile = selectedFiles.find(
+      (file) => !file.type.startsWith('image/')
+    );
+
+    if (invalidFile) {
+      setFormError('Please select image files only.');
+      setImages([]);
+      return;
+    }
+
+    setImages(selectedFiles);
+    setFormError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (isSubmitting) return;
+
     setFormError('');
+
     const input = validateForm();
+
     if (!input) return;
 
     setIsSubmitting(true);
+
     try {
       if (editingProductId) {
         const updated = await productsApi.update(editingProductId, input);
-        setProducts((prev) => prev.map((p) => (p._id === editingProductId ? updated : p)));
-        showToast({ message: 'Edition updated', type: 'success' });
+
+        setProducts((prev) =>
+          prev.map((p) =>
+            p._id === editingProductId ? updated : p
+          )
+        );
+
+        showToast({
+          message: 'Edition updated',
+          type: 'success',
+        });
       } else {
         const created = await productsApi.create(input);
+
         setProducts((prev) => [created, ...prev]);
-        showToast({ message: 'Edition created', type: 'success' });
+
+        showToast({
+          message: 'Edition created',
+          type: 'success',
+        });
       }
+
       setShowModal(false);
       resetForm();
     } catch {
@@ -148,7 +188,7 @@ export const AdminProductsPage: React.FC = () => {
     setPrice(product.price.toString());
     setStock(product.stock.toString());
     setCategory(product.category);
-    setImageUrl(product.images?.[0] || '');
+    setImages([]);
     setIsActive(product.isActive !== false);
     setEditingProductId(product._id);
     setFormError('');
@@ -166,21 +206,35 @@ export const AdminProductsPage: React.FC = () => {
     setDescription('');
     setPrice('');
     setStock('');
-    setImageUrl('');
+    setImages([]);
     setIsActive(true);
     setEditingProductId(null);
     setCategory('Jigsaw Puzzles');
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm(t.adminProducts?.deleteConfirm || 'Delete this product?')) return;
+    if (!window.confirm(t.adminProducts?.deleteConfirm || 'Delete this product?')) {
+      return;
+    }
+
     setPendingDeleteId(id);
+
     try {
       await productsApi.delete(id);
-      setProducts((prev) => prev.filter((p) => p._id !== id));
-      showToast({ message: 'Edition removed', type: 'info' });
+
+      setProducts((prev) =>
+        prev.filter((p) => p._id !== id)
+      );
+
+      showToast({
+        message: 'Edition removed',
+        type: 'info',
+      });
     } catch {
-      showToast({ message: 'Failed to delete product', type: 'error' });
+      showToast({
+        message: 'Failed to delete product',
+        type: 'error',
+      });
     } finally {
       setPendingDeleteId(null);
     }
@@ -188,13 +242,28 @@ export const AdminProductsPage: React.FC = () => {
 
   const filtered = products.filter((p) => {
     if (!search.trim()) return true;
+
     const q = search.toLowerCase();
-    return p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || p._id.toLowerCase().includes(q);
+
+    return (
+      p.name.toLowerCase().includes(q) ||
+      p.category.toLowerCase().includes(q) ||
+      p._id.toLowerCase().includes(q)
+    );
   });
 
-  const totalStock = products.reduce((acc, p) => acc + p.stock, 0);
-  const lowStock = products.filter((p) => p.stock > 0 && p.stock <= 5).length;
-  const outOfStock = products.filter((p) => p.stock === 0).length;
+  const totalStock = products.reduce(
+    (acc, p) => acc + p.stock,
+    0
+  );
+
+  const lowStock = products.filter(
+    (p) => p.stock > 0 && p.stock <= 5
+  ).length;
+
+  const outOfStock = products.filter(
+    (p) => p.stock === 0
+  ).length;
 
   return (
     <div className="w-full max-w-[1360px] mx-auto px-margin-mobile lg:px-margin py-space-lg pb-space-2xl">
@@ -205,13 +274,16 @@ export const AdminProductsPage: React.FC = () => {
           <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest">
             Atelier Vault &amp; Stock
           </span>
+
           <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight mt-1">
             Product Management &amp; Inventory
           </h1>
+
           <p className="font-body-md text-body-md text-on-surface-variant mt-1.5 max-w-2xl">
             Manage artisan puzzle editions and workshop inventory.
           </p>
         </div>
+
         <Button onClick={handleAddNewClick} icon="add">
           Add New Puzzle Edition
         </Button>
@@ -220,6 +292,7 @@ export const AdminProductsPage: React.FC = () => {
       {error && (
         <div className="bg-error-container/20 border border-error/40 text-error p-4 rounded-md flex items-center justify-between gap-3 mb-6">
           <span>{error}</span>
+
           <Button type="button" size="sm" onClick={fetchProducts}>
             Retry
           </Button>
@@ -237,10 +310,19 @@ export const AdminProductsPage: React.FC = () => {
             key={stat.label}
             className="bg-surface-container-low p-4 rounded shadow-sm border border-outline-variant/20"
           >
-            <span className={`font-label-caps text-label-caps uppercase tracking-wider ${stat.danger ? 'text-error' : 'text-outline'}`}>
+            <span
+              className={`font-label-caps text-label-caps uppercase tracking-wider ${
+                stat.danger ? 'text-error' : 'text-outline'
+              }`}
+            >
               {stat.label}
             </span>
-            <div className={`font-headline-md text-headline-md mt-2 font-medium ${stat.danger ? 'text-error' : 'text-on-surface'}`}>
+
+            <div
+              className={`font-headline-md text-headline-md mt-2 font-medium ${
+                stat.danger ? 'text-error' : 'text-on-surface'
+              }`}
+            >
               {isLoading ? '—' : stat.value}
             </div>
           </div>
@@ -249,10 +331,19 @@ export const AdminProductsPage: React.FC = () => {
 
       <div className="bg-surface-container-low rounded-lg p-4 mb-6 border border-outline-variant/20">
         <div className="relative max-w-md">
-          <Icon name="search" className="absolute left-3.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none" size={18} />
-          <label htmlFor="admin-product-search" className="sr-only">
+          <Icon
+            name="search"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none"
+            size={18}
+          />
+
+          <label
+            htmlFor="admin-product-search"
+            className="sr-only"
+          >
             Search products
           </label>
+
           <input
             id="admin-product-search"
             value={search}
@@ -280,16 +371,23 @@ export const AdminProductsPage: React.FC = () => {
                   <th className="py-3.5 pr-6 pl-4 text-right">Actions</th>
                 </tr>
               </thead>
+
               <tbody className="divide-y divide-outline-variant/20">
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-on-surface-variant">
+                    <td
+                      colSpan={6}
+                      className="py-12 text-center text-on-surface-variant"
+                    >
                       No editions match.
                     </td>
                   </tr>
                 ) : (
                   filtered.map((product) => (
-                    <tr key={product._id} className="hover:bg-surface-container/60 transition-colors">
+                    <tr
+                      key={product._id}
+                      className="hover:bg-surface-container/60 transition-colors"
+                    >
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-3.5">
                           <div className="w-12 h-14 bg-surface-container-high rounded shrink-0 overflow-hidden">
@@ -300,25 +398,39 @@ export const AdminProductsPage: React.FC = () => {
                               loading="lazy"
                             />
                           </div>
+
                           <div className="min-w-0">
                             <span className="font-headline-sm text-sm text-on-surface truncate block">
                               {product.name}
                             </span>
+
                             <span className="text-[10px] text-outline uppercase tracking-wider">
                               {product._id.slice(-8).toUpperCase()}
                             </span>
                           </div>
                         </div>
                       </td>
-                      <td className="py-4 px-4 text-on-surface-variant">{product.category}</td>
+
+                      <td className="py-4 px-4 text-on-surface-variant">
+                        {product.category}
+                      </td>
+
                       <td className="py-4 px-4">
                         <PriceDisplay amount={product.price} size="sm" />
                       </td>
+
                       <td className="py-4 px-4">
-                        <span className={product.stock <= 5 ? 'text-error font-medium' : 'text-on-surface'}>
+                        <span
+                          className={
+                            product.stock <= 5
+                              ? 'text-error font-medium'
+                              : 'text-on-surface'
+                          }
+                        >
                           {product.stock}
                         </span>
                       </td>
+
                       <td className="py-4 px-4">
                         <span
                           className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider ${
@@ -330,6 +442,7 @@ export const AdminProductsPage: React.FC = () => {
                           {product.isActive ? 'Active' : 'Archived'}
                         </span>
                       </td>
+
                       <td className="py-4 pr-6 pl-4 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <Button
@@ -339,6 +452,7 @@ export const AdminProductsPage: React.FC = () => {
                             icon="edit"
                             aria-label="Edit"
                           />
+
                           <Button
                             onClick={() => handleDelete(product._id)}
                             variant="ghost"
@@ -362,7 +476,10 @@ export const AdminProductsPage: React.FC = () => {
       {showModal && (
         <div
           className="fixed inset-0 bg-surface-container-lowest/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
-          onClick={() => !isSubmitting && (setShowModal(false), resetForm())}
+          onClick={() =>
+            !isSubmitting &&
+            (setShowModal(false), resetForm())
+          }
         >
           <div
             className="bg-surface-container-low max-w-lg w-full rounded-lg p-6 shadow-2xl border border-outline-variant/30 animate-scale-in max-h-[90vh] overflow-y-auto"
@@ -376,10 +493,17 @@ export const AdminProductsPage: React.FC = () => {
                 <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest">
                   {editingProductId ? 'Edit' : 'Create'} Edition
                 </span>
-                <h2 id="admin-product-modal-title" className="font-headline-sm text-headline-sm text-on-surface mt-1">
-                  {editingProductId ? 'Update Puzzle Details' : 'New Artisan Puzzle'}
+
+                <h2
+                  id="admin-product-modal-title"
+                  className="font-headline-sm text-headline-sm text-on-surface mt-1"
+                >
+                  {editingProductId
+                    ? 'Update Puzzle Details'
+                    : 'New Artisan Puzzle'}
                 </h2>
               </div>
+
               <Button
                 onClick={() => {
                   setShowModal(false);
@@ -391,16 +515,28 @@ export const AdminProductsPage: React.FC = () => {
               />
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 py-4" noValidate>
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-4 py-4"
+              noValidate
+            >
               {formError && (
-                <p className="text-sm text-error" role="alert">
+                <p
+                  className="text-sm text-error"
+                  role="alert"
+                >
                   {formError}
                 </p>
               )}
+
               <div>
-                <label className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5" htmlFor="ap-name">
+                <label
+                  className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5"
+                  htmlFor="ap-name"
+                >
                   Puzzle Title *
                 </label>
+
                 <input
                   id="ap-name"
                   type="text"
@@ -411,10 +547,15 @@ export const AdminProductsPage: React.FC = () => {
                   required
                 />
               </div>
+
               <div>
-                <label className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5" htmlFor="ap-desc">
+                <label
+                  className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5"
+                  htmlFor="ap-desc"
+                >
                   Description *
                 </label>
+
                 <textarea
                   id="ap-desc"
                   maxLength={2000}
@@ -424,11 +565,16 @@ export const AdminProductsPage: React.FC = () => {
                   required
                 />
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5" htmlFor="ap-price">
+                  <label
+                    className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5"
+                    htmlFor="ap-price"
+                  >
                     Price ($) *
                   </label>
+
                   <input
                     id="ap-price"
                     type="number"
@@ -441,10 +587,15 @@ export const AdminProductsPage: React.FC = () => {
                     required
                   />
                 </div>
+
                 <div>
-                  <label className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5" htmlFor="ap-stock">
+                  <label
+                    className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5"
+                    htmlFor="ap-stock"
+                  >
                     Stock *
                   </label>
+
                   <input
                     id="ap-stock"
                     type="number"
@@ -458,10 +609,15 @@ export const AdminProductsPage: React.FC = () => {
                   />
                 </div>
               </div>
+
               <div>
-                <label className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5" htmlFor="ap-cat">
+                <label
+                  className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5"
+                  htmlFor="ap-cat"
+                >
                   Category *
                 </label>
+
                 <select
                   id="ap-cat"
                   value={category}
@@ -474,20 +630,52 @@ export const AdminProductsPage: React.FC = () => {
                   <option value="Mystery Puzzles">Mystery Atelier</option>
                 </select>
               </div>
+
               <div>
-                <label className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5" htmlFor="ap-img">
-                  Cover Image URL
+                <label
+                  className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5"
+                  htmlFor="ap-images"
+                >
+                  Product Images *
                 </label>
+
                 <input
-                  id="ap-img"
-                  type="url"
-                  maxLength={500}
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
+                  id="ap-images"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageChange}
                   className="w-full bg-surface-container text-on-surface text-sm px-3.5 py-2.5 rounded focus:outline-none focus:ring-2 focus:ring-primary/40"
-                  placeholder="https://…"
                 />
+
+                <p className="text-xs text-outline mt-1.5">
+                  Select up to 10 images.
+                </p>
+
+                {images.length > 0 && (
+                  <div className="grid grid-cols-4 gap-2 mt-3">
+                    {images.map((image, index) => (
+                      <div
+                        key={`${image.name}-${index}`}
+                        className="aspect-square rounded overflow-hidden bg-surface-container-high"
+                      >
+                        <img
+                          src={URL.createObjectURL(image)}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {editingProductId && images.length === 0 && (
+                  <p className="text-xs text-outline mt-2">
+                    Leave empty to keep the current images.
+                  </p>
+                )}
               </div>
+
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -495,8 +683,12 @@ export const AdminProductsPage: React.FC = () => {
                   onChange={(e) => setIsActive(e.target.checked)}
                   className="w-5 h-5 rounded accent-primary"
                 />
-                <span className="text-sm text-on-surface-variant">Visible in public storefront</span>
+
+                <span className="text-sm text-on-surface-variant">
+                  Visible in public storefront
+                </span>
               </label>
+
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-outline-variant/20">
                 <Button
                   type="button"
@@ -509,8 +701,15 @@ export const AdminProductsPage: React.FC = () => {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting} isLoading={isSubmitting}>
-                  {editingProductId ? 'Save Changes' : 'Create Edition'}
+
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  isLoading={isSubmitting}
+                >
+                  {editingProductId
+                    ? 'Save Changes'
+                    : 'Create Edition'}
                 </Button>
               </div>
             </form>
@@ -522,3 +721,4 @@ export const AdminProductsPage: React.FC = () => {
 };
 
 export default AdminProductsPage;
+
