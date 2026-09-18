@@ -8,6 +8,7 @@ export const ContactForm: React.FC = () => {
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -16,7 +17,7 @@ export const ContactForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name || !email || !message) {
+    if (!name || !email || !subject || !message) {
       setError(t.contact.fillAllFields);
       return;
     }
@@ -24,10 +25,11 @@ export const ContactForm: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      await staticApi.sendMessage({ name, email, message });
+      await staticApi.sendMessage({ name, email, subject, message });
       setSuccess(true);
       setName('');
       setEmail('');
+      setSubject('');
       setMessage('');
     } catch (err) {
       setError(t.contact.sendError);
@@ -80,6 +82,21 @@ export const ContactForm: React.FC = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t.contact.emailPlaceholder}
+          className="w-full bg-[var(--bg-main)] border border-border rounded-md px-3.5 py-2.5 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-border"
+          required
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <label className="text-xs font-medium text-[var(--text-main)]">
+          Subject
+        </label>
+
+        <input
+          type="text"
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+          placeholder="What is this regarding?"
           className="w-full bg-[var(--bg-main)] border border-border rounded-md px-3.5 py-2.5 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-border"
           required
         />

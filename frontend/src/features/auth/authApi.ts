@@ -23,12 +23,12 @@ export interface AuthResponse {
 
 export const authApi = {
   register: async (credentials: RegisterCredentials) => {
-    const response = await apiClient.post<AuthResponse>('/auth/register', credentials);
-    return response.data;
+    const response = await apiClient.post<{ success: boolean; data: AuthResponse }>('/auth/register', credentials);
+    return response.data.data;
   },
 
   login: async (credentials: LoginCredentials) => {
-    const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
-    return response.data;
+    const response = await apiClient.post<{ success: boolean; data: AuthResponse }>('/auth/login', credentials);
+    return response.data.data;
   },
 };
