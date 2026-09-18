@@ -10,17 +10,17 @@ export interface WishlistItem {
 
 export const wishlistApi = {
   get: async () => {
-    const response = await apiClient.get<{ success: boolean; data: WishlistItem[] }>('/wishlist');
+    const response = await apiClient.get<{ success: boolean; data: Product[] }>('/wishlist');
     return response.data.data;
   },
 
   add: async (productId: string) => {
-    const response = await apiClient.post<{ success: boolean; data: WishlistItem[] }>(`/wishlist/${productId}`);
+    const response = await apiClient.post<{ success: boolean; data: Product[] }>(`/wishlist/${productId}`);
     return response.data.data;
   },
 
   remove: async (productId: string) => {
-    const response = await apiClient.delete<{ success: boolean; data: WishlistItem[] }>(`/wishlist/${productId}`);
+    const response = await apiClient.delete<{ success: boolean; data: Product[] }>(`/wishlist/${productId}`);
     return response.data.data;
   }
 };

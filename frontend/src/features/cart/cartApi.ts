@@ -40,7 +40,7 @@ export const cartApi = {
       title: item.product.name,
       price: item.product.price,
       stock: item.product.stock,
-      imageUrl: item.product.images[0],
+      imageUrl: item.product.image || '/placeholder.png',
       quantity: item.quantity
     }));
   },

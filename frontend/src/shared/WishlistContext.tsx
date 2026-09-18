@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { wishlistApi, type WishlistItem } from '../features/wishlist/wishlistApi';
+import { wishlistApi } from '../features/wishlist/wishlistApi';
 import { useAuth } from '../features/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from './context/ToastContext';
@@ -28,9 +28,8 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       const items = await wishlistApi.get();
-      // The backend returns an array of WishlistItem { product: Product }
-      // We map it to just the product objects so frontend is happy
-      setWishlistItems(items.map((item: WishlistItem) => item.product));
+      // The backend returns an array of Product objects directly
+      setWishlistItems(items);
     } catch (err) {
       console.error("Failed to fetch wishlist", err);
     } finally {
