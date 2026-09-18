@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Loader2, Mail, CheckCircle, Circle } from 'lucide-react';
-import { useLanguage } from '../../shared/context/LanguageContext';
+import { Loader2, Mail, CheckCircle } from 'lucide-react';
 import { staticApi } from './staticApi';
 import { Button } from '../../shared/components/ui/Button';
 
@@ -15,7 +14,7 @@ interface ContactMessage {
 }
 
 export const AdminMessagesPage: React.FC = () => {
-  const { t } = useLanguage();
+  // t removed
 
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);

@@ -37,7 +37,9 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
   // Debounce Search
   useEffect(() => {
     const timer = setTimeout(() => {
-      onSearchChange(localSearch);
+      if (localSearch.length === 0 || localSearch.length >= 3) {
+        onSearchChange(localSearch);
+      }
     }, 400);
     return () => clearTimeout(timer);
   }, [localSearch, onSearchChange]);

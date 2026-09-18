@@ -1,7 +1,8 @@
 import {
   Search, Heart, ShoppingBag, UserCircle2, SlidersHorizontal,
   ListFilter, ChevronUp, ChevronDown, ChevronRight, ChevronLeft,
-  AlertCircle, PackageOpen, Leaf, X, Settings, ArrowUpDown, Check, CheckCircle
+  AlertCircle, PackageOpen, Leaf, X, Settings, ArrowUpDown, Check, CheckCircle,
+  Minus, Plus, Trash2, MessageCircle, Star, ShoppingCart, Bookmark
 } from "lucide-react";
 import type { LucideProps, LucideIcon } from "lucide-react";
 
@@ -25,6 +26,14 @@ const ICONS: Record<string, LucideIcon> = {
   sort: ArrowUpDown,
   check: Check,
   check_circle: CheckCircle,
+  remove: Minus,
+  add: Plus,
+  delete_outline: Trash2,
+  chat_bubble_outline: MessageCircle,
+  star: Star,
+  shopping_cart_checkout: ShoppingCart,
+  bookmark: Bookmark,
+  bookmark_border: Bookmark,
 };
 
 interface IconProps extends Omit<LucideProps, "size"> {

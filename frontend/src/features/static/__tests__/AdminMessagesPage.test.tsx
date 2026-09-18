@@ -3,8 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AdminMessagesPage } from '../AdminMessagesPage';
 import { staticApi } from '../staticApi';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { AuthProvider } from '../../auth/AuthContext';
+import { MemoryRouter } from 'react-router-dom';
 
 // Mock language context
 vi.mock('../../../shared/context/LanguageContext', () => ({
