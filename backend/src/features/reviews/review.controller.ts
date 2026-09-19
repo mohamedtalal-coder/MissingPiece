@@ -3,6 +3,7 @@ import {
   createReviewSchema,
   updateReviewSchema,
   listReviewsQuerySchema,
+  reviewProductParamSchema,
 } from "./review.validation.js";
 import * as reviewService from "./review.service.js";
 import type { AppError } from "../../shared/middleware/errorHandler.js";
@@ -50,6 +51,16 @@ export async function listReviewsHandler(req: Request, res: Response, next: Next
     const query = listReviewsQuerySchema.parse(req.query);
     const result = await reviewService.listReviewsForProduct(query);
     res.json({ success: true, ...result });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function canReviewProductHandler(req: Request, res: Response, next: NextFunction) {
+  try {
+    const productId = reviewProductParamSchema.parse(req.params["product"]);
+    const canReview = await reviewService.canReviewProduct(req.userId!, productId);
+    res.json({ success: true, canReview });
   } catch (err) {
     next(err);
   }

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Review } from "./review.model.js";
 import { Product } from "../products/product.model.js";
+import { Order } from "../orders/order.model.js";
 import type { z } from "zod";
 import type { createReviewSchema, updateReviewSchema, listReviewsQuerySchema } from "./review.validation.js";
 import type { AppError } from "../../shared/middleware/errorHandler.js";
@@ -34,9 +35,29 @@ export async function createReview(userId: string, input: z.infer<typeof createR
     throw err;
   }
 
-  const review = await Review.create({ ...input, user: userId });
+  const hasDeliveredPurchase = await Order.exists({
+    user: userId,
+    status: "delivered",
+    "items.product": input.product,
+  });
+
+  if (!hasDeliveredPurchase) {
+    const err: AppError = new Error("You can only review products you have received.");
+    err.statusCode = 403;
+    throw err;
+  }
+
+  const review = await Review.create({ ...input, user: userId, status: "approved" });
   await recalculateProductRating(input.product);
   return review;
+}
+
+export async function canReviewProduct(userId: string, productId: string) {
+  return Boolean(await Order.exists({
+    user: userId,
+    status: "delivered",
+    "items.product": productId,
+  }));
 }
 
 export async function updateReview(

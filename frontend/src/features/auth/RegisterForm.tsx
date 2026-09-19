@@ -62,7 +62,11 @@ export function RegisterForm() {
       setLoading(true);
       const data = await authApi.register({ name: cleanName, email: cleanEmail, password: cleanPassword });
       login(data.token, data.user);
-      navigate(from, { replace: true });
+      if (data.user.isEmailVerified) {
+        navigate(from, { replace: true });
+      } else {
+        navigate('/verify-email', { replace: true, state: { email: data.user.email, from } });
+      }
     } catch (err: any) {
       setError(
         err.response?.data?.message || t.auth?.registrationFailed || 'Registration failed. Please try again.',

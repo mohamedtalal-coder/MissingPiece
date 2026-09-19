@@ -2,12 +2,14 @@ import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import {
   createReview,
+  canReviewProduct,
   updateReview,
   deleteReview,
   listReviewsForProduct,
 } from "../../../features/reviews/review.service.js";
 import { Review } from "../../../features/reviews/review.model.js";
 import { Product } from "../../../features/products/product.model.js";
+import { Order } from "../../../features/orders/order.model.js";
 import { User } from "../../../features/auth/user.model.js";
 import { createReviewSchema } from "../../../features/reviews/review.validation.js";
 
@@ -33,6 +35,22 @@ describe("Review Service", () => {
   let productId: string;
   const userId1 = new mongoose.Types.ObjectId().toString();
   const userId2 = new mongoose.Types.ObjectId().toString();
+
+  const createDeliveredOrderForUser = async (userId: string, productId: string) => {
+    await Order.create({
+      user: new mongoose.Types.ObjectId(userId),
+      items: [{ product: new mongoose.Types.ObjectId(productId), quantity: 1, priceAtPurchase: 10 }],
+      totalAmount: 10,
+      shippingAddress: {
+        street: "123 Main",
+        city: "Test City",
+        state: "TS",
+        zipCode: "12345",
+        country: "US",
+      },
+      status: "delivered",
+    });
+  };
 
   beforeEach(async () => {
     const product = await Product.create({
@@ -74,6 +92,8 @@ describe("Review Service", () => {
 
   describe("createReview", () => {
     it("succeeds for a first review and recalculates rating", async () => {
+      await createDeliveredOrderForUser(userId1, productId);
+
       const review = await createReview(userId1, {
         product: productId,
         rating: 4,
@@ -87,9 +107,16 @@ describe("Review Service", () => {
       expect(product?.reviewCount).toBe(1);
     });
 
+    it("forbids reviews for products the user never received", async () => {
+      await expect(
+        createReview(userId1, { product: productId, rating: 5, comment: "I bought it" })
+      ).rejects.toThrow("You can only review products you have received.");
+    });
+
     it("throws 11000 on a second review by the same user for the same product", async () => {
+      await createDeliveredOrderForUser(userId1, productId);
       await createReview(userId1, { product: productId, rating: 4, comment: "First" });
-      
+
       await expect(
         createReview(userId1, { product: productId, rating: 5, comment: "Second" })
       ).rejects.toThrow(/E11000/); // MongoDB duplicate key error
@@ -103,10 +130,22 @@ describe("Review Service", () => {
     });
   });
 
+  describe("canReviewProduct", () => {
+    it("returns true only for a user with a delivered order containing the product", async () => {
+      expect(await canReviewProduct(userId1, productId)).toBe(false);
+
+      await createDeliveredOrderForUser(userId1, productId);
+
+      expect(await canReviewProduct(userId1, productId)).toBe(true);
+      expect(await canReviewProduct(userId2, productId)).toBe(false);
+    });
+  });
+
   describe("updateReview", () => {
     let reviewId: string;
 
     beforeEach(async () => {
+      await createDeliveredOrderForUser(userId1, productId);
       const review = await createReview(userId1, {
         product: productId,
         rating: 3,
@@ -138,6 +177,7 @@ describe("Review Service", () => {
     let reviewId: string;
 
     beforeEach(async () => {
+      await createDeliveredOrderForUser(userId1, productId);
       const review = await createReview(userId1, {
         product: productId,
         rating: 3,
@@ -169,6 +209,21 @@ describe("Review Service", () => {
 
   describe("recalculateProductRating", () => {
     it("produces correct average after multiple reviews and resets to 0/0 when last deleted", async () => {
+      await Order.create({
+        user: new mongoose.Types.ObjectId(userId1),
+        items: [{ product: new mongoose.Types.ObjectId(productId), quantity: 1, priceAtPurchase: 10 }],
+        totalAmount: 10,
+        shippingAddress: { street: "123 Main", city: "Test City", state: "TS", zipCode: "12345", country: "US" },
+        status: "delivered",
+      });
+      await Order.create({
+        user: new mongoose.Types.ObjectId(userId2),
+        items: [{ product: new mongoose.Types.ObjectId(productId), quantity: 1, priceAtPurchase: 10 }],
+        totalAmount: 10,
+        shippingAddress: { street: "456 Main", city: "Test City", state: "TS", zipCode: "12345", country: "US" },
+        status: "delivered",
+      });
+
       await createReview(userId1, { product: productId, rating: 5, comment: "User 1" });
       await createReview(userId2, { product: productId, rating: 4, comment: "User 2" });
 
@@ -197,8 +252,16 @@ describe("Review Service", () => {
       // create a user to populate
       const u = await User.create({ name: "Rev User", email: "rev@e.com", passwordHash: "secret" });
 
+      await Order.create({
+        user: u._id,
+        items: [{ product: new mongoose.Types.ObjectId(productId), quantity: 1, priceAtPurchase: 10 }],
+        totalAmount: 10,
+        shippingAddress: { street: "99 Main", city: "Test City", state: "TS", zipCode: "12345", country: "US" },
+        status: "delivered",
+      });
+
       await createReview(u._id.toString(), { product: productId, rating: 4, comment: "C1" });
-      
+
       const result = await listReviewsForProduct({ product: productId, page: 1, limit: 10 });
       expect(result.reviews.length).toBe(1);
       

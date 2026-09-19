@@ -4,6 +4,7 @@ import {
   updateReviewHandler,
   deleteReviewHandler,
   listReviewsHandler,
+  canReviewProductHandler,
   listReviewsAdminHandler,
   updateReviewStatusHandler,
 } from "./review.controller.js";
@@ -14,6 +15,7 @@ import { reviewWriteLimiter, reviewReadLimiter, adminRateLimiter } from "../../s
 const router = Router();
 
 router.get("/", reviewReadLimiter, listReviewsHandler);
+router.get("/can-review/:product", requireAuth, reviewReadLimiter, canReviewProductHandler);
 router.post("/", requireAuth, reviewWriteLimiter, createReviewHandler);
 router.patch("/:id", requireAuth, reviewWriteLimiter, updateReviewHandler);
 router.delete("/:id", requireAuth, reviewWriteLimiter, deleteReviewHandler);

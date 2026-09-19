@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWishlist } from '../../shared/WishlistContext';
 import { useCart } from '../cart/CartContext';
@@ -46,12 +46,16 @@ interface WishlistItemCardProps {
 function WishlistItemCard({ item, pendingAction, onRemove, onMoveToCart, t }: WishlistItemCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
+  const imageRef = useRef<HTMLImageElement>(null);
   const imageSrc = item.images?.[0];
   const isPending = pendingAction !== null;
 
   useEffect(() => {
     setImageLoaded(false);
     setImageFailed(false);
+    if (imageRef.current?.complete && imageRef.current.naturalWidth > 0) {
+      setImageLoaded(true);
+    }
   }, [imageSrc]);
 
   return (
@@ -73,6 +77,7 @@ function WishlistItemCard({ item, pendingAction, onRemove, onMoveToCart, t }: Wi
           )}
           {imageSrc && !imageFailed ? (
             <img
+              ref={imageRef}
               src={imageSrc}
               alt={item.name}
               className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${

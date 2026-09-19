@@ -4,6 +4,8 @@ import {
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  verifyEmailSchema,
+  resendVerificationSchema,
 } from "./auth.validation.js";
 import { revokeAllUserTokens } from "../../shared/utils/tokenRevocation.js";
 import {
@@ -11,6 +13,8 @@ import {
   loginUser,
   forgotPassword as forgotPasswordService,
   resetPassword as resetPasswordService,
+  verifyEmail as verifyEmailService,
+  resendVerificationCode as resendVerificationService,
 } from "./auth.service.js";
 export async function register(
   req: Request,
@@ -113,6 +117,44 @@ export async function resetPassword(
     res.status(200).json({
       success: true,
       message: "Password reset successful",
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function verifyEmail(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const data = verifyEmailSchema.parse(req.body);
+
+    await verifyEmailService(data.email, data.otp);
+
+    res.status(200).json({
+      success: true,
+      message: "Email verified successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function resendVerification(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const data = resendVerificationSchema.parse(req.body);
+
+    await resendVerificationService(data.email);
+
+    res.status(200).json({
+      success: true,
+      message: "If the account exists and is unverified, a code has been sent",
     });
   } catch (error) {
     next(error);

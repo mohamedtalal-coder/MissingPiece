@@ -5,6 +5,7 @@ import ProfilePage from '../../../features/account/ProfilePage';
 import { accountApi } from '../../../features/account/accountApi';
 import { LanguageProvider } from '../../../shared/context/LanguageContext';
 import { ToastProvider } from '../../../shared/context/ToastContext';
+import { AuthProvider } from '../../../features/auth/AuthContext';
 
 vi.mock('../../../features/account/accountApi', () => ({
   accountApi: {
@@ -22,11 +23,13 @@ describe('Account Profile Feature', () => {
     return render(
       <LanguageProvider>
         <ToastProvider>
-          <MemoryRouter initialEntries={['/profile']}>
-            <Routes>
-              <Route path="/profile" element={<ProfilePage />} />
-            </Routes>
-          </MemoryRouter>
+          <AuthProvider>
+            <MemoryRouter initialEntries={['/profile']}>
+              <Routes>
+                <Route path="/profile" element={<ProfilePage />} />
+              </Routes>
+            </MemoryRouter>
+          </AuthProvider>
         </ToastProvider>
       </LanguageProvider>
     );

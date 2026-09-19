@@ -112,6 +112,25 @@ describe("Product Service", () => {
       expect(updated!.slug).toBe("original-name"); // slug unchanged
       expect(updated!.name).toBe("New Name");
     });
+
+    it("preserves existing images when an update has no new images", async () => {
+      const p = await createProduct({
+        name: "Illustrated Puzzle",
+        description: "D",
+        price: 10,
+        category: "cat",
+        stock: 10,
+        images: ["https://example.com/original.jpg"],
+      });
+
+      const updated = await updateProduct(p._id.toString(), {
+        name: "Updated Puzzle",
+        images: [],
+      });
+
+      expect(updated!.name).toBe("Updated Puzzle");
+      expect(updated!.images).toEqual(["https://example.com/original.jpg"]);
+    });
   });
 
   describe("softDeleteProduct", () => {

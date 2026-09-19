@@ -3,8 +3,19 @@ import { Product } from "../products/product.model.js";
 import mongoose from "mongoose";
 
 export async function getCart(userId: string) {
-  const cart = await Cart.findOne({ userId }).lean();
-  return cart?.items ?? [];
+  const cart = await Cart.findOne({ userId }).populate("items.productId").lean();
+  if (!cart || !cart.items) return [];
+
+  return cart.items
+    .filter((item: any) => item.productId != null)
+    .map((item: any) => {
+      const isPopulated = item.productId && typeof item.productId === "object" && "_id" in item.productId;
+      return {
+        productId: isPopulated ? item.productId._id : item.productId,
+        quantity: item.quantity,
+        product: isPopulated ? item.productId : null,
+      };
+    });
 }
 
 const MAX_ADD_RETRIES = 3;

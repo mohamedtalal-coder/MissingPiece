@@ -70,7 +70,7 @@ export async function createProductHandler(req: Request, res: Response, next: Ne
     await logAdminAction({
       adminId: req.userId!,
       action: "CREATE_PRODUCT",
-      resourceId: String(product.id ?? (product as { _id?: unknown })._id ?? ""),
+      resourceId: String((product as unknown as { id?: unknown; _id?: unknown }).id ?? (product as { _id?: unknown })._id ?? ""),
       resourceModel: "Product",
       details: { name: input.name },
       ipAddress: req.ip,

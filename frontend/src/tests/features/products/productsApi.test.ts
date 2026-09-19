@@ -46,4 +46,31 @@ describe('productsApi', () => {
       expect(apiClient.get).toHaveBeenCalledWith('/products/admin/all', { params: {}, signal: undefined });
     });
   });
+
+  it('normalizes backend order-shaped totals and populated product items', async () => {
+    (apiClient.get as any).mockResolvedValue({
+      data: {
+        success: true,
+        data: {
+          _id: 'order-1',
+          totalAmount: 49.99,
+          items: [{
+            product: { _id: 'product-1', name: 'Wooden Puzzle', images: ['puzzle.jpg'], price: 49.99 },
+            quantity: 1,
+            priceAtPurchase: 49.99,
+          }],
+        },
+      },
+    });
+
+    const { ordersApi } = await import('../../../features/orders/ordersApi');
+    const order = await ordersApi.getOrderById('order-1');
+
+    expect(order.total).toBe(49.99);
+    expect(order.items[0]).toMatchObject({
+      title: 'Wooden Puzzle',
+      imageUrl: 'puzzle.jpg',
+      price: 49.99,
+    });
+  });
 });

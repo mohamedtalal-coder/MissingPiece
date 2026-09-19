@@ -6,6 +6,18 @@ import type { AppError } from "../../shared/middleware/errorHandler.js";
 import { findValidDiscountByCode, calculateDiscount, incrementDiscountUsage } from "../discounts/discount.service.js";
 import { User } from "../auth/user.model.js";
 
+export const AUTO_DELIVERY_DELAY_MS = 90_000;
+
+async function markDueOrdersDelivered(userId?: string) {
+  const filter: Record<string, unknown> = {
+    status: { $in: ["pending", "paid", "shipped"] },
+    createdAt: { $lte: new Date(Date.now() - AUTO_DELIVERY_DELAY_MS) },
+  };
+  if (userId) filter.user = userId;
+
+  await Order.updateMany(filter, { $set: { status: "delivered" } });
+}
+
 export interface CreateOrderInput {
   items: { product: string; quantity: number }[];
   shippingAddress: ShippingAddress;
@@ -103,11 +115,12 @@ export interface AdminListOrdersParams extends ListOrdersParams {
 }
 
 export async function getMyOrders(userId: string, params: ListOrdersParams) {
+  await markDueOrdersDelivered(userId);
   const skip = (params.page - 1) * params.limit;
 
   const [items, total] = await Promise.all([
     Order.find({ user: userId })
-      .populate("items.product", "name images")
+      .populate("items.product", "name images price slug")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(params.limit)
@@ -169,7 +182,7 @@ export async function getAllOrdersAdmin(params: AdminListOrdersParams) {
   const [items, total] = await Promise.all([
     Order.find(filter)
       .populate("user", "name email")
-      .populate("items.product", "name images price")
+      .populate("items.product", "name images price slug")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(params.limit)
@@ -191,13 +204,14 @@ export async function exportOrdersAdmin(params: Omit<AdminListOrdersParams, "pag
 }
 
 export async function getOrderById(orderId: string, userId: string, isAdmin: boolean) {
+  await markDueOrdersDelivered(isAdmin ? undefined : userId);
   const filter: Record<string, unknown> = { _id: orderId };
 
   if (!isAdmin) {
     filter.user = userId;
   }
 
-  return Order.findOne(filter).populate("items.product", "name images price").lean();
+  return Order.findOne(filter).populate("items.product", "name images price slug").lean();
 }
 
 /** Validated order status state machine */
@@ -210,7 +224,7 @@ export const ALLOWED_TRANSITIONS: Record<string, string[]> = {
   refunded: [],
 };
 
-async function restoreStock(
+export async function restoreStock(
   items: { product: unknown; quantity: number }[],
   session: import("mongoose").ClientSession
 ) {
@@ -221,6 +235,38 @@ async function restoreStock(
       { session }
     );
   }
+}
+
+/**
+ * Buyer-initiated cancellation. Unlike updateOrderStatus (admin-only, any
+ * valid transition), this only allows a buyer to cancel their OWN order,
+ * and only while it is still "pending" (spec: "if it hasn't shipped yet").
+ */
+export async function cancelOwnOrder(orderId: string, userId: string) {
+  return withTransaction(async (session) => {
+    const order = await Order.findOne({ _id: orderId, user: userId }).session(session);
+
+    if (!order) {
+      const err: AppError = new Error("Order not found");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    if (order.status !== "pending") {
+      const err: AppError = new Error(
+        `Order cannot be cancelled once it is ${order.status}`
+      );
+      err.statusCode = 409;
+      throw err;
+    }
+
+    await restoreStock(order.items, session);
+
+    order.status = "cancelled";
+    await order.save({ session });
+
+    return order;
+  });
 }
 
 export async function updateOrderStatus(orderId: string, status: string) {

@@ -1,0 +1,40 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+
+# Environments
+.env
+.env.*
+!.env.example
+.env.local
+
+# Editor directories and files
+.vscode/
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Build output
+build/
+
+# Scratch scripts
+test-mongoose-pipeline.ts
+test-mongoose-return.ts
+test-script.ts
+test2.ts
+test-security.js

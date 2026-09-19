@@ -16,7 +16,8 @@ vi.mock('../../../shared/context/LanguageContext', () => ({
         noMessages: 'No Messages',
         noMessagesDescription: 'Empty'
       }
-    }
+    },
+    formatDate: (value: string) => new Date(value).toLocaleDateString(),
   })
 }));
 

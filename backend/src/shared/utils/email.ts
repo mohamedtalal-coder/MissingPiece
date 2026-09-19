@@ -2,23 +2,54 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env["RESEND_API_KEY"] || "re_dummy");
 
-export async function sendPasswordResetEmail(
-  email: string,
-  otp: string
-) {
+function isResendSandboxRestriction(message: string): boolean {
+  return message.includes("You can only send testing emails to your own email address");
+}
+
+async function sendEmail({
+  to,
+  subject,
+  otp,
+}: {
+  to: string;
+  subject: string;
+  otp: string;
+}) {
   const { error } = await resend.emails.send({
     from: process.env["RESEND_FROM_EMAIL"] || "onboarding@resend.dev",
-    to: email,
-    subject: "Reset Your Password",
+    to,
+    subject,
     html: `
-      <h2>Password Reset</h2>
-      <p>Your password reset code is:</p>
+      <h2>${subject}</h2>
+      <p>Your code is:</p>
       <h1>${otp}</h1>
       <p>This code will expire in 10 minutes.</p>
     `,
   });
 
   if (error) {
+    const isDevelopment = process.env["NODE_ENV"] !== "production";
+    if (isDevelopment && isResendSandboxRestriction(error.message)) {
+      console.warn(
+        `[Email development fallback] Resend sandbox rejected ${to}. Use OTP ${otp} from this log.`
+      );
+      return;
+    }
+
     throw new Error(error.message);
   }
+}
+
+export async function sendPasswordResetEmail(
+  email: string,
+  otp: string
+) {
+  await sendEmail({ to: email, otp, subject: "Reset Your Password" });
+}
+
+export async function sendEmailVerificationCode(
+  email: string,
+  otp: string
+) {
+  await sendEmail({ to: email, otp, subject: "Verify Your Email" });
 }

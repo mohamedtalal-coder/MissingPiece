@@ -84,7 +84,7 @@ describe('Orders Feature', () => {
     renderWithProviders('/orders');
 
     await waitFor(() => {
-      expect(screen.getAllByText(`Order #${orderShortId(mockOrders[0]!._id)}`).length).toBeGreaterThan(0);
+      expect(screen.getAllByText((text) => text.includes(orderShortId(mockOrders[0]!._id))).length).toBeGreaterThan(0);
     });
 
     expect(screen.getByText(/Page 1 of 3/)).toBeInTheDocument();
@@ -106,8 +106,33 @@ describe('Orders Feature', () => {
 
     await waitFor(() => {
       expect(ordersApi.getMyOrders).toHaveBeenCalledWith(2, 10);
-      expect(screen.getByText(`Order #${orderShortId('507f1f77bcf86cd799439099')}`)).toBeInTheDocument();
+      expect(screen.getByText((text) => text.includes(orderShortId('507f1f77bcf86cd799439099')))).toBeInTheDocument();
     });
+  });
+
+  it('shows a review action on delivered orders', async () => {
+    (ordersApi.getMyOrders as any).mockResolvedValue({
+      items: [{
+        _id: '507f1f77bcf86cd799439011',
+        createdAt: new Date().toISOString(),
+        status: 'delivered',
+        total: 100,
+        shippingAddress: { street: 'a', city: 'b', state: 'c', zipCode: 'd', country: 'e' },
+        items: [{ productId: '507f1f77bcf86cd799439012', slug: 'starry-night-jigsaw-puzzle', title: 'Puzzle', quantity: 1, price: 100 }],
+      }],
+      total: 1,
+      page: 1,
+      limit: 10,
+      totalPages: 1,
+    });
+
+    renderWithProviders('/orders');
+
+    await waitFor(() => {
+      expect(screen.getByRole('link', { name: /review item/i })).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole('link', { name: /review item/i })).toHaveAttribute('href', '/products/starry-night-jigsaw-puzzle#reviews');
   });
 
   it('IDOR check - gracefully handles 403 when viewing someone elses order', async () => {

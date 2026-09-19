@@ -15,7 +15,7 @@ const reviewSchema = new Schema(
       },
     },
     comment: { type: String, trim: true, maxlength: 1000, default: "" },
-    status: { type: String, enum: ["pending", "approved", "rejected", "flagged"], default: "pending" },
+    status: { type: String, enum: ["pending", "approved", "rejected", "flagged"], default: "approved" },
     moderationReason: { type: String },
   },
   { timestamps: true }

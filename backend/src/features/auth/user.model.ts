@@ -23,6 +23,20 @@ const userSchema = new Schema(
     isActive: { type: Boolean, default: true },
     deactivatedAt: { type: Date },
 
+    isEmailVerified: { type: Boolean, default: false },
+
+    emailVerificationOtpHash: {
+      type: String,
+      select: false,
+    },
+
+    emailVerificationOtpExpires: {
+      type: Date,
+      select: false,
+    },
+
+    avatarUrl: { type: String },
+
     resetPasswordOtpHash: {
       type: String,
       select: false,

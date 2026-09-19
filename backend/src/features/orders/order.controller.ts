@@ -64,6 +64,20 @@ export const getOrderById = async (req: Request, res: Response, next: NextFuncti
 };
 
 /**
+ * Cancel own order (Buyer only, own order, pending only)
+ * PATCH /api/orders/:id/cancel
+ */
+export const cancelMyOrder = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const orderId = req.params["id"] as string;
+    const order = await orderService.cancelOwnOrder(orderId, getUserId(req));
+    res.status(200).json({ success: true, data: order });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Update order status (Admin only)
  * PATCH /api/orders/:id/status
  */
@@ -101,7 +115,7 @@ export const updateOrderStatus = async (req: Request, res: Response, next: NextF
 export const getAllOrdersAdmin = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const query = adminOrdersQuerySchema.parse(req.query);
-    const result = await orderService.getAllOrdersAdmin(query);
+    const result = await orderService.getAllOrdersAdmin(query as unknown as orderService.AdminListOrdersParams);
     res.status(200).json({ success: true, ...result });
   } catch (error) {
     next(error);
@@ -115,7 +129,7 @@ export const getAllOrdersAdmin = async (req: Request, res: Response, next: NextF
 export const exportOrdersAdmin = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const query = adminOrdersQuerySchema.omit({ page: true, limit: true }).parse(req.query);
-    const items = await orderService.exportOrdersAdmin(query);
+    const items = await orderService.exportOrdersAdmin(query as unknown as Omit<orderService.AdminListOrdersParams, "page" | "limit">);
 
     const header = "id,customer,email,status,totalAmount,createdAt,city,country\n";
     const rows = items

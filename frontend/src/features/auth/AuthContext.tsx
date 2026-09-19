@@ -5,48 +5,55 @@ interface User {
   name: string;
   email: string;
   role: 'guest' | 'buyer' | 'admin';
+  isEmailVerified?: boolean;
+  avatarUrl?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   login: (token: string, userData: User) => void;
   logout: () => void;
+  updateUser: (partial: Partial<User>) => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('mp_user');
-    const savedToken = localStorage.getItem('token');
-    
-    if (savedUser && savedToken) {
-      try {
+    try {
+      const savedUser = localStorage.getItem('mp_user');
+      const savedToken = localStorage.getItem('token');
+
+      if (savedUser && savedToken) {
         // Decode JWT to check expiry
         const payloadBase64 = savedToken.split('.')[1];
         if (payloadBase64) {
           const payload = JSON.parse(atob(payloadBase64));
           const isExpired = payload.exp && payload.exp * 1000 < Date.now();
-          
+
           if (isExpired) {
             localStorage.removeItem('mp_user');
             localStorage.removeItem('token');
-            setUser(null);
-            return;
+          } else {
+            setUser(JSON.parse(savedUser));
           }
+        } else {
+          localStorage.removeItem('mp_user');
+          localStorage.removeItem('token');
         }
-        
-        setUser(JSON.parse(savedUser));
-      } catch (e) {
-        setUser(null);
+      }
+    } catch {
         localStorage.removeItem('mp_user');
         localStorage.removeItem('token');
-      }
     }
+
+    setIsLoading(false);
 
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'token' && !e.newValue) {
@@ -61,6 +68,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(userData);
     localStorage.setItem('mp_user', JSON.stringify(userData));
     localStorage.setItem('token', token); // نفس المفتاح اللي بيقرأه client.ts
+  };
+
+  const updateUser = (partial: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, ...partial };
+      localStorage.setItem('mp_user', JSON.stringify(next));
+      return next;
+    });
   };
 
   const logout = async () => {
@@ -79,8 +95,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         login,
         logout,
+        updateUser,
         isAuthenticated: !!user,
         isAdmin: user?.role === 'admin',
+        isLoading,
       }}
     >
       {children}

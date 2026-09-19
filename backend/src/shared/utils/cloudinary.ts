@@ -1,10 +1,10 @@
 import { cloudinary } from "../config/cloudinary.js";
 
-export function uploadImage(buffer: Buffer): Promise<string> {
+export function uploadImage(buffer: Buffer, folder = "missing-piece/products"): Promise<string> {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
-        folder: "missing-piece/products",
+        folder,
         resource_type: "image",
       },
       (error, result) => {

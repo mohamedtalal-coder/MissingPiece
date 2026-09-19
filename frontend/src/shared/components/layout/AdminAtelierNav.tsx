@@ -4,7 +4,17 @@ import { useLanguage } from '../../context/LanguageContext';
 
 export function AdminAtelierNav() {
   const { t } = useLanguage();
-  const n = t.adminPanel.nav;
+  const n = t.adminPanel?.nav ?? {
+    dashboard: 'Dashboard',
+    inventory: 'Inventory',
+    fulfillment: 'Orders',
+    inquiries: 'Messages',
+    users: 'Users',
+    reviews: 'Reviews',
+    faqs: 'FAQs',
+    discounts: 'Discounts',
+    audit: 'Audit logs',
+  };
 
   const links = [
     { to: '/admin', label: n.dashboard, icon: 'dashboard' as const, end: true },

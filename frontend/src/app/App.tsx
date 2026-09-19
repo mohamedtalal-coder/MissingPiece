@@ -29,6 +29,7 @@ import { WishlistPage } from '../features/wishlist/WishlistPage';
 import { LoginPage } from '../features/auth/LoginPage';
 import { RegisterPage } from '../features/auth/RegisterPage';
 import { ForgotPasswordPage } from '../features/auth/ForgotPasswordPage';
+import { VerifyEmailPage } from '../features/auth/VerifyEmailPage';
 
 import { ProfilePage } from '../features/account/ProfilePage';
 
@@ -99,6 +100,14 @@ export function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route
+                  path="/verify-email"
+                  element={
+                    <ProtectedRoute>
+                      <VerifyEmailPage />
+                    </ProtectedRoute>
+                  }
+                />
 
 
                 <Route

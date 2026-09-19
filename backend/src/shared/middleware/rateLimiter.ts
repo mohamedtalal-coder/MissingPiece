@@ -1,6 +1,6 @@
 import rateLimit from "express-rate-limit";
 import type { Request, Response } from "express";
-import { RedisStore } from "rate-limit-redis";
+import { RedisStore, type RedisReply } from "rate-limit-redis";
 import { redis } from "../utils/redis.js";
 
 function rateLimitHandler(_req: Request, res: Response) {
@@ -31,10 +31,9 @@ function keyByIp(req: Request): string {
 }
 
 const store = new RedisStore({
-  // @ts-expect-error - Known issue with the `ioredis` and `rate-limit-redis` types
   sendCommand: async (...args: string[]) => {
     try {
-      return await redis.call(...(args as [string, ...string[]]));
+      return (await redis.call(...(args as [string, ...string[]]))) as RedisReply;
     } catch (error) {
       console.warn("Redis rate limiter store error:", error);
       throw error;
@@ -101,6 +100,13 @@ export const accountWriteLimiter = rateLimit({
   keyGenerator: (req) => `account_write:${keyByUser(req)}`,
 });
 
+export const accountPasswordLimiter = rateLimit({
+  ...sharedOpts,
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  keyGenerator: (req) => `account_password:${keyByUser(req)}`,
+});
+
 export const wishlistWriteLimiter = rateLimit({
   ...sharedOpts,
   windowMs: 60 * 1000,
@@ -127,6 +133,20 @@ export const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 10,
   keyGenerator: (req) => `login:${keyByIp(req)}`,
+});
+
+export const resendVerificationLimiter = rateLimit({
+  ...sharedOpts,
+  windowMs: 5 * 60 * 1000,
+  limit: 3,
+  keyGenerator: (req) => `resend_verification:${keyByIp(req)}`,
+});
+
+export const verifyEmailLimiter = rateLimit({
+  ...sharedOpts,
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  keyGenerator: (req) => `verify_email:${keyByIp(req)}`,
 });
 
 export const discountValidateLimiter = rateLimit({

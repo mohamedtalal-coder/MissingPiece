@@ -12,15 +12,6 @@ function sanitize(value: string, max: number): string {
   return value.replace(/[<>]/g, '').trim().slice(0, max);
 }
 
-function isSafeHttpUrl(url: string): boolean {
-  try {
-    const u = new URL(url);
-    return u.protocol === 'https:' || u.protocol === 'http:';
-  } catch {
-    return false;
-  }
-}
-
 function TableSkeleton() {
   return (
     <div className="p-6 space-y-3" aria-busy="true" aria-label="Loading inventory">

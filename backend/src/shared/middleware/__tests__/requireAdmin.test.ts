@@ -1,5 +1,6 @@
 import { requireAdmin } from '../requireAdmin.js';
 import type { Request, Response, NextFunction } from 'express';
+import { jest } from '@jest/globals';
 
 describe('requireAdmin middleware', () => {
   let mockRequest: Partial<Request>;
@@ -11,7 +12,7 @@ describe('requireAdmin middleware', () => {
     mockResponse = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
-    };
+    } as any;
     nextFunction = jest.fn();
   });
 
@@ -31,7 +32,7 @@ describe('requireAdmin middleware', () => {
     requireAdmin(mockRequest as Request, mockResponse as Response, nextFunction);
 
     expect(nextFunction).toHaveBeenCalledTimes(1);
-    const err = (nextFunction as jest.Mock).mock.calls[0][0];
+    const err = (nextFunction as jest.Mock).mock.calls[0]![0] as any;
     expect(err).toBeInstanceOf(Error);
     expect(err.message).toBe('Admin access required');
     expect(err.statusCode).toBe(403);
@@ -42,7 +43,7 @@ describe('requireAdmin middleware', () => {
     requireAdmin(mockRequest as Request, mockResponse as Response, nextFunction);
 
     expect(nextFunction).toHaveBeenCalledTimes(1);
-    const err = (nextFunction as jest.Mock).mock.calls[0][0];
+    const err = (nextFunction as jest.Mock).mock.calls[0]![0] as any;
     expect(err.message).toBe('Admin access required');
     expect(err.statusCode).toBe(403);
   });

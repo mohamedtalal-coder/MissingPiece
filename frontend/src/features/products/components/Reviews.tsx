@@ -24,6 +24,7 @@ export const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [canReviewProduct, setCanReviewProduct] = useState(false);
   
   // Form state
   const [rating, setRating] = useState(5);
@@ -58,6 +59,28 @@ export const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
   useEffect(() => {
     fetchReviews();
   }, [fetchReviews]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setCanReviewProduct(false);
+      return;
+    }
+
+    let isMounted = true;
+    const checkReviewAccess = async () => {
+      try {
+        const canReview = await reviewsApi.canReview(productId);
+        if (isMounted) setCanReviewProduct(canReview);
+      } catch {
+        if (isMounted) setCanReviewProduct(false);
+      }
+    };
+
+    checkReviewAccess();
+    return () => {
+      isMounted = false;
+    };
+  }, [isAuthenticated, productId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,6 +139,10 @@ export const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
             {!isAuthenticated ? (
               <div className="py-space-md text-center">
                 <p className="font-body-md text-body-md text-on-surface-variant mb-space-md">You must be logged in to leave a review.</p>
+              </div>
+            ) : !canReviewProduct ? (
+              <div className="py-space-md text-center">
+                <p className="font-body-md text-body-md text-on-surface-variant mb-space-md">Reviews unlock after delivery of this item.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-space-md">

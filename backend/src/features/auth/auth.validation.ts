@@ -31,3 +31,12 @@ export const resetPasswordSchema = z.object({
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
     .regex(/[^a-zA-Z0-9]/, "Password must contain at least one symbol"),
 });
+
+export const verifyEmailSchema = z.object({
+  email: z.string().trim().toLowerCase().regex(emailRegex, "Invalid email"),
+  otp: z.string().length(6, "OTP must be 6 digits").regex(/^\d{6}$/, "OTP must contain only numbers"),
+});
+
+export const resendVerificationSchema = z.object({
+  email: z.string().trim().toLowerCase().regex(emailRegex, "Invalid email"),
+});

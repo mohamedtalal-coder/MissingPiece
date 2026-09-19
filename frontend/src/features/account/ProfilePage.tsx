@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../../shared/context/LanguageContext';
 import { useToast } from '../../shared/context/ToastContext';
 import { Icon } from '../../shared/components/ui/Icon';
 import { Button } from '../../shared/components/ui/Button';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { accountApi, type UserProfile, type Address } from './accountApi';
+import { useAuth } from '../auth/AuthContext';
 import { useScrollLock } from '../../shared/hooks/useScrollLock';
 
 function sanitize(value: string, max: number): string {
@@ -28,6 +29,8 @@ function ProfileSkeleton() {
 export function ProfilePage() {
   const { t } = useLanguage() as any;
   const { showToast } = useToast();
+  const { updateUser: updateAuthUser, logout } = useAuth();
+  const navigate = useNavigate();
 
   const [user, setUser] = useState<UserProfile | null>(null);
   const [name, setName] = useState('');
@@ -47,6 +50,15 @@ export function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
 
   useScrollLock(isAddressModalOpen);
 
@@ -173,6 +185,71 @@ export function ProfilePage() {
     });
   };
 
+  const handleAvatarPick = () => {
+    if (avatarUploading) return;
+    avatarInputRef.current?.click();
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-selecting the same file later
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      showToast({ message: 'Please choose an image file.', type: 'error' });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      showToast({ message: 'Image must be smaller than 5MB.', type: 'error' });
+      return;
+    }
+
+    setAvatarUploading(true);
+    try {
+      const updated = await accountApi.uploadAvatar(file);
+      setUser(updated);
+      updateAuthUser({ avatarUrl: updated.avatarUrl });
+      showToast({ message: 'Profile picture updated', type: 'success' });
+    } catch (err) {
+      console.error(err);
+      showToast({ message: 'Failed to upload profile picture', type: 'error' });
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError('');
+
+    if (newPassword.length < 8) {
+      setPasswordError('New password must be at least 8 characters.');
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      setPasswordError('New passwords do not match.');
+      return;
+    }
+    if (newPassword === currentPassword) {
+      setPasswordError('New password must be different from the current password.');
+      return;
+    }
+
+    setChangingPassword(true);
+    try {
+      await accountApi.changePassword({ currentPassword, newPassword });
+      showToast({ message: 'Password updated. Please sign in again.', type: 'success' });
+      // Changing the password revokes every existing token for this account —
+      // including the one this tab is using — so the session ends here too.
+      logout();
+      navigate('/login', { replace: true });
+    } catch (err: any) {
+      setPasswordError(err.response?.data?.message || 'Failed to change password.');
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
   if (loading) {
     return <ProfileSkeleton />;
   }
@@ -182,10 +259,37 @@ export function ProfilePage() {
       <div className="w-full max-w-[1360px] mx-auto px-margin-mobile lg:px-margin py-space-lg pb-space-2xl">
         <div className="flex flex-col md:flex-row md:items-end justify-between pb-space-lg mb-space-lg border-b border-surface-container-highest gap-space-md animate-fade-in">
           <div className="flex items-center gap-space-md">
-            <div className="w-20 h-20 rounded-full bg-surface-container-highest border border-outline-variant/30 flex items-center justify-center overflow-hidden shadow-sm">
-              <span className="font-headline-lg text-headline-lg text-primary uppercase">
-                {user?.name?.substring(0, 2) || 'CV'}
-              </span>
+            <div className="relative group">
+              <div className="w-20 h-20 rounded-full bg-surface-container-highest border border-outline-variant/30 flex items-center justify-center overflow-hidden shadow-sm">
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="font-headline-lg text-headline-lg text-primary uppercase">
+                    {user?.name?.substring(0, 2) || 'CV'}
+                  </span>
+                )}
+                {avatarUploading && (
+                  <div className="absolute inset-0 rounded-full bg-surface-container-lowest/70 flex items-center justify-center">
+                    <span className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={handleAvatarPick}
+                disabled={avatarUploading}
+                aria-label="Change profile picture"
+                className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center border-2 border-surface shadow-sm hover:bg-primary transition-colors disabled:opacity-50"
+              >
+                <Icon name="edit" size={14} />
+              </button>
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="hidden"
+              />
             </div>
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-space-xs">
@@ -200,7 +304,24 @@ export function ProfilePage() {
               <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight">
                 {user?.name || t.profile?.guest || 'Guest'}
               </h1>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">{user?.email}</p>
+              <p className="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-2 flex-wrap">
+                <span>{user?.email}</span>
+                {user && (
+                  user.isEmailVerified ? (
+                    <span className="inline-flex items-center gap-1 text-[11px] uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                      <Icon name="check_circle" size={12} /> Verified
+                    </span>
+                  ) : (
+                    <Link
+                      to="/verify-email"
+                      state={{ email: user.email, from: '/profile' }}
+                      className="inline-flex items-center gap-1 text-[11px] uppercase tracking-wider text-error bg-error-container/20 px-2 py-0.5 rounded-full hover:bg-error-container/30 transition-colors"
+                    >
+                      <Icon name="warning" size={12} /> Unverified — Verify now
+                    </Link>
+                  )
+                )}
+              </p>
             </div>
           </div>
 
@@ -268,6 +389,73 @@ export function ProfilePage() {
 
                 <Button type="submit" disabled={saving} isLoading={saving} className="w-full mt-2" icon="save">
                   {t.profile?.saveProfile || 'Save Profile'}
+                </Button>
+              </form>
+            </section>
+
+            <section className="bg-surface-container-low border border-outline-variant/10 p-space-lg rounded-xl shadow-sm">
+              <h2 className="text-on-surface font-title-editorial text-title-editorial border-b border-outline-variant/20 pb-space-sm mb-space-md flex items-center gap-2">
+                <Icon name="lock" className="text-primary text-[20px]" />
+                Change Password
+              </h2>
+
+              <form onSubmit={handleChangePassword} className="space-y-space-md font-body-sm" noValidate>
+                {passwordError && (
+                  <p className="text-sm text-error" role="alert">
+                    {passwordError}
+                  </p>
+                )}
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-label-md text-label-md text-on-surface-variant" htmlFor="current-password">
+                    Current Password
+                  </label>
+                  <input
+                    id="current-password"
+                    type="password"
+                    autoComplete="current-password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="w-full bg-surface-container border border-transparent rounded-lg px-space-md py-2.5 text-on-surface focus:outline-none focus:bg-surface-container-high focus:border-outline-variant/30 transition-colors"
+                    required
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-label-md text-label-md text-on-surface-variant" htmlFor="new-password">
+                    New Password
+                  </label>
+                  <input
+                    id="new-password"
+                    type="password"
+                    autoComplete="new-password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full bg-surface-container border border-transparent rounded-lg px-space-md py-2.5 text-on-surface focus:outline-none focus:bg-surface-container-high focus:border-outline-variant/30 transition-colors"
+                    required
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-label-md text-label-md text-on-surface-variant" htmlFor="confirm-new-password">
+                    Confirm New Password
+                  </label>
+                  <input
+                    id="confirm-new-password"
+                    type="password"
+                    autoComplete="new-password"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    className="w-full bg-surface-container border border-transparent rounded-lg px-space-md py-2.5 text-on-surface focus:outline-none focus:bg-surface-container-high focus:border-outline-variant/30 transition-colors"
+                    required
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  disabled={changingPassword}
+                  isLoading={changingPassword}
+                  className="w-full mt-2"
+                  icon="lock"
+                  variant="secondary"
+                >
+                  Update Password
                 </Button>
               </form>
             </section>

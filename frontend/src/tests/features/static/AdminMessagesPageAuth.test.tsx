@@ -14,6 +14,7 @@ vi.mock('../../../features/auth/AuthContext', () => ({
 vi.mock('../../../shared/context/LanguageContext', () => ({
   useLanguage: () => ({
     t: { adminMessages: { title: 'Admin Messages' } },
+    formatDate: (value: string) => new Date(value).toLocaleDateString(),
   }),
 }));
 

@@ -132,6 +132,9 @@ describe('AdminProductsPage', () => {
     });
     fireEvent.change(screen.getByLabelText(/Price/i), { target: { value: '10' } });
     fireEvent.change(screen.getByLabelText(/Stock/i), { target: { value: '5' } });
+    fireEvent.change(screen.getByLabelText(/Product Images/i), {
+      target: { files: [new File(['image'], 'puzzle.png', { type: 'image/png' })] },
+    });
 
     const activeCheckbox = screen.getByLabelText(/Visible in public storefront/i);
     expect(activeCheckbox).toBeChecked();

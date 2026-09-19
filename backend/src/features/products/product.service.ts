@@ -1,6 +1,18 @@
 import { Product } from "./product.model.js";
 import type { Types } from "mongoose";
 
+const categoryAliases: Record<string, string[]> = {
+  jigsaw: ["jigsaw", "puzzle", "Jigsaw Puzzles"],
+  "3d": ["3d", "3d-puzzle", "3D Puzzles", "3D Architectural"],
+  wooden: ["wooden", "chess", "Wooden Puzzles"],
+  mystery: ["mystery", "puzzle-game", "Mystery Puzzles"],
+};
+
+export function resolveCategoryFilter(category: string): string | { $in: string[] } {
+  const aliases = categoryAliases[category.toLowerCase()];
+  return aliases ? { $in: aliases } : category;
+}
+
 function slugify(input: string): string {
   return input.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
@@ -20,7 +32,9 @@ export interface ListProductsParams {
 export async function listProducts(params: ListProductsParams) {
   const filter: Record<string, unknown> = {};
   if (!params.includeInactive) filter.isActive = true;
-  if (params.category) filter.category = params.category;
+  if (params.category) {
+    filter.category = resolveCategoryFilter(params.category);
+  }
 
   if (params.minPrice !== undefined || params.maxPrice !== undefined) {
     const priceFilter: Record<string, number> = {};
@@ -121,7 +135,11 @@ export type UpdateProductInput = {
 
 export async function updateProduct(id: string, input: UpdateProductInput) {
   // Slug intentionally NOT regenerated on rename — keeps existing links/bookmarks stable.
-  return Product.findByIdAndUpdate(id, input, { new: true, runValidators: true }).lean();
+  const update = input.images?.length === 0
+    ? { ...input, images: undefined }
+    : input;
+
+  return Product.findByIdAndUpdate(id, update, { new: true, runValidators: true }).lean();
 }
 
 export async function softDeleteProduct(id: string) {

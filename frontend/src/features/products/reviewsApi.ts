@@ -23,6 +23,11 @@ export interface ReviewListResult {
 }
 
 export const reviewsApi = {
+  canReview: async (productId: string): Promise<boolean> => {
+    const response = await apiClient.get<{ success: boolean; canReview: boolean }>(`/reviews/can-review/${productId}`);
+    return response.data.canReview;
+  },
+
   list: async (productId: string, page = 1, limit = 10): Promise<ReviewListResult> => {
     const response = await apiClient.get('/reviews', {
       params: { product: productId, page, limit }

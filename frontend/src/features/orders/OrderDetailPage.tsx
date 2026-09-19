@@ -39,7 +39,7 @@ export function OrderDetailPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { showToast } = useToast();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { refreshCart } = useCart();
   const reducedMotion = useReducedMotion();
 
@@ -49,6 +49,7 @@ export function OrderDetailPage() {
   const [claimOpen, setClaimOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [reordering, setReordering] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     const paymentStatus = searchParams.get('payment');
@@ -92,7 +93,11 @@ export function OrderDetailPage() {
     if (!isAuthenticated || !id) return;
     const controller = new AbortController();
     fetchOrder(controller.signal);
-    return () => controller.abort();
+    const refreshTimer = window.setInterval(() => fetchOrder(), 10000);
+    return () => {
+      controller.abort();
+      window.clearInterval(refreshTimer);
+    };
   }, [fetchOrder, isAuthenticated, id]);
 
   const copyRegistry = async () => {
@@ -143,6 +148,32 @@ export function OrderDetailPage() {
       setReordering(false);
     }
   };
+
+  const handleCancelOrder = async () => {
+    if (!order || cancelling) return;
+    const confirmed = window.confirm('Cancel this order? This cannot be undone.');
+    if (!confirmed) return;
+
+    setCancelling(true);
+    try {
+      const updated = await ordersApi.cancelOrder(order._id);
+      setOrder(updated);
+      showToast({ message: 'Order cancelled', type: 'success' });
+    } catch (err: unknown) {
+      const e = err as { response?: { status?: number; data?: { message?: string } } };
+      if (e.response?.status === 409) {
+        showToast({ message: 'This order can no longer be cancelled.', type: 'error' });
+      } else {
+        showToast({ message: 'Failed to cancel order', type: 'error' });
+      }
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  if (authLoading) {
+    return <DetailSkeleton />;
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: id ? `/orders/${id}` : '/orders' }} />;
@@ -209,6 +240,18 @@ export function OrderDetailPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            {order.status === 'pending' && (
+              <Button
+                type="button"
+                variant="outline"
+                icon="close"
+                isLoading={cancelling}
+                disabled={cancelling}
+                onClick={handleCancelOrder}
+              >
+                Cancel Order
+              </Button>
+            )}
             {canClaim && (
               <Button type="button" variant="outline" icon="warning" onClick={() => setClaimOpen(true)}>
                 Report Missing Piece

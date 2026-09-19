@@ -3,8 +3,6 @@ import { Order } from '../order.model.js';
 import mongoose from 'mongoose';
 import { jest } from '@jest/globals';
 
-jest.mock('../order.model.js');
-jest.mock('../../products/product.model.js');
 jest.mock('../../../shared/utils/withTransaction.js', () => ({
   withTransaction: jest.fn((cb: any) => cb({} as any)),
 }));
@@ -12,18 +10,28 @@ jest.mock('../../../shared/utils/withTransaction.js', () => ({
 describe('Order State Machine', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(mongoose, 'startSession').mockResolvedValue({
+      startTransaction: jest.fn(),
+      commitTransaction: jest.fn(),
+      abortTransaction: jest.fn(),
+      endSession: jest.fn(),
+    } as unknown as mongoose.ClientSession);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('should allow valid transition from pending to paid', async () => {
-    const mockOrder = {
+    const mockOrder: any = {
       _id: new mongoose.Types.ObjectId(),
       status: 'pending',
       items: [],
-      save: jest.fn().mockResolvedValue(true),
+      save: jest.fn(() => Promise.resolve(true)) as any,
     };
-    (Order.findById as jest.Mock).mockReturnValue({
-      session: jest.fn().mockResolvedValue(mockOrder),
-    });
+    jest.spyOn(Order, 'findById').mockReturnValue({
+      session: (() => Promise.resolve(mockOrder)) as any,
+    } as any);
 
     await updateOrderStatus(mockOrder._id.toString(), 'paid');
 
@@ -32,15 +40,15 @@ describe('Order State Machine', () => {
   });
 
   it('should reject invalid transition from shipped to pending', async () => {
-    const mockOrder = {
+    const mockOrder: any = {
       _id: new mongoose.Types.ObjectId(),
       status: 'shipped',
       items: [],
-      save: jest.fn(),
+      save: jest.fn() as any,
     };
-    (Order.findById as jest.Mock).mockReturnValue({
-      session: jest.fn().mockResolvedValue(mockOrder),
-    });
+    jest.spyOn(Order, 'findById').mockReturnValue({
+      session: (() => Promise.resolve(mockOrder)) as any,
+    } as any);
 
     await expect(updateOrderStatus(mockOrder._id.toString(), 'pending')).rejects.toThrow(
       'Invalid status transition from shipped to pending'
@@ -51,15 +59,15 @@ describe('Order State Machine', () => {
   });
 
   it('should reject invalid transition from cancelled to paid', async () => {
-    const mockOrder = {
+    const mockOrder: any = {
       _id: new mongoose.Types.ObjectId(),
       status: 'cancelled',
       items: [],
-      save: jest.fn(),
+      save: jest.fn() as any,
     };
-    (Order.findById as jest.Mock).mockReturnValue({
-      session: jest.fn().mockResolvedValue(mockOrder),
-    });
+    jest.spyOn(Order, 'findById').mockReturnValue({
+      session: (() => Promise.resolve(mockOrder)) as any,
+    } as any);
 
     await expect(updateOrderStatus(mockOrder._id.toString(), 'paid')).rejects.toThrow(
       'Invalid status transition from cancelled to paid'

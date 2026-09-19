@@ -18,6 +18,7 @@ export interface AuthResponse {
     name: string;
     email: string;
     role: 'guest' | 'buyer' | 'admin';
+    isEmailVerified?: boolean;
   };
 }
 
@@ -29,6 +30,11 @@ export interface ResetPasswordCredentials {
   email: string;
   otp: string;
   newPassword: string;
+}
+
+export interface VerifyEmailCredentials {
+  email: string;
+  otp: string;
 }
 
 export const authApi = {
@@ -49,6 +55,16 @@ export const authApi = {
 
   resetPassword: async (credentials: ResetPasswordCredentials) => {
     const response = await apiClient.post<{ success: boolean; message: string }>('/auth/reset-password', credentials);
+    return response.data;
+  },
+
+  verifyEmail: async (credentials: VerifyEmailCredentials) => {
+    const response = await apiClient.post<{ success: boolean; message: string }>('/auth/verify-email', credentials);
+    return response.data;
+  },
+
+  resendVerification: async (email: string) => {
+    const response = await apiClient.post<{ success: boolean; message: string }>('/auth/resend-verification', { email });
     return response.data;
   },
 

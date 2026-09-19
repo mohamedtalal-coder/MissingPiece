@@ -284,30 +284,45 @@ export function OrderHistoryPage() {
                   </div>
 
                   <ul className="space-y-3">
-                    {archivalOrders.map((order, i) => (
-                      <Motion key={order._id} delayMs={reducedMotion ? 0 : i * 40}>
-                        <li className="bg-surface-container-low hover:bg-surface-container transition-colors rounded-xl p-space-md flex flex-col md:flex-row md:items-center justify-between gap-space-md border border-outline-variant/10">
-                          <div>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-headline-sm text-sm text-on-surface font-semibold">
-                                {t.orderHistory?.orderNumber || 'Order #'} {orderShortId(order._id)}
-                              </span>
-                              <StatusBadge status={order.status} type="order" />
+                    {archivalOrders.map((order, i) => {
+                      const reviewableItem = order.items.find((item) => item.productSlug || item.slug || item.productId || (typeof item.product === 'object' && item.product && 'slug' in item.product));
+                      const reviewLink = reviewableItem
+                        ? (() => {
+                            const productSlug = reviewableItem.productSlug || reviewableItem.slug || (typeof reviewableItem.product === 'object' && reviewableItem.product && 'slug' in reviewableItem.product ? reviewableItem.product.slug : undefined);
+                            return productSlug ? `/products/${productSlug}#reviews` : undefined;
+                          })()
+                        : undefined;
+
+                      return (
+                        <Motion key={order._id} delayMs={reducedMotion ? 0 : i * 40}>
+                          <li className="bg-surface-container-low hover:bg-surface-container transition-colors rounded-xl p-space-md flex flex-col md:flex-row md:items-center justify-between gap-space-md border border-outline-variant/10">
+                            <div>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-headline-sm text-sm text-on-surface font-semibold">
+                                  {t.orderHistory?.orderNumber || 'Order #'} {orderShortId(order._id)}
+                                </span>
+                                <StatusBadge status={order.status} type="order" />
+                              </div>
+                              <p className="text-xs text-on-surface-variant mt-1">
+                                {order.items.length} {t.orderHistory?.items || 'item(s)'} ·{' '}
+                                {formatDate(order.createdAt)}
+                              </p>
                             </div>
-                            <p className="text-xs text-on-surface-variant mt-1">
-                              {order.items.length} {t.orderHistory?.items || 'item(s)'} ·{' '}
-                              {formatDate(order.createdAt)}
-                            </p>
-                          </div>
-                          <div className="flex items-center justify-between md:justify-end gap-space-md">
-                            <PriceDisplay amount={order.total} size="md" />
-                            <Button as="link" to={`/orders/${order._id}`} variant="ghost" size="sm" icon="receipt_long">
-                              {t.orderHistory?.provenance || 'Provenance'}
-                            </Button>
-                          </div>
-                        </li>
-                      </Motion>
-                    ))}
+                            <div className="flex items-center justify-between md:justify-end gap-space-md">
+                              <PriceDisplay amount={order.total} size="md" />
+                              {order.status === 'delivered' && reviewLink && (
+                                <Button as="link" to={reviewLink} variant="ghost" size="sm" icon="star_rate">
+                                  Review item
+                                </Button>
+                              )}
+                              <Button as="link" to={`/orders/${order._id}`} variant="ghost" size="sm" icon="receipt_long">
+                                {t.orderHistory?.provenance || 'Provenance'}
+                              </Button>
+                            </div>
+                          </li>
+                        </Motion>
+                      );
+                    })}
                   </ul>
                 </section>
               )}

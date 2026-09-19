@@ -241,8 +241,12 @@ export function CheckoutPage() {
       }
       await clearCart();
       window.location.href = url;
-    } catch {
-      showToast({ message: t.checkout?.placeOrderError || 'Failed to place order or start payment', type: 'error' });
+    } catch (error: unknown) {
+      const status = (error as { response?: { status?: number } }).response?.status;
+      const message = status === 503
+        ? 'Payments are temporarily unavailable. Please try again later.'
+        : t.checkout?.placeOrderError || 'Failed to place order or start payment';
+      showToast({ message, type: 'error' });
       setSubmitting(false);
     }
   };
@@ -268,6 +272,29 @@ export function CheckoutPage() {
           </Button>
           <Button as="link" to="/register" variant="outline">
             {t.checkout?.createAccountBtn || 'Create Account'}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (user && user.isEmailVerified === false) {
+    return (
+      <div className="max-w-lg mx-auto px-margin-mobile py-space-2xl text-center animate-fade-in">
+        <Icon name="mail" className="text-[40px] text-primary mx-auto mb-4" />
+        <h1 className="font-headline-sm text-headline-sm text-on-surface mb-2">Verify your email to check out</h1>
+        <p className="font-body-md text-on-surface-variant mb-6">
+          We sent a verification code to <span className="text-on-surface font-medium">{user.email}</span>.
+          Confirm it before placing an order — your cart is saved.
+        </p>
+        <div className="flex flex-wrap justify-center gap-3">
+          <Button
+            onClick={() => navigate('/verify-email', { state: { email: user.email, from: '/checkout' } })}
+          >
+            Verify Email
+          </Button>
+          <Button as="link" to="/cart" variant="outline">
+            {t.checkout?.returnToBag || 'Return to Bag'}
           </Button>
         </div>
       </div>

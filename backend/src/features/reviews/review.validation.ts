@@ -16,3 +16,5 @@ export const updateReviewSchema = z.object({
 export const listReviewsQuerySchema = paginationSchema.extend({
   product: objectId,
 });
+
+export const reviewProductParamSchema = objectId;

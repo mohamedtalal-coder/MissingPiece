@@ -24,7 +24,7 @@ export const getFAQs = async (req: Request, res: Response, next: NextFunction) =
       .lean();
     res.json({
       success: true,
-      items: faqs.map((f) => localizeFaq(f as Record<string, unknown>, lang)),
+      items: faqs.map((f) => localizeFaq(f as unknown as Record<string, unknown>, lang)),
     });
   } catch (error) {
     next(error);
@@ -36,7 +36,7 @@ export const getFAQsAdmin = async (req: Request, res: Response, next: NextFuncti
     const faqs = await FAQ.find({}).sort({ order: 1, createdAt: -1 }).lean();
     res.json({
       success: true,
-      items: faqs.map((f) => localizeFaq(f as Record<string, unknown>, "en")),
+      items: faqs.map((f) => localizeFaq(f as unknown as Record<string, unknown>, "en")),
     });
   } catch (error) {
     next(error);
@@ -58,7 +58,7 @@ export const createFAQ = async (req: Request, res: Response, next: NextFunction)
       ipAddress: req.ip,
     });
 
-    res.status(201).json({ success: true, data: localizeFaq(faq.toObject() as Record<string, unknown>) });
+    res.status(201).json({ success: true, data: localizeFaq(faq.toObject() as unknown as Record<string, unknown>) });
   } catch (error) {
     next(error);
   }
@@ -85,7 +85,7 @@ export const updateFAQ = async (req: Request, res: Response, next: NextFunction)
       ipAddress: req.ip,
     });
 
-    res.json({ success: true, data: localizeFaq(faq as Record<string, unknown>) });
+    res.json({ success: true, data: localizeFaq(faq as unknown as Record<string, unknown>) });
   } catch (error) {
     next(error);
   }
