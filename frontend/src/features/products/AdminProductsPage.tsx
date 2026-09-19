@@ -49,7 +49,7 @@ export const AdminProductsPage: React.FC = () => {
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
   const [category, setCategory] = useState('Jigsaw Puzzles');
-  const [imageUrl, setImageUrl] = useState('');
+  const [images, setImages] = useState<File[]>([]);
   const [isActive, setIsActive] = useState(true);
 
   useScrollLock(showModal);
@@ -76,7 +76,6 @@ export const AdminProductsPage: React.FC = () => {
     const cleanDesc = sanitize(description, 2000);
     const priceNum = Number(price);
     const stockNum = Math.floor(Number(stock));
-    const cleanImage = sanitize(imageUrl, 500);
 
     if (cleanName.length < 2) {
       setFormError('Title must be at least 2 characters.');
@@ -94,8 +93,14 @@ export const AdminProductsPage: React.FC = () => {
       setFormError('Stock must be an integer between 0 and 10000.');
       return null;
     }
-    if (cleanImage && !isSafeHttpUrl(cleanImage)) {
-      setFormError('Image URL must be a valid http(s) link.');
+
+    if (images.length > 10) {
+      setFormError('You can upload up to 10 images.');
+      return null;
+    }
+
+    if (!editingProductId && images.length === 0) {
+      setFormError('Please select at least one image.');
       return null;
     }
 
@@ -106,10 +111,31 @@ export const AdminProductsPage: React.FC = () => {
       stock: stockNum,
       category: sanitize(category, 80) || 'Jigsaw Puzzles',
       isActive,
-      images: cleanImage
-        ? [cleanImage]
-        : ['https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=500&auto=format&fit=crop&q=60'],
+      images,
     };
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []);
+
+    if (selectedFiles.length > 10) {
+      setFormError('You can upload up to 10 images.');
+      setImages([]);
+      return;
+    }
+
+    const invalidFile = selectedFiles.find(
+      (file) => !file.type.startsWith('image/')
+    );
+
+    if (invalidFile) {
+      setFormError('Please select image files only.');
+      setImages([]);
+      return;
+    }
+
+    setImages(selectedFiles);
+    setFormError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -148,7 +174,7 @@ export const AdminProductsPage: React.FC = () => {
     setPrice(product.price.toString());
     setStock(product.stock.toString());
     setCategory(product.category);
-    setImageUrl(product.images?.[0] || '');
+    setImages([]);
     setIsActive(product.isActive !== false);
     setEditingProductId(product._id);
     setFormError('');
@@ -166,7 +192,7 @@ export const AdminProductsPage: React.FC = () => {
     setDescription('');
     setPrice('');
     setStock('');
-    setImageUrl('');
+    setImages([]);
     setIsActive(true);
     setEditingProductId(null);
     setCategory('Jigsaw Puzzles');
@@ -476,17 +502,21 @@ export const AdminProductsPage: React.FC = () => {
               </div>
               <div>
                 <label className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5" htmlFor="ap-img">
-                  Cover Image URL
+                  Product Images (Max 10) {editingProductId ? '(Optional - overrides existing)' : '*'}
                 </label>
                 <input
                   id="ap-img"
-                  type="url"
-                  maxLength={500}
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  className="w-full bg-surface-container text-on-surface text-sm px-3.5 py-2.5 rounded focus:outline-none focus:ring-2 focus:ring-primary/40"
-                  placeholder="https://…"
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="w-full bg-surface-container text-on-surface text-sm px-3.5 py-2.5 rounded focus:outline-none focus:ring-2 focus:ring-primary/40 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-on-primary hover:file:bg-primary/90"
                 />
+                {images.length > 0 && (
+                  <p className="text-xs text-on-surface-variant mt-2">
+                    {images.length} image(s) selected
+                  </p>
+                )}
               </div>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input

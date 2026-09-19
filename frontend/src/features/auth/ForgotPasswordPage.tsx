@@ -4,61 +4,78 @@ import { useLanguage } from '../../shared/context/LanguageContext';
 import { Button } from '../../shared/components/ui/Button';
 import { Input } from '../../shared/components/ui/Input';
 import { Icon } from '../../shared/components/ui/Icon';
+import { authApi } from './authApi';
 
 export function ForgotPasswordPage() {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [loading, setLoading] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const { t } = useLanguage() as any;
   const navigate = useNavigate();
 
-  const handleCheckEmail = (e: React.FormEvent) => {
+  const handleCheckEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSuccess(null);
+    setLoading(true);
 
-    const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-    const userExists = registeredUsers.some((u: { email?: string }) => u.email === email);
+    try {
+      const response = await authApi.forgotPassword({ email });
 
-    if (!userExists) {
-      setError(t.auth?.emailNotRegistered || 'This email address is not registered in our system.');
-      return;
+      setSuccess(response.message);
+      setStep(2);
+    } catch (error: any) {
+      setError(
+        error.response?.data?.message ||
+        'Something went wrong. Please try again.'
+      );
+    } finally {
+      setLoading(false);
     }
-
-    setStep(2);
   };
 
-  const handleResetPassword = (e: React.FormEvent) => {
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSuccess(null);
+    setLoading(true);
+
+    if (otp.length !== 6) {
+      setError('Please enter the 6-digit verification code.');
+      setLoading(false);
+      return;
+    }
 
     if (newPassword.length < 6) {
       setError(t.auth?.passwordLength6 || 'Password must be at least 6 characters long.');
+      setLoading(false);
       return;
     }
 
-    const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+    try {
+      const response = await authApi.resetPassword({
+        email,
+        otp,
+        newPassword,
+      });
 
-    const updatedUsers = registeredUsers.map((u: { email?: string; password?: string }) => {
-      if (u.email === email) {
-        return { ...u, password: newPassword };
-      }
-      return u;
-    });
+      setSuccess(response.message + ' Redirecting to login...');
 
-    localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
-
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (currentUser.email === email) {
-      currentUser.password = newPassword;
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+    } catch (error: any) {
+      setError(
+        error.response?.data?.message ||
+        'Invalid or expired reset code.'
+      );
+    } finally {
+      setLoading(false);
     }
-
-    setSuccess(t.auth?.passwordUpdatedSuccess || 'Password updated successfully! Redirecting to login...');
-    setTimeout(() => {
-      navigate('/login');
-    }, 2000);
   };
 
   return (
@@ -83,7 +100,7 @@ export function ForgotPasswordPage() {
           <p className="font-body-sm text-body-sm text-on-surface-variant mt-1.5">
             {step === 1
               ? (t.auth?.resetSubtitle1 || 'Enter your email to recover your account')
-              : (t.auth?.resetSubtitle2 || 'Enter your new secure password')}
+              : 'Enter the code sent to your email and your new password'}
           </p>
         </div>
 
@@ -118,12 +135,23 @@ export function ForgotPasswordPage() {
                 placeholder="you@example.com"
                 autoComplete="email"
               />
-              <Button type="submit" fullWidth>
-                {t.auth?.verifyEmail || 'Verify Email'}
+              <Button type="submit" fullWidth disabled={loading}>
+                {loading ? 'Sending Code...' : (t.auth?.verifyEmail || 'Verify Email')}
               </Button>
             </form>
           ) : (
             <form onSubmit={handleResetPassword} className="space-y-space-lg" noValidate>
+              <Input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                label="Verification Code"
+                icon="password"
+                required
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                placeholder="Enter 6-digit code"
+              />
               <Input
                 type="password"
                 label={t.auth?.newPassword || "New Password"}
@@ -134,8 +162,8 @@ export function ForgotPasswordPage() {
                 placeholder="••••••••"
                 autoComplete="new-password"
               />
-              <Button type="submit" fullWidth>
-                {t.auth?.updatePassword || 'Update Password'}
+              <Button type="submit" fullWidth disabled={loading}>
+                {loading ? 'Updating...' : (t.auth?.updatePassword || 'Update Password')}
               </Button>
             </form>
           )}
@@ -153,3 +181,4 @@ export function ForgotPasswordPage() {
 }
 
 export default ForgotPasswordPage;
+
