@@ -1,4 +1,4 @@
-import rateLimit from "express-rate-limit";
+import { rateLimit } from "express-rate-limit";
 import type { Request, Response } from "express";
 import { RedisStore, type RedisReply } from "rate-limit-redis";
 import { redis } from "../utils/redis.js";
