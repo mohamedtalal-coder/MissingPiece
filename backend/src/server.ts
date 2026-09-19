@@ -12,4 +12,10 @@ async function startServer(): Promise<void> {
   });
 }
 
-startServer();
+// Vercel loads `src/app.ts` as the Express entry. Do not open a port or
+// connect to Mongo at module load during the Vercel build/runtime bootstrap.
+if (!process.env["VERCEL"]) {
+  void startServer();
+}
+
+export default app;

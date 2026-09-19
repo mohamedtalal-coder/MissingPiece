@@ -1,4 +1,4 @@
-import express, { type Application } from "express";
+import express, { type Application, type NextFunction, type Request, type Response } from "express";
 import cors from "cors";
 import morgan from "morgan";
 import helmet from "helmet";
@@ -18,10 +18,21 @@ import auditRoutes from "./features/audit/audit.routes.js";
 import faqRoutes from "./features/faq/faq.routes.js";
 import adminUserRoutes from "./features/account/admin.routes.js";
 import adminDashboardRoutes from "./features/admin/admin.routes.js";
+import { connectDB } from "./config/db.js";
 
 const app: Application = express();
 
 app.set("trust proxy", 1);
+
+// Ensure Mongo is connected on serverless (Vercel) before handling a request.
+app.use(async (_req: Request, _res: Response, next: NextFunction) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 app.use(
   cors({

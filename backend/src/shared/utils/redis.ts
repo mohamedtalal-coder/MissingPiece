@@ -1,7 +1,12 @@
 import { Redis } from "ioredis";
 
 const db = process.env.NODE_ENV === "test" ? process.env.JEST_WORKER_ID || 1 : 0;
-export const redis = new Redis(process.env["REDIS_URL"] || `redis://localhost:6379/${db}`);
+
+// lazyConnect avoids opening a TCP connection at import time (Vercel build / cold start).
+export const redis = new Redis(process.env["REDIS_URL"] || `redis://localhost:6379/${db}`, {
+  lazyConnect: true,
+  maxRetriesPerRequest: 1,
+});
 
 redis.on("error", (error: Error) => {
   console.error("Redis connection error:", error);
