@@ -6,6 +6,8 @@ export interface IContact extends Document {
   subject: string;
   message: string;
   status: "unread" | "read" | "resolved";
+  assignedTo?: mongoose.Types.ObjectId;
+  adminNotes?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -17,6 +19,8 @@ const ContactSchema = new Schema<IContact>(
     subject: { type: String, required: true },
     message: { type: String, required: true },
     status: { type: String, enum: ["unread", "read", "resolved"], default: "unread" },
+    assignedTo: { type: Schema.Types.ObjectId, ref: "User" },
+    adminNotes: { type: String },
   },
   { timestamps: true }
 );

@@ -43,7 +43,7 @@ function ProductDetailSkeleton() {
 
 export function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>();
-  const { t } = useLanguage() as any;
+  const { t, formatCurrency } = useLanguage() as any;
   const reducedMotion = useReducedMotion();
 
   const [product, setProduct] = useState<Product | null>(null);
@@ -100,7 +100,7 @@ export function ProductDetailPage() {
         const e = err as { name?: string; code?: string };
         if (e.name === 'CanceledError' || e.name === 'AbortError' || e.code === 'ERR_CANCELED') return;
         setProduct(null);
-        setError('Failed to load product details.');
+        setError(t.productDetail?.loadError || 'Failed to load product details.');
       } finally {
         if (!controller.signal.aborted) setIsLoading(false);
       }
@@ -122,9 +122,9 @@ export function ProductDetailPage() {
     try {
       await addItem(product, safeQty);
       setIsSuccessCart(true);
-      showToast({ message: 'Added to bag', type: 'success' });
+      showToast({ message: t.productDetail?.addedSuccess || 'Added to bag', type: 'success' });
     } catch {
-      showToast({ message: 'Could not add to bag', type: 'error' });
+      showToast({ message: t.productDetail?.addError || 'Could not add to bag', type: 'error' });
     } finally {
       setIsAddingToCart(false);
     }
@@ -168,7 +168,7 @@ export function ProductDetailPage() {
           <div className="max-w-[1360px] mx-auto px-margin-mobile md:px-margin py-3.5 flex flex-wrap items-center justify-between gap-4">
             <nav aria-label="Breadcrumbs" className="flex items-center gap-2 font-label-caps text-label-caps uppercase tracking-[0.14em]">
               <Link to="/products" className="text-on-surface-variant hover:text-primary transition-colors">
-                {t.nav?.catalog || 'Catalog'}
+                {t.productDetail?.catalog || 'Catalog'}
               </Link>
               <span className="text-outline/40">/</span>
               <Link
@@ -217,9 +217,9 @@ export function ProductDetailPage() {
                   </div>
                 )}
 
-                <div className="absolute top-4 left-4 z-20">
+                <div className="absolute top-4 start-4 z-20">
                   <span className="bg-surface-container-lowest/90 backdrop-blur-md px-3 py-1 text-label-caps font-label-caps uppercase text-primary border border-outline-variant/50 tracking-[0.16em] rounded-sm">
-                    Archival Edition
+                    {t.productDetail?.archivalEdition || 'Archival Edition'}
                   </span>
                 </div>
 
@@ -227,7 +227,7 @@ export function ProductDetailPage() {
                   <button
                     type="button"
                     onClick={() => setZoomOpen(true)}
-                    className="absolute top-4 right-4 z-20 p-2.5 rounded-full bg-surface-container-lowest/90 backdrop-blur-md text-on-surface-variant hover:text-on-surface border border-outline-variant/50 transition-all"
+                    className="absolute top-4 end-4 z-20 p-2.5 rounded-full bg-surface-container-lowest/90 backdrop-blur-md text-on-surface-variant hover:text-on-surface border border-outline-variant/50 transition-all"
                     aria-label="Zoom image"
                   >
                     <Icon name="eye" size={18} />
@@ -260,7 +260,7 @@ export function ProductDetailPage() {
               )}
             </div>
 
-            <div className="lg:col-span-5 flex flex-col pt-1 lg:pl-space-sm">
+            <div className="lg:col-span-5 flex flex-col pt-1 lg:ps-space-sm">
               <div className="border-b border-outline-variant/40 pb-6 mb-6">
                 <div className="flex items-center justify-between gap-2 mb-2.5">
                   <span className="font-label-caps text-label-caps uppercase tracking-[0.18em] text-primary-container font-semibold">
@@ -278,7 +278,7 @@ export function ProductDetailPage() {
                       aria-hidden
                     />
                     {product.stock > 0
-                      ? `${product.stock} in vault`
+                      ? (t.productDetail?.inVault ? t.productDetail.inVault.replace('{{stock}}', product.stock.toString()) : `${product.stock} in vault`)
                       : t.productDetail?.outOfStock || 'Out of Stock'}
                   </span>
                 </div>
@@ -351,7 +351,7 @@ export function ProductDetailPage() {
                       ? t.productDetail?.added || 'Added to Bag'
                       : product.stock === 0
                         ? t.productDetail?.outOfStock || 'Out of Stock'
-                        : `${t.productDetail?.addToCart || 'Add to Cart'} • $${(product.price * quantity).toFixed(2)}`}
+                        : `${t.productDetail?.addToCart || 'Add to Cart'} · ${formatCurrency(product.price * quantity)}`}
                   </Button>
 
                   <button
@@ -399,10 +399,10 @@ export function ProductDetailPage() {
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-4 border-b border-outline-variant/30 gap-4">
               <div>
                 <span className="font-label-caps text-label-caps uppercase tracking-[0.2em] text-primary font-semibold">
-                  Curated Pairings
+                  {t.productDetail?.curatedPairings || 'Curated Pairings'}
                 </span>
                 <h2 className="font-headline-lg text-headline-lg text-on-surface tracking-tight mt-1">
-                  Companion Puzzles
+                  {t.productDetail?.companionPuzzles || 'Companion Puzzles'}
                 </h2>
               </div>
               <Link

@@ -63,6 +63,10 @@ export async function loginUser(email: string, password: string) {
     throw new ApiError(401, "Invalid email or password");
   }
 
+  if (user.isActive === false) {
+    throw new ApiError(403, "Account suspended. Contact support.");
+  }
+
   const token = generateToken(user._id.toString(), user.role);
 
   return {

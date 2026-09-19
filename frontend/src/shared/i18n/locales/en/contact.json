@@ -19,5 +19,13 @@
   "helpPlaceholder": "How can we help you?",
   "supportEmail": "support@missingpiece.com",
   "phone": "+20 100 123 4567",
-  "location": "Zagazig, Egypt"
+  "location": "Zagazig, Egypt",
+  "conciergeSupport": "Concierge Support",
+  "emailLabel": "Email",
+  "phoneLabel": "Phone",
+  "atelierLabel": "Atelier",
+  "sendAnother": "Send Another Message",
+  "subject": "Subject",
+  "subjectPlaceholder": "What is this regarding?",
+  "sending": "Sending..."
 }

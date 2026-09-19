@@ -5,7 +5,7 @@
   "createProduct": "إنشاء منتج جديد",
   "productTitle": "اسم المنتج",
   "productDescription": "الوصف",
-  "price": "السعر ($)",
+  "price": "السعر",
   "stock": "المخزون",
   "imageUrl": "رابط الصورة (اختياري)",
   "saveProduct": "حفظ المنتج",

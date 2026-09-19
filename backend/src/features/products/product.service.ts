@@ -31,7 +31,11 @@ export async function listProducts(params: ListProductsParams) {
 
   const searchTerm = params.search?.trim();
   if (searchTerm) {
-    filter.$text = { $search: searchTerm };
+    const safeTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    filter.$or = [
+      { name: { $regex: safeTerm, $options: 'i' } },
+      { description: { $regex: safeTerm, $options: 'i' } }
+    ];
   }
 
   if (params.cursor) {
@@ -41,17 +45,10 @@ export async function listProducts(params: ListProductsParams) {
   }
 
   const sortMap = { price_asc: { price: 1 }, price_desc: { price: -1 }, newest: { _id: -1 } } as const;
-  // With an active search, default/"newest" uses textScore so name hits rank above description noise.
-  const useRelevance = Boolean(searchTerm) && (!params.sort || params.sort === "newest");
-  const sortOption = useRelevance
-    ? ({ score: { $meta: "textScore" }, _id: -1 } as Record<string, 1 | -1 | { $meta: string }>)
-    : sortMap[params.sort ?? "newest"];
+  const sortOption = sortMap[params.sort ?? "newest"];
   const skip = params.cursor ? 0 : (params.page - 1) * params.limit;
 
   let query = Product.find(filter);
-  if (searchTerm) {
-    query = query.select({ score: { $meta: "textScore" } });
-  }
 
   const [items, total] = await Promise.all([
     query.sort(sortOption as Record<string, 1 | -1>).skip(skip).limit(params.limit).lean(),

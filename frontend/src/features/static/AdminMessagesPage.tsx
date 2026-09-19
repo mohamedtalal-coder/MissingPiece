@@ -5,6 +5,7 @@ import { StatusBadge } from '../../shared/components/ui/StatusBadge';
 import { EmptyState } from '../../shared/components/ui/EmptyState';
 import { AdminAtelierNav } from '../../shared/components/layout/AdminAtelierNav';
 import { useToast } from '../../shared/context/ToastContext';
+import { useLanguage } from '../../shared/context/LanguageContext';
 
 interface ContactMessage {
   _id: string;
@@ -28,6 +29,7 @@ function MessageSkeleton() {
 
 export const AdminMessagesPage: React.FC = () => {
   const toast = useToast();
+  const { formatDate } = useLanguage();
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -174,7 +176,13 @@ export const AdminMessagesPage: React.FC = () => {
                 </div>
 
                 <span className="font-label-caps text-label-caps text-outline uppercase tracking-wider text-right shrink-0">
-                  {new Date(msg.createdAt).toLocaleString()}
+                  {formatDate(msg.createdAt, {
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                  })}
                 </span>
               </div>
 

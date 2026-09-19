@@ -40,7 +40,7 @@ export function Select({ value, onChange, options, className = "", triggerClassN
 
       {isOpen && (
         <ul
-          className="absolute z-50 w-full min-w-[160px] right-0 mt-1 bg-surface-container-lowest border border-outline-variant/50 rounded-lg shadow-lg max-h-60 overflow-auto animate-fade-in"
+          className="absolute z-50 w-full min-w-[160px] end-0 mt-1 bg-surface-container-lowest border border-outline-variant/50 rounded-lg shadow-lg max-h-60 overflow-auto animate-fade-in"
           role="listbox"
         >
           {options.map((option) => (

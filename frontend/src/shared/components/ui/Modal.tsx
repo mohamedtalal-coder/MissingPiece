@@ -68,7 +68,7 @@ export const Modal: React.FC<ModalProps> = ({
       aria-labelledby={title ? "modal-title" : undefined}
     >
       <div
-        className={`w-full ${maxWidthClasses[maxWidth]} bg-surface rounded-xl shadow-[0_20px_40px_-15px_rgba(5,7,10,0.7)] border border-outline-variant/20 flex flex-col max-h-[90vh] animate-scale-in`}
+        className={`w-full ${maxWidthClasses[maxWidth]} bg-surface rounded-xl shadow-[0_20px_40px_-15px_color-mix(in_srgb,var(--color-inverse-surface)_55%,transparent)] border border-outline-variant/20 flex flex-col max-h-[90vh] animate-scale-in`}
         role="document"
       >
         {title && (
@@ -79,7 +79,7 @@ export const Modal: React.FC<ModalProps> = ({
             {!hideCloseButton && (
               <button
                 onClick={onClose}
-                className="p-2 -mr-2 text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container transition-colors"
+                className="p-2 -me-2 text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container transition-colors"
                 aria-label="Close modal"
               >
                 <Icon name="close" size={20} />
@@ -91,7 +91,7 @@ export const Modal: React.FC<ModalProps> = ({
         {!title && !hideCloseButton && (
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 z-10 p-2 text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container bg-surface/50 backdrop-blur transition-colors"
+            className="absolute top-4 end-4 z-10 p-2 text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container bg-surface/50 backdrop-blur transition-colors"
             aria-label="Close modal"
           >
             <Icon name="close" size={20} />

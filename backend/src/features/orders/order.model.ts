@@ -3,7 +3,7 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface OrderItem {
   product: mongoose.Types.ObjectId;
   quantity: number;
-  priceAtPurchase: number; // Snapshot of the price at the time of checkout
+  priceAtPurchase: number;
 }
 
 export interface ShippingAddress {
@@ -14,14 +14,22 @@ export interface ShippingAddress {
   country: string;
 }
 
+export type OrderStatus =
+  | "pending"
+  | "paid"
+  | "shipped"
+  | "delivered"
+  | "cancelled"
+  | "refunded";
+
 export interface IOrder extends Document {
   user: mongoose.Types.ObjectId;
   items: OrderItem[];
   totalAmount: number;
   shippingAddress: ShippingAddress;
-  status: "pending" | "paid" | "shipped" | "delivered" | "cancelled";
+  status: OrderStatus;
   stripeSessionId?: string;
-  paymentIntentId?: string; // For Stripe or other payment processors
+  paymentIntentId?: string;
   discountCode?: string;
   discountAmount?: number;
   createdAt: Date;
@@ -44,15 +52,14 @@ const ShippingAddressSchema = new Schema<ShippingAddress>({
 
 const OrderSchema = new Schema<IOrder>(
   {
-    user: { type: Schema.Types.ObjectId, ref: "User", required: true }, // Auth is strictly required
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     items: [OrderItemSchema],
     totalAmount: { type: Number, required: true, min: 0 },
     shippingAddress: { type: ShippingAddressSchema, required: true },
     status: {
       type: String,
-      enum: ["pending", "paid", "shipped", "delivered", "cancelled"],
+      enum: ["pending", "paid", "shipped", "delivered", "cancelled", "refunded"],
       default: "pending",
-      // TODO: pending orders hold stock indefinitely; a TTL or cron cleanup is needed
     },
     stripeSessionId: { type: String },
     paymentIntentId: { type: String },
@@ -63,5 +70,6 @@ const OrderSchema = new Schema<IOrder>(
 );
 
 OrderSchema.index({ user: 1, createdAt: -1 });
+OrderSchema.index({ status: 1, createdAt: -1 });
 
 export const Order = mongoose.model<IOrder>("Order", OrderSchema);

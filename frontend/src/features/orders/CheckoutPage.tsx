@@ -10,6 +10,7 @@ import { Icon } from '../../shared/components/ui/Icon';
 import { Button } from '../../shared/components/ui/Button';
 import { PriceDisplay } from '../../shared/components/ui/PriceDisplay';
 import { Spinner } from '../../shared/components/ui/Spinner';
+import { useLanguage } from '../../shared/context/LanguageContext';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const FREE_SHIPPING_THRESHOLD = 80;
@@ -61,6 +62,7 @@ const inputClass = (hasError?: boolean) =>
   }`;
 
 export function CheckoutPage() {
+  const { t, formatCurrency, language } = useLanguage();
   const { isAuthenticated, user } = useAuth();
   const { clearCart } = useCart();
   const navigate = useNavigate();
@@ -120,7 +122,7 @@ export function CheckoutPage() {
     } catch (err: unknown) {
       const e = err as { name?: string; code?: string };
       if (e.name === 'CanceledError' || e.name === 'AbortError' || e.code === 'ERR_CANCELED') return;
-      showToast({ message: 'Failed to load cart', type: 'error' });
+      showToast({ message: t.checkout?.loadCartError || 'Failed to load cart', type: 'error' });
       setCartItems([]);
     } finally {
       if (!signal?.aborted) setLoading(false);
@@ -148,7 +150,7 @@ export function CheckoutPage() {
   const applyPromo = async (codeRaw: string) => {
     const code = codeRaw.trim().toUpperCase().slice(0, 20);
     if (code.length < 3 || cartItems.length === 0) {
-      setPromoError('Enter a valid code.');
+      setPromoError(t.checkout?.invalidPromo || 'Enter a valid code.');
       return;
     }
     setPromoLoading(true);
@@ -159,7 +161,7 @@ export function CheckoutPage() {
         cartItems.map((i) => ({ product: i.productId, quantity: i.quantity }))
       );
       if (!res.applied || res.discountAmount <= 0) {
-        setPromoError('Invalid or expired code.');
+        setPromoError(t.checkout?.invalidExpiredPromo || 'Invalid or expired code.');
         setPromoCode(null);
         setDiscountAmount(0);
         return;
@@ -168,7 +170,7 @@ export function CheckoutPage() {
       setDiscountAmount(res.discountAmount);
       setPromoInput('');
     } catch {
-      setPromoError('Invalid or expired code.');
+      setPromoError(t.checkout?.invalidExpiredPromo || 'Invalid or expired code.');
       setPromoCode(null);
       setDiscountAmount(0);
     } finally {
@@ -186,16 +188,16 @@ export function CheckoutPage() {
   const validateForm = (): boolean => {
     const next: FieldErrors = {};
     const cleanEmail = sanitizeText(email, 100).toLowerCase();
-    if (!EMAIL_RE.test(cleanEmail)) next.email = 'Enter a valid email.';
-    if (sanitizeText(firstName, 50).length < 1) next.firstName = 'Required.';
-    if (sanitizeText(lastName, 50).length < 1) next.lastName = 'Required.';
-    if (sanitizeText(address.street, 200).length < 1) next.street = 'Required.';
-    if (sanitizeText(address.city, 100).length < 1) next.city = 'Required.';
-    if (sanitizeText(address.state, 100).length < 1) next.state = 'Required.';
-    if (sanitizeText(address.zipCode, 20).length < 1) next.zipCode = 'Required.';
-    if (sanitizeText(address.country, 100).length < 1) next.country = 'Required.';
+    if (!EMAIL_RE.test(cleanEmail)) next.email = t.checkout?.emailInvalid || 'Enter a valid email.';
+    if (sanitizeText(firstName, 50).length < 1) next.firstName = t.checkout?.fieldRequired || 'Required.';
+    if (sanitizeText(lastName, 50).length < 1) next.lastName = t.checkout?.fieldRequired || 'Required.';
+    if (sanitizeText(address.street, 200).length < 1) next.street = t.checkout?.fieldRequired || 'Required.';
+    if (sanitizeText(address.city, 100).length < 1) next.city = t.checkout?.fieldRequired || 'Required.';
+    if (sanitizeText(address.state, 100).length < 1) next.state = t.checkout?.fieldRequired || 'Required.';
+    if (sanitizeText(address.zipCode, 20).length < 1) next.zipCode = t.checkout?.fieldRequired || 'Required.';
+    if (sanitizeText(address.country, 100).length < 1) next.country = t.checkout?.fieldRequired || 'Required.';
     if (phone && phone.replace(/\D/g, '').length > 0 && phone.replace(/\D/g, '').length < 7) {
-      next.phone = 'Enter a valid phone or leave blank.';
+      next.phone = t.checkout?.phoneInvalid || 'Enter a valid phone or leave blank.';
     }
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -204,12 +206,12 @@ export function CheckoutPage() {
   const handleCheckout = async (e: FormEvent) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      showToast({ message: 'Please sign in first', type: 'error' });
+      showToast({ message: t.checkout?.signInFirst || 'Please sign in first', type: 'error' });
       navigate('/login', { state: { from: '/checkout' } });
       return;
     }
     if (cartItems.length === 0) {
-      showToast({ message: 'Your cart is empty', type: 'error' });
+      showToast({ message: t.checkout?.cartEmptyToast || 'Your cart is empty', type: 'error' });
       return;
     }
     if (!validateForm() || submitting) return;
@@ -235,12 +237,12 @@ export function CheckoutPage() {
 
       const { url } = await ordersApi.createCheckoutSession(order._id || order.id!);
       if (!url || !/^https:\/\//i.test(url)) {
-        throw new Error('Invalid payment redirect');
+        throw new Error(t.checkout?.invalidPayment || 'Invalid payment redirect');
       }
       await clearCart();
       window.location.href = url;
     } catch {
-      showToast({ message: 'Failed to place order or start payment', type: 'error' });
+      showToast({ message: t.checkout?.placeOrderError || 'Failed to place order or start payment', type: 'error' });
       setSubmitting(false);
     }
   };
@@ -256,16 +258,16 @@ export function CheckoutPage() {
     return (
       <div className="max-w-lg mx-auto px-margin-mobile py-space-2xl text-center animate-fade-in">
         <Icon name="lock" className="text-[40px] text-primary mx-auto mb-4" />
-        <h1 className="font-headline-sm text-headline-sm text-on-surface mb-2">Sign in to checkout</h1>
+        <h1 className="font-headline-sm text-headline-sm text-on-surface mb-2">{t.checkout?.signInToCheckout || 'Sign in to checkout'}</h1>
         <p className="font-body-md text-on-surface-variant mb-6">
-          An Atelier account is required to commission editions and complete secure payment.
+          {t.checkout?.accountRequired || 'An Atelier account is required to commission editions and complete secure payment.'}
         </p>
         <div className="flex flex-wrap justify-center gap-3">
           <Button as="link" to="/login">
-            Sign In
+            {t.checkout?.signInBtn || 'Sign In'}
           </Button>
           <Button as="link" to="/register" variant="outline">
-            Create Account
+            {t.checkout?.createAccountBtn || 'Create Account'}
           </Button>
         </div>
       </div>
@@ -277,21 +279,21 @@ export function CheckoutPage() {
       <div className="mb-space-lg flex items-center justify-between gap-4 animate-slide-up">
         <Link
           to="/cart"
-          className="inline-flex items-center gap-2 text-xs text-on-surface-variant hover:text-on-surface transition-colors"
+          className="inline-flex items-center gap-2 text-xs text-on-surface-variant hover:text-on-surface transition-colors rtl:-scale-x-100"
         >
           <Icon name="chevron_left" size={16} />
-          Return to Bag
+          {t.checkout?.returnToBag || 'Return to Bag'}
         </Link>
-        <h1 className="font-headline-sm text-headline-sm text-on-surface">Secure Checkout</h1>
+        <h1 className="font-headline-sm text-headline-sm text-on-surface">{t.checkout?.secureCheckout || 'Secure Checkout'}</h1>
       </div>
 
       <section aria-label="Checkout progress" className="w-full mb-space-xl animate-fade-in">
         <div className="bg-surface-container-low rounded-xl p-space-md md:p-space-lg">
           <ol className="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
             {[
-              { n: '01', label: 'Shipping' },
-              { n: '02', label: 'Delivery' },
-              { n: '03', label: 'Payment' },
+              { n: '01', label: t.checkout?.shipping || 'Shipping' },
+              { n: '02', label: t.checkout?.delivery || 'Delivery' },
+              { n: '03', label: t.checkout?.payment || 'Payment' },
             ].map((step, i) => (
               <li key={step.n} className="flex items-center gap-space-sm">
                 <span
@@ -313,10 +315,10 @@ export function CheckoutPage() {
       ) : cartItems.length === 0 ? (
         <div className="text-center py-24 animate-fade-in">
           <Icon name="shopping_bag" className="text-6xl text-outline mb-space-sm mx-auto" />
-          <h2 className="font-headline-sm text-headline-sm text-on-surface mb-2">Your cart is empty</h2>
-          <p className="font-body-md text-on-surface-variant mb-6">Add editions before checking out.</p>
+          <h2 className="font-headline-sm text-headline-sm text-on-surface mb-2">{t.checkout?.emptyCart || 'Your cart is empty'}</h2>
+          <p className="font-body-md text-on-surface-variant mb-6">{t.checkout?.addEditions || 'Add editions before checking out.'}</p>
           <Button as="link" to="/products">
-            Explore Catalog
+            {t.checkout?.exploreCatalog || 'Explore Catalog'}
           </Button>
         </div>
       ) : (
@@ -325,12 +327,12 @@ export function CheckoutPage() {
             <section className="bg-surface-container-low rounded-xl p-space-lg flex flex-col gap-space-md">
               <div className="flex items-center gap-2.5">
                 <Icon name="person_outline" className="text-primary" size={20} />
-                <h2 className="font-headline-sm text-headline-sm text-on-surface">1. Contact</h2>
+                <h2 className="font-headline-sm text-headline-sm text-on-surface">1. {t.checkout?.contact || 'Contact'}</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">
                 <div className="flex flex-col gap-1.5 md:col-span-2">
                   <label className="font-label-md text-label-md text-on-surface-variant" htmlFor="contact-email">
-                    Email <span className="text-primary">*</span>
+                    {t.checkout?.email || 'Email'} <span className="text-primary">*</span>
                   </label>
                   <input
                     id="contact-email"
@@ -350,7 +352,7 @@ export function CheckoutPage() {
                 </div>
                 <div className="flex flex-col gap-1.5 md:col-span-2">
                   <label className="font-label-md text-label-md text-on-surface-variant" htmlFor="contact-phone">
-                    Phone (optional)
+                    {t.checkout?.phoneOptional || 'Phone (optional)'}
                   </label>
                   <input
                     id="contact-phone"
@@ -369,12 +371,12 @@ export function CheckoutPage() {
             <section className="bg-surface-container-low rounded-xl p-space-lg flex flex-col gap-space-md">
               <div className="flex items-center gap-2.5">
                 <Icon name="location_on" className="text-primary" size={20} />
-                <h2 className="font-headline-sm text-headline-sm text-on-surface">2. Shipping destination</h2>
+                <h2 className="font-headline-sm text-headline-sm text-on-surface">2. {t.checkout?.shippingDestination || 'Shipping destination'}</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="first-name" className="font-label-md text-label-md text-on-surface-variant">
-                    First name <span className="text-primary">*</span>
+                    {t.checkout?.firstName || 'First name'} <span className="text-primary">*</span>
                   </label>
                   <input
                     id="first-name"
@@ -389,7 +391,7 @@ export function CheckoutPage() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="last-name" className="font-label-md text-label-md text-on-surface-variant">
-                    Last name <span className="text-primary">*</span>
+                    {t.checkout?.lastName || 'Last name'} <span className="text-primary">*</span>
                   </label>
                   <input
                     id="last-name"
@@ -404,7 +406,7 @@ export function CheckoutPage() {
                 </div>
                 <div className="flex flex-col gap-1.5 md:col-span-2">
                   <label htmlFor="street" className="font-label-md text-label-md text-on-surface-variant">
-                    Street address <span className="text-primary">*</span>
+                    {t.checkout?.streetAddress || 'Street address'} <span className="text-primary">*</span>
                   </label>
                   <input
                     id="street"
@@ -419,7 +421,7 @@ export function CheckoutPage() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="city" className="font-label-md text-label-md text-on-surface-variant">
-                    City <span className="text-primary">*</span>
+                    {t.checkout?.city || 'City'} <span className="text-primary">*</span>
                   </label>
                   <input
                     id="city"
@@ -434,7 +436,7 @@ export function CheckoutPage() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="state" className="font-label-md text-label-md text-on-surface-variant">
-                    State / Province <span className="text-primary">*</span>
+                    {t.checkout?.stateProvince || 'State / Province'} <span className="text-primary">*</span>
                   </label>
                   <input
                     id="state"
@@ -449,7 +451,7 @@ export function CheckoutPage() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="zip" className="font-label-md text-label-md text-on-surface-variant">
-                    Postal code <span className="text-primary">*</span>
+                    {t.checkout?.postalCode || 'Postal code'} <span className="text-primary">*</span>
                   </label>
                   <input
                     id="zip"
@@ -464,7 +466,7 @@ export function CheckoutPage() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="country" className="font-label-md text-label-md text-on-surface-variant">
-                    Country <span className="text-primary">*</span>
+                    {t.checkout?.country || 'Country'} <span className="text-primary">*</span>
                   </label>
                   <select
                     id="country"
@@ -489,7 +491,7 @@ export function CheckoutPage() {
             <section className="bg-surface-container-low rounded-xl p-space-lg flex flex-col gap-space-md">
               <div className="flex items-center gap-2.5">
                 <Icon name="local_shipping" className="text-primary" size={20} />
-                <h2 className="font-headline-sm text-headline-sm text-on-surface">3. Delivery method</h2>
+                <h2 className="font-headline-sm text-headline-sm text-on-surface">3. {t.checkout?.deliveryMethod || 'Delivery method'}</h2>
               </div>
               <div className="flex flex-col gap-space-sm">
                 {(Object.values(SHIPPING) as Array<(typeof SHIPPING)[keyof typeof SHIPPING]>).map((method) => {
@@ -521,7 +523,7 @@ export function CheckoutPage() {
                         </div>
                       </div>
                       <span className="font-headline-sm text-primary font-semibold tabular-nums">
-                        {fee === 0 ? 'Free' : `$${fee.toFixed(2)}`}
+                        {fee === 0 ? (t.checkout?.free || 'Free') : formatCurrency(fee)}
                       </span>
                     </label>
                   );
@@ -533,28 +535,27 @@ export function CheckoutPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <Icon name="lock" className="text-primary" size={20} />
-                  <h2 className="font-headline-sm text-headline-sm text-on-surface">4. Payment</h2>
+                  <h2 className="font-headline-sm text-headline-sm text-on-surface">4. {t.checkout?.payment || 'Payment'}</h2>
                 </div>
                 <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider flex items-center gap-1">
                   <Icon name="verified_user" size={14} className="text-primary" />
-                  Stripe Secure
+                  {t.checkout?.stripeSecure || 'Stripe Secure'}
                 </span>
               </div>
               <div className="bg-surface-container p-3 rounded-lg text-on-surface-variant text-sm flex gap-2">
                 <Icon name="info" className="text-primary shrink-0" size={18} />
                 <span>
-                  Card details are never collected on this site. You will complete payment on Stripe&apos;s
-                  encrypted checkout.
+                  {t.checkout?.stripeInfo || "Card details are never collected on this site. You will complete payment on Stripe's encrypted checkout."}
                 </span>
               </div>
             </section>
 
             <div className="bg-surface-container-low rounded-xl p-space-lg flex flex-col gap-space-md">
               <Button type="submit" disabled={submitting} isLoading={submitting} className="w-full" size="lg" icon="lock">
-                Proceed to Payment · ${total.toFixed(2)}
+                {t.checkout?.proceedToPayment || 'Proceed to Payment'} · {formatCurrency(total)}
               </Button>
               <p className="font-body-sm text-body-sm text-outline text-center leading-relaxed">
-                By continuing you agree to MissingPiece purchase terms and the Lifetime Piece Replacement Policy.
+                {t.checkout?.termsAgree || 'By continuing you agree to MissingPiece purchase terms and the Lifetime Piece Replacement Policy.'}
               </p>
             </div>
           </div>
@@ -562,29 +563,29 @@ export function CheckoutPage() {
           <aside className="lg:col-span-5">
             <div className="bg-surface-container-low rounded-xl p-space-lg shadow-md flex flex-col gap-space-md sticky top-28">
               <div className="flex items-center justify-between pb-space-sm">
-                <h2 className="font-headline-sm text-headline-sm text-on-surface">Order Summary</h2>
+                <h2 className="font-headline-sm text-headline-sm text-on-surface">{t.checkout?.orderSummary || 'Order Summary'}</h2>
                 <span className="font-label-caps text-label-caps uppercase tracking-wider px-2 py-0.5 rounded bg-surface-container text-primary">
-                  {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}
+                  {cartItems.length} {cartItems.length === 1 ? (t.checkout?.item || 'item') : (t.checkout?.items || 'items')}
                 </span>
               </div>
 
-              <ul className="flex flex-col gap-space-md max-h-80 overflow-y-auto pr-1">
+              <ul className="flex flex-col gap-space-md max-h-80 overflow-y-auto pe-1">
                 {cartItems.map((item) => (
                   <li key={item.productId} className="flex items-center gap-space-md p-2 rounded-lg bg-surface-container">
                     <div className="w-16 h-16 rounded-md overflow-hidden bg-surface-container-lowest shrink-0 relative">
                       {item.imageUrl ? (
                         <img className="w-full h-full object-cover" src={item.imageUrl} alt="" />
                       ) : null}
-                      <span className="absolute bottom-0.5 right-0.5 text-[10px] bg-surface/90 px-1 rounded text-primary font-bold">
+                      <span className="absolute bottom-0.5 end-0.5 text-[10px] bg-surface/90 px-1 rounded text-primary font-bold">
                         {item.quantity}×
                       </span>
                     </div>
                     <div className="flex flex-col flex-1 min-w-0">
                       <span className="font-headline-sm text-sm text-on-surface truncate">{item.title}</span>
                       <div className="flex justify-between mt-1">
-                        <span className="text-xs text-outline">Qty {item.quantity}</span>
+                        <span className="text-xs text-outline">{t.checkout?.qty || 'Qty'} {item.quantity}</span>
                         <span className="text-sm text-primary font-semibold tabular-nums">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          {formatCurrency(item.price * item.quantity)}
                         </span>
                       </div>
                     </div>
@@ -599,7 +600,7 @@ export function CheckoutPage() {
                 <input
                   id="checkout-promo"
                   className="flex-1 bg-surface-container rounded-lg px-space-md py-2 text-xs text-on-surface uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-primary/40"
-                  placeholder="Atelier code"
+                  placeholder={t.checkout?.promoPlaceholder || "Atelier code"}
                   maxLength={20}
                   value={promoInput}
                   onChange={(e) => {
@@ -613,7 +614,7 @@ export function CheckoutPage() {
                   onClick={() => applyPromo(promoInput)}
                   className="px-space-md py-2 bg-surface-container-high hover:bg-surface-bright text-on-surface rounded-lg text-xs uppercase tracking-wider transition-colors disabled:opacity-50 inline-flex items-center gap-1"
                 >
-                  {promoLoading ? <Spinner size="sm" /> : 'Apply'}
+                  {promoLoading ? <Spinner size="sm" /> : (t.checkout?.apply || 'Apply')}
                 </button>
               </div>
               {promoError && (
@@ -623,35 +624,35 @@ export function CheckoutPage() {
               )}
               {promoCode && !promoError && (
                 <p className="text-[11px] text-primary flex items-center gap-1">
-                  <Icon name="check" size={12} /> {promoCode} (−${safeDiscount.toFixed(2)})
+                  <Icon name="check" size={12} /> {promoCode} (−{formatCurrency(safeDiscount)})
                   <button
                     type="button"
-                    className="underline ml-1 text-outline"
+                    className="underline ms-1 text-outline"
                     onClick={() => {
                       setPromoCode(null);
                       setDiscountAmount(0);
                     }}
                   >
-                    Remove
+                    {t.checkout?.remove || 'Remove'}
                   </button>
                 </p>
               )}
 
               <div className="bg-surface-container rounded-lg p-space-md flex flex-col gap-2.5">
                 <div className="flex justify-between text-sm">
-                  <span className="text-on-surface-variant">Subtotal</span>
+                  <span className="text-on-surface-variant">{t.checkout?.subtotal || 'Subtotal'}</span>
                   <PriceDisplay amount={subtotal} size="sm" className="text-on-surface" />
                 </div>
                 {safeDiscount > 0 && (
                   <div className="flex justify-between text-sm text-primary">
-                    <span>Discount</span>
-                    <span className="tabular-nums">−${safeDiscount.toFixed(2)}</span>
+                    <span>{t.checkout?.discount || 'Discount'}</span>
+                    <span className="tabular-nums">−{formatCurrency(safeDiscount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
-                  <span className="text-on-surface-variant">Courier</span>
+                  <span className="text-on-surface-variant">{t.checkout?.courier || 'Courier'}</span>
                   <span className="tabular-nums text-on-surface">
-                    {shippingFee === 0 ? 'Complimentary' : `$${shippingFee.toFixed(2)}`}
+                    {shippingFee === 0 ? (t.checkout?.complimentary || 'Complimentary') : formatCurrency(shippingFee)}
                   </span>
                 </div>
               </div>
@@ -659,9 +660,11 @@ export function CheckoutPage() {
               <div className="flex justify-between items-baseline">
                 <div>
                   <span className="font-label-md text-label-md text-on-surface uppercase tracking-wider font-semibold">
-                    Total
+                    {t.checkout?.total || 'Total'}
                   </span>
-                  <p className="text-[0.75rem] text-on-surface-variant">USD</p>
+                  <p className="text-[0.75rem] text-on-surface-variant">
+                    {new Intl.DisplayNames([language === 'ar' ? 'ar-EG' : 'en-US'], { type: 'currency' }).of('USD')}
+                  </p>
                 </div>
                 <PriceDisplay amount={total} size="xl" className="text-primary" />
               </div>

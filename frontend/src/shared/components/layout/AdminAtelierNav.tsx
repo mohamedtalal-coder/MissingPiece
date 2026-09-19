@@ -1,13 +1,23 @@
 import { NavLink } from 'react-router-dom';
 import { Icon } from '../ui/Icon';
-
-const links = [
-  { to: '/admin/products', label: 'Inventory', icon: 'inventory_2' },
-  { to: '/admin/orders', label: 'Fulfillment', icon: 'local_shipping' },
-  { to: '/admin/messages', label: 'Inquiries', icon: 'chat_bubble_outline' },
-] as const;
+import { useLanguage } from '../../context/LanguageContext';
 
 export function AdminAtelierNav() {
+  const { t } = useLanguage();
+  const n = t.adminPanel.nav;
+
+  const links = [
+    { to: '/admin', label: n.dashboard, icon: 'dashboard' as const, end: true },
+    { to: '/admin/products', label: n.inventory, icon: 'inventory_2' as const },
+    { to: '/admin/orders', label: n.fulfillment, icon: 'local_shipping' as const },
+    { to: '/admin/messages', label: n.inquiries, icon: 'chat_bubble_outline' as const },
+    { to: '/admin/users', label: n.users, icon: 'group' as const },
+    { to: '/admin/reviews', label: n.reviews, icon: 'star_rate' as const },
+    { to: '/admin/faq', label: n.faqs, icon: 'help_outline' as const },
+    { to: '/admin/discounts', label: n.discounts, icon: 'sell' as const },
+    { to: '/admin/audit', label: n.audit, icon: 'history' as const },
+  ];
+
   return (
     <div className="mb-space-lg space-y-3 animate-fade-in">
       <div className="flex items-center gap-2">
@@ -27,6 +37,7 @@ export function AdminAtelierNav() {
           <NavLink
             key={link.to}
             to={link.to}
+            end={link.end}
             className={({ isActive }) =>
               `shrink-0 inline-flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium rounded-t-lg border-b-2 transition-colors ${
                 isActive

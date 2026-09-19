@@ -6,6 +6,7 @@ import { PriceDisplay } from '../../shared/components/ui/PriceDisplay';
 import { EmptyState } from '../../shared/components/ui/EmptyState';
 import { AdminAtelierNav } from '../../shared/components/layout/AdminAtelierNav';
 import { ordersApi, type Order } from './ordersApi';
+import { useLanguage } from '../../shared/context/LanguageContext';
 
 function TableSkeleton() {
   return (
@@ -19,6 +20,7 @@ function TableSkeleton() {
 
 export function AdminOrdersPage() {
   const toast = useToast();
+  const { formatDate } = useLanguage();
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -114,7 +116,7 @@ export function AdminOrdersPage() {
                   <th className="py-3.5 px-4" scope="col">
                     Dispatch Status
                   </th>
-                  <th className="py-3.5 pr-6 pl-4 text-right" scope="col">
+                  <th className="py-3.5 pe-6 ps-4 text-right" scope="col">
                     Actions
                   </th>
                 </tr>
@@ -129,7 +131,7 @@ export function AdminOrdersPage() {
                       {(order as Order & { user?: { name?: string } }).user?.name || 'Unknown'}
                     </td>
                     <td className="py-4 px-4 text-on-surface-variant">
-                      {new Date(order.createdAt).toLocaleDateString()}
+                      {formatDate(order.createdAt)}
                     </td>
                     <td className="py-4 px-4 truncate max-w-[200px] text-on-surface-variant">
                       {order.shippingAddress?.city}, {order.shippingAddress?.country}
@@ -140,7 +142,7 @@ export function AdminOrdersPage() {
                     <td className="py-4 px-4">
                       <StatusBadge type="order" status={order.status} />
                     </td>
-                    <td className="py-4 pr-6 pl-4 text-right">
+                    <td className="py-4 pe-6 ps-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         {order.status === 'paid' && (
                           <Button

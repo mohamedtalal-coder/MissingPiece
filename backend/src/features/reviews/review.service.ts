@@ -7,7 +7,7 @@ import type { AppError } from "../../shared/middleware/errorHandler.js";
 
 async function recalculateProductRating(productId: string) {
   const stats = await Review.aggregate([
-    { $match: { product: new mongoose.Types.ObjectId(productId) } },
+    { $match: { product: new mongoose.Types.ObjectId(productId), status: "approved" } },
     {
       $group: {
         _id: "$product",
@@ -91,15 +91,53 @@ export async function listReviewsForProduct(params: z.infer<typeof listReviewsQu
   const { product, page, limit } = params;
   const skip = (page - 1) * limit;
 
+  // We should only show approved reviews to the public. 
+  // Admin routes will bypass this by using a new admin specific fetch if necessary, 
+  // but for the product detail page, only approved reviews.
+  const filter = { product, status: "approved" as const };
+
   const [reviews, total] = await Promise.all([
-    Review.find({ product })
+    Review.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .populate("user", "name")
       .lean(),
-    Review.countDocuments({ product }),
+    Review.countDocuments(filter),
   ]);
 
   return { reviews, total, page, limit };
+}
+
+export async function listAllReviewsAdmin(page: number, limit: number, status?: string) {
+  const skip = (page - 1) * limit;
+  const filter: Record<string, unknown> = {};
+  if (status) filter.status = status;
+
+  const [items, total] = await Promise.all([
+    Review.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("user", "name email")
+      .populate("product", "name")
+      .lean(),
+    Review.countDocuments(filter),
+  ]);
+
+  return { items, total, page, limit, totalPages: Math.ceil(total / limit) };
+}
+
+export async function updateReviewStatus(reviewId: string, status: string, moderationReason?: string) {
+  const review = await Review.findByIdAndUpdate(
+    reviewId,
+    { status, moderationReason },
+    { new: true, runValidators: true }
+  );
+
+  if (review) {
+    await recalculateProductRating(review.product.toString());
+  }
+
+  return review;
 }

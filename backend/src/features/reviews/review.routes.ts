@@ -4,9 +4,12 @@ import {
   updateReviewHandler,
   deleteReviewHandler,
   listReviewsHandler,
+  listReviewsAdminHandler,
+  updateReviewStatusHandler,
 } from "./review.controller.js";
 import { requireAuth } from "../../shared/middleware/requireAuth.js";
-import { reviewWriteLimiter, reviewReadLimiter } from "../../shared/middleware/rateLimiter.js";
+import { requireAdmin } from "../../shared/middleware/requireAdmin.js";
+import { reviewWriteLimiter, reviewReadLimiter, adminRateLimiter } from "../../shared/middleware/rateLimiter.js";
 
 const router = Router();
 
@@ -14,5 +17,9 @@ router.get("/", reviewReadLimiter, listReviewsHandler);
 router.post("/", requireAuth, reviewWriteLimiter, createReviewHandler);
 router.patch("/:id", requireAuth, reviewWriteLimiter, updateReviewHandler);
 router.delete("/:id", requireAuth, reviewWriteLimiter, deleteReviewHandler);
+
+// Admin routes
+router.get("/admin/all", requireAuth, requireAdmin, listReviewsAdminHandler);
+router.patch("/:id/status", requireAuth, requireAdmin, adminRateLimiter, updateReviewStatusHandler);
 
 export default router;

@@ -2,7 +2,7 @@ import type { ReactNode, CSSProperties } from 'react';
 import { useInView } from '../../hooks/useInView';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 
-type MotionPreset = 'fade' | 'up' | 'down';
+type MotionPreset = 'fade' | 'up' | 'down' | 'left' | 'right';
 
 interface MotionProps {
   children: ReactNode;
@@ -15,6 +15,8 @@ const presetClass: Record<MotionPreset, string> = {
   fade: 'motion-fade',
   up: 'motion-up',
   down: 'motion-down',
+  left: 'motion-left',
+  right: 'motion-right',
 };
 
 /** Scroll-triggered entrance; skipped when user prefers reduced motion. */

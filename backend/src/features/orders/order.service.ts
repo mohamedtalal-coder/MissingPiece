@@ -4,6 +4,7 @@ import type { ShippingAddress } from "./order.model.js";
 import { Product } from "../products/product.model.js";
 import type { AppError } from "../../shared/middleware/errorHandler.js";
 import { findValidDiscountByCode, calculateDiscount, incrementDiscountUsage } from "../discounts/discount.service.js";
+import { User } from "../auth/user.model.js";
 
 export interface CreateOrderInput {
   items: { product: string; quantity: number }[];
@@ -16,16 +17,15 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
     let totalAmount = 0;
     const orderItems = [];
 
-    // Validate products, check stock, and calculate total using DB prices
     for (const item of input.items) {
       const product = await Product.findById(item.product).session(session);
-      
+
       if (!product) {
         const err: AppError = new Error(`Product with ID ${item.product} not found`);
         err.statusCode = 404;
         throw err;
       }
-      
+
       if (!product.isActive) {
         const err: AppError = new Error(`Product ${product.name} is no longer available`);
         err.statusCode = 400;
@@ -47,7 +47,6 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
         priceAtPurchase: product.price,
       });
 
-      // Deduct stock
       product.stock -= item.quantity;
       await product.save({ session });
     }
@@ -63,17 +62,16 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
         err.statusCode = 400;
         throw err;
       }
-      
+
       const { discountAmount } = calculateDiscount(discount, orderItems);
       appliedDiscountAmount = discountAmount;
-      
+
       await incrementDiscountUsage(discount._id.toString(), session);
-      
+
       finalTotalAmount = Math.max(0, totalAmount - appliedDiscountAmount);
       appliedDiscountCode = discount.code;
     }
 
-    // Create the order
     const order = new Order({
       user: userId,
       items: orderItems,
@@ -95,6 +93,15 @@ export interface ListOrdersParams {
   limit: number;
 }
 
+export interface AdminListOrdersParams extends ListOrdersParams {
+  status?: string;
+  search?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  minAmount?: number;
+  maxAmount?: number;
+}
+
 export async function getMyOrders(userId: string, params: ListOrdersParams) {
   const skip = (params.page - 1) * params.limit;
 
@@ -111,27 +118,81 @@ export async function getMyOrders(userId: string, params: ListOrdersParams) {
   return { items, total, page: params.page, limit: params.limit, totalPages: Math.ceil(total / params.limit) };
 }
 
-export async function getAllOrdersAdmin(params: ListOrdersParams) {
+async function buildAdminOrderFilter(params: AdminListOrdersParams) {
+  const filter: Record<string, unknown> = {};
+
+  if (params.status) {
+    filter.status = params.status;
+  }
+
+  if (params.minAmount !== undefined || params.maxAmount !== undefined) {
+    const amount: Record<string, number> = {};
+    if (params.minAmount !== undefined) amount.$gte = params.minAmount;
+    if (params.maxAmount !== undefined) amount.$lte = params.maxAmount;
+    filter.totalAmount = amount;
+  }
+
+  if (params.dateFrom || params.dateTo) {
+    const createdAt: Record<string, Date> = {};
+    if (params.dateFrom) createdAt.$gte = new Date(params.dateFrom);
+    if (params.dateTo) {
+      const end = new Date(params.dateTo);
+      end.setHours(23, 59, 59, 999);
+      createdAt.$lte = end;
+    }
+    filter.createdAt = createdAt;
+  }
+
+  if (params.search) {
+    const users = await User.find({
+      $or: [
+        { name: { $regex: params.search, $options: "i" } },
+        { email: { $regex: params.search, $options: "i" } },
+      ],
+    })
+      .select("_id")
+      .lean();
+    const userIds = users.map((u) => u._id);
+    filter.$or = [
+      { user: { $in: userIds } },
+      ...(params.search.match(/^[a-f\d]{24}$/i) ? [{ _id: params.search }] : []),
+    ];
+  }
+
+  return filter;
+}
+
+export async function getAllOrdersAdmin(params: AdminListOrdersParams) {
   const skip = (params.page - 1) * params.limit;
+  const filter = await buildAdminOrderFilter(params);
 
   const [items, total] = await Promise.all([
-    Order.find({})
+    Order.find(filter)
       .populate("user", "name email")
       .populate("items.product", "name images price")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(params.limit)
       .lean(),
-    Order.countDocuments({}),
+    Order.countDocuments(filter),
   ]);
 
   return { items, total, page: params.page, limit: params.limit, totalPages: Math.ceil(total / params.limit) };
 }
 
+export async function exportOrdersAdmin(params: Omit<AdminListOrdersParams, "page" | "limit">) {
+  const filter = await buildAdminOrderFilter({ ...params, page: 1, limit: 1 });
+  const items = await Order.find(filter)
+    .populate("user", "name email")
+    .sort({ createdAt: -1 })
+    .limit(5000)
+    .lean();
+  return items;
+}
+
 export async function getOrderById(orderId: string, userId: string, isAdmin: boolean) {
   const filter: Record<string, unknown> = { _id: orderId };
-  
-  // Enforce IDOR protection: if not admin, must own the order
+
   if (!isAdmin) {
     filter.user = userId;
   }
@@ -139,13 +200,28 @@ export async function getOrderById(orderId: string, userId: string, isAdmin: boo
   return Order.findOne(filter).populate("items.product", "name images price").lean();
 }
 
-const ALLOWED_TRANSITIONS: Record<string, string[]> = {
+/** Validated order status state machine */
+export const ALLOWED_TRANSITIONS: Record<string, string[]> = {
   pending: ["paid", "cancelled"],
-  paid: ["shipped", "cancelled"],
+  paid: ["shipped", "cancelled", "refunded"],
   shipped: ["delivered"],
-  delivered: [],
+  delivered: ["refunded"],
   cancelled: [],
+  refunded: [],
 };
+
+async function restoreStock(
+  items: { product: unknown; quantity: number }[],
+  session: import("mongoose").ClientSession
+) {
+  for (const item of items) {
+    await Product.findByIdAndUpdate(
+      item.product,
+      { $inc: { stock: item.quantity } },
+      { session }
+    );
+  }
+}
 
 export async function updateOrderStatus(orderId: string, status: string) {
   return withTransaction(async (session) => {
@@ -157,21 +233,21 @@ export async function updateOrderStatus(orderId: string, status: string) {
     }
 
     const currentStatus = order.status;
-    
+
     if (!ALLOWED_TRANSITIONS[currentStatus]?.includes(status)) {
       const err: AppError = new Error(`Invalid status transition from ${currentStatus} to ${status}`);
       err.statusCode = 409;
       throw err;
     }
 
-    if (status === "cancelled" && currentStatus !== "cancelled") {
-      for (const item of order.items) {
-        await Product.findByIdAndUpdate(
-          item.product,
-          { $inc: { stock: item.quantity } },
-          { session }
-        );
-      }
+    // Cancel from pending/paid restores stock; refund from paid/delivered restores stock.
+    // Shipped cannot be cancelled (no transition) — must deliver or handle offline.
+    if (
+      (status === "cancelled" || status === "refunded") &&
+      currentStatus !== "cancelled" &&
+      currentStatus !== "refunded"
+    ) {
+      await restoreStock(order.items, session);
     }
 
     order.status = status as typeof order.status;

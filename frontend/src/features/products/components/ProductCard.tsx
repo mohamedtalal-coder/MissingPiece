@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Product } from '../productsApi';
 import { useCart } from '../../cart/CartContext';
@@ -24,6 +24,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
 
   const isWishlisted = isInWishlist(product._id || product.slug);
   const imageSrc = product.images?.[0];
@@ -37,6 +38,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   useEffect(() => {
     setImageLoaded(false);
     setImageFailed(false);
+    if (imgRef.current?.complete) {
+      setImageLoaded(true);
+    }
   }, [imageSrc]);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
@@ -48,9 +52,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     try {
       await addItem(product, 1);
       setIsSuccess(true);
-      showToast({ message: 'Added to bag', type: 'success' });
+      showToast({ message: t.productCard?.addedToBagToast || 'Added to bag', type: 'success' });
     } catch {
-      showToast({ message: 'Could not add to bag', type: 'error' });
+      showToast({ message: t.productCard?.couldNotAddToast || 'Could not add to bag', type: 'error' });
     } finally {
       setIsAdding(false);
     }
@@ -79,6 +83,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {!imageLoaded && !imageFailed && <div className="absolute inset-0 animate-shimmer" aria-hidden />}
         {imageSrc && !imageFailed ? (
           <img
+            ref={imgRef}
             src={imageSrc}
             alt={product.name}
             className={`w-full h-full object-cover object-center group-hover:scale-105 transition-all duration-700 ease-out ${
@@ -97,12 +102,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
         <button
           onClick={handleToggleWishlist}
-          className={`wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full backdrop-blur flex items-center justify-center transition-transform hover:scale-110 z-10 ${
+          className={`wishlist-btn absolute top-3 end-3 w-8 h-8 rounded-full backdrop-blur flex items-center justify-center transition-transform hover:scale-110 z-10 ${
             isWishlisted
               ? 'bg-surface-container-lowest/80 text-error'
               : 'bg-surface-container-lowest/80 text-on-surface-variant hover:text-primary'
           }`}
-          aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+          aria-label={isWishlisted ? (t.productCard?.removeFromWishlist || 'Remove from wishlist') : (t.productCard?.addToWishlist || 'Add to wishlist')}
           type="button"
         >
           <Icon

@@ -104,7 +104,7 @@ export const LoginForm: React.FC = () => {
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             className={`absolute right-space-md top-[34px] text-on-surface-variant hover:text-on-surface focus:outline-none ${
-              language === 'ar' ? 'left-space-md right-auto' : ''
+              language === 'ar' ? 'left-space-md end-auto' : ''
             }`}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >

@@ -19,5 +19,13 @@
   "helpPlaceholder": "كيف يمكننا مساعدتك؟",
   "supportEmail": "support@missingpiece.com",
   "phone": "+20 100 123 4567",
-  "location": "الزقازيق، مصر"
+  "location": "الزقازيق، مصر",
+  "conciergeSupport": "خدمة الدعم الخاص",
+  "emailLabel": "البريد الإلكتروني",
+  "phoneLabel": "الهاتف",
+  "atelierLabel": "المقر",
+  "sendAnother": "إرسال رسالة أخرى",
+  "subject": "الموضوع",
+  "subjectPlaceholder": "بخصوص ماذا؟",
+  "sending": "جاري الإرسال..."
 }

@@ -7,7 +7,6 @@ import { ProductFilters } from './components/ProductFilters';
 import { ProductCardSkeleton } from './components/ProductCardSkeleton';
 import { Icon } from '../../shared/components/ui/Icon';
 import { Motion } from '../../shared/components/ui/Motion';
-import { Spinner } from '../../shared/components/ui/Spinner';
 import { useLanguage } from '../../shared/context/LanguageContext';
 import { Pagination } from '../../shared/components/ui/Pagination';
 import { EmptyState } from '../../shared/components/ui/EmptyState';
@@ -23,7 +22,6 @@ export function ProductListPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
 
   const searchTerm = searchParams.get('search') || '';
   const selectedCategory = searchParams.get('category') || '';
@@ -85,7 +83,6 @@ export function ProductListPage() {
         );
         setProducts(data.items);
         setTotalPages(data.totalPages);
-        setTotalCount(data.total);
       } catch (err: unknown) {
         const e = err as { name?: string; code?: string };
         if (e.name === 'CanceledError' || e.name === 'AbortError' || e.code === 'ERR_CANCELED') return;
@@ -115,53 +112,20 @@ export function ProductListPage() {
   return (
     <div className="w-full flex flex-col relative overflow-hidden">
       <div
-        className="absolute -top-40 left-1/2 -translate-x-1/2 w-[850px] h-[350px] bg-gradient-to-b from-primary/10 via-primary/5 to-transparent blur-3xl pointer-events-none rounded-full"
+        className="absolute -top-40 start-1/2 -translate-x-1/2 w-[850px] h-[350px] bg-gradient-to-b from-primary/10 via-primary/5 to-transparent blur-3xl pointer-events-none rounded-full"
         aria-hidden
       />
 
       <div className="max-w-[1360px] mx-auto w-full px-margin-mobile lg:px-margin pt-space-md pb-space-2xl">
         <section className={`flex flex-col gap-space-sm pb-space-lg relative z-10 ${reducedMotion ? '' : 'animate-slide-up'}`}>
-          <div className="flex flex-wrap items-center justify-between gap-space-sm">
-            <nav aria-label="Breadcrumb" className="flex items-center gap-2">
-              <span className="font-label-caps text-label-caps text-outline uppercase tracking-widest">Atelier</span>
-              <span className="text-outline text-xs opacity-40">/</span>
-              <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest">
-                Catalog Archive
-              </span>
-              <span className="text-outline text-xs opacity-40">/</span>
-              <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">
-                {selectedCategory || 'All Disciplines'}
-              </span>
-            </nav>
-            <div
-              className="flex items-center gap-space-sm bg-surface-container-low px-space-sm py-1 rounded"
-              aria-live="polite"
-            >
-              {isLoading || isRefreshing ? (
-                <Spinner size="sm" />
-              ) : (
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary" />
-              )}
-              <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
-                {isLoading
-                  ? 'Loading editions…'
-                  : `Displaying ${products.length}${totalCount ? ` of ${totalCount}` : ''} editions`}
-              </span>
-            </div>
-          </div>
-
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md mt-space-xs">
             <div>
-              <span className="font-label-caps text-label-caps text-primary uppercase tracking-[0.2em] block mb-1">
-                Meticulous Craftsmanship
-              </span>
               <h1 className="font-display-lg text-display-lg-mobile lg:text-display-lg text-on-surface tracking-tight font-medium">
-                Master Puzzle Collection
+                {t.productList?.heroTitle || 'Master Puzzle Collection'}
               </h1>
             </div>
             <p className="font-body-md text-body-md text-on-surface-variant max-w-md pb-1.5">
-              Architectural joinery, heirloom walnut grains, and micro-precision laser die-cuts for contemplative
-              focus.
+              {t.productList?.heroDesc || 'Architectural joinery, heirloom walnut grains, and micro-precision laser die-cuts for contemplative focus.'}
             </p>
           </div>
         </section>
@@ -192,7 +156,7 @@ export function ProductListPage() {
               onClick={() => fetchProducts()}
               className="mt-6 px-space-xl py-3 bg-primary-container hover:bg-primary text-on-primary-container rounded font-semibold transition-colors"
             >
-              Try Again
+              {t.productList?.tryAgain || 'Try Again'}
             </button>
           </div>
         ) : isLoading ? (

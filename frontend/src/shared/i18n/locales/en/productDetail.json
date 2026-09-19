@@ -1,10 +1,25 @@
 {
+  "loadError": "Failed to load product details.",
+  "addedSuccess": "Added to bag",
+  "addError": "Could not add to bag",
+  "notFound": "Product not found",
   "backToCatalog": "Back to Catalog",
+  "catalog": "Catalog",
+  "batchNo": "Batch No.",
+  "archivalEdition": "Archival Edition",
+  "inVault": "{{stock}} in vault",
   "outOfStock": "Out of Stock",
   "inStock": "In Stock",
   "available": "available",
   "quantity": "Quantity",
+  "reviews": "Reviews",
   "addToCart": "Add to Cart",
-  "addedToCart": "Added to Cart!",
-  "addToWishlist": "Add to Wishlist"
+  "addedToCart": "Added to Bag!",
+  "added": "Added to Bag",
+  "addToWishlist": "Add to Wishlist",
+  "shipping": "Dispatches within 24 Hours",
+  "guarantee": "Missing Piece Guarantee",
+  "curatedPairings": "Curated Pairings",
+  "companionPuzzles": "Companion Puzzles",
+  "viewEntireCatalog": "View Entire Catalog"
 }

@@ -12,6 +12,9 @@ import checkoutEn from './locales/en/checkout.json';
 import orderHistoryEn from './locales/en/orderHistory.json';
 import productListEn from './locales/en/productList.json';
 import adminProductsEn from './locales/en/adminProducts.json';
+import cartEn from './locales/en/cart.json';
+import adminPanelEn from './locales/en/adminPanel.json';
+import faqEn from './locales/en/faq.json';
 
 import navAr from './locales/ar/nav.json';
 import footerAr from './locales/ar/footer.json';
@@ -27,6 +30,9 @@ import checkoutAr from './locales/ar/checkout.json';
 import orderHistoryAr from './locales/ar/orderHistory.json';
 import productListAr from './locales/ar/productList.json';
 import adminProductsAr from './locales/ar/adminProducts.json';
+import cartAr from './locales/ar/cart.json';
+import adminPanelAr from './locales/ar/adminPanel.json';
+import faqAr from './locales/ar/faq.json';
 
 export const en = {
   nav: navEn,
@@ -43,9 +49,12 @@ export const en = {
   orderHistory: orderHistoryEn,
   productList: productListEn,
   adminProducts: adminProductsEn,
+  cart: cartEn,
+  adminPanel: adminPanelEn,
+  faq: faqEn,
 };
 
-export const ar = {
+const arRaw = {
   nav: navAr,
   footer: footerAr,
   home: homeAr,
@@ -60,7 +69,35 @@ export const ar = {
   orderHistory: orderHistoryAr,
   productList: productListAr,
   adminProducts: adminProductsAr,
+  cart: cartAr,
+  adminPanel: adminPanelAr,
+  faq: faqAr,
 };
+
+function deepMerge<T>(target: any, source: any): T {
+  const output = { ...target };
+  if (isObject(target) && isObject(source)) {
+    Object.keys(source).forEach(key => {
+      if (isObject(source[key])) {
+        if (!(key in target)) {
+          Object.assign(output, { [key]: source[key] });
+        } else {
+          output[key] = deepMerge(target[key], source[key]);
+        }
+      } else {
+        Object.assign(output, { [key]: source[key] });
+      }
+    });
+  }
+  return output as T;
+}
+
+function isObject(item: any) {
+  return (item && typeof item === 'object' && !Array.isArray(item));
+}
+
+// Ensure Arabic has all English keys as fallback
+export const ar = deepMerge<typeof en>(en, arRaw);
 
 export const translations = { en, ar };
 

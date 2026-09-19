@@ -1,10 +1,25 @@
 {
-  "backToCatalog": "العودة إلى المنتجات",
+  "loadError": "فشل تحميل تفاصيل المنتج.",
+  "addedSuccess": "تمت الإضافة إلى الحقيبة",
+  "addError": "لم نتمكن من الإضافة إلى الحقيبة",
+  "notFound": "المنتج غير موجود",
+  "backToCatalog": "العودة إلى الكتالوج",
+  "catalog": "الكتالوج",
+  "batchNo": "رقم الدفعة",
+  "archivalEdition": "نسخة أرشيفية",
+  "inVault": "{{stock}} في القبو",
   "outOfStock": "غير متوفر",
   "inStock": "متوفر",
   "available": "متاح",
   "quantity": "الكمية",
+  "reviews": "التقييمات",
   "addToCart": "أضف إلى السلة",
-  "addedToCart": "تمت الإضافة إلى السلة!",
-  "addToWishlist": "أضف إلى المفضلة"
+  "addedToCart": "تمت الإضافة!",
+  "added": "تمت الإضافة",
+  "addToWishlist": "أضف للمفضلة",
+  "shipping": "يتم الشحن خلال 24 ساعة",
+  "guarantee": "ضمان القطعة المفقودة",
+  "curatedPairings": "تنسيقات منتقاة",
+  "companionPuzzles": "بازل مصاحب",
+  "viewEntireCatalog": "عرض الكتالوج بالكامل"
 }

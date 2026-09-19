@@ -4,22 +4,25 @@ import {
   ShoppingBag,
   Heart,
   Layers,
-  Compass,
   Menu,
   X,
-  ShieldCheck,
   Sliders,
   User,
   LogOut,
   LogIn,
   Settings,
   Package,
+  Sun,
+  Moon,
+  Globe,
 } from 'lucide-react';
 import { useCart } from '../../../features/cart/CartContext';
 import { useWishlist } from '../../WishlistContext';
 import { useAuth } from '../../../features/auth/AuthContext';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { useScrollLock } from '../../hooks/useScrollLock';
+import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `relative px-3.5 py-2 text-sm font-medium transition-all rounded-lg flex items-center gap-2 ${
@@ -34,6 +37,8 @@ export function Navbar() {
   const { cartItemCount } = useCart();
   const { wishlistItems } = useWishlist();
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const { t, language, toggleLanguage } = useLanguage() as any;
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
@@ -45,8 +50,6 @@ export function Navbar() {
 
   const wishlistCount = wishlistItems.length;
   const isAdminRoute = location.pathname.startsWith('/admin');
-  const hasActiveOrdersPath =
-    location.pathname.startsWith('/orders') && location.pathname !== '/orders';
 
   const closeMobile = () => setMobileOpen(false);
 
@@ -59,33 +62,6 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-outline-variant/40 bg-surface/90 backdrop-blur-md">
-      {/* Announcement bar */}
-      <div className="border-b border-outline-variant/20 bg-surface-container-lowest px-4 py-1.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 text-[11px] text-on-surface-variant">
-          <div className="hidden sm:flex items-center gap-2 text-primary/90">
-            <ShieldCheck className="w-3.5 h-3.5 text-primary-container shrink-0" aria-hidden />
-            <span>Lifetime Missing Piece Guarantee</span>
-          </div>
-          <p className="mx-auto sm:mx-0 text-center tracking-wide">
-            Complimentary white-glove shipping on commissions over $80
-          </p>
-          <div className="hidden md:flex items-center gap-3">
-            <span className="text-outline">Copenhagen · San Francisco · Kyoto</span>
-            {isAdmin && (
-              <>
-                <span className="h-2 w-px bg-outline-variant/50" aria-hidden />
-                <Link
-                  to="/admin/orders"
-                  className="text-primary-container hover:text-primary transition-colors inline-flex items-center gap-1 font-medium"
-                >
-                  <Sliders className="w-3 h-3" aria-hidden />
-                  Atelier Vault
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
 
       {/* Main row */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -110,7 +86,7 @@ export function Navbar() {
                 </span>
               </div>
               <p className="hidden sm:block text-[11px] uppercase tracking-widest text-outline font-label-caps">
-                Artisanal Wooden Jigsaw Atelier
+                {t.nav?.tagline || 'Artisanal Wooden Jigsaw Atelier'}
               </p>
             </div>
           </Link>
@@ -118,25 +94,19 @@ export function Navbar() {
           <nav className="hidden lg:flex items-center gap-1" aria-label="Primary">
             <NavLink to="/products" className={navLinkClass}>
               <Layers className="w-4 h-4 text-primary-container" aria-hidden />
-              The Collection
+              {t.nav?.collection || 'The Collection'}
             </NavLink>
-            <NavLink to="/orders" className={navLinkClass}>
-              <Compass className="w-4 h-4 text-primary-container" aria-hidden />
-              Provenance
-              {hasActiveOrdersPath && (
-                <span className="px-1.5 py-0.5 text-[10px] rounded-full bg-primary-container/20 text-primary border border-primary-container/30 font-label-caps">
-                  Active
-                </span>
-              )}
+            <NavLink to="/bespoke" className={navLinkClass}>
+              {t.nav?.bespoke || 'Bespoke'}
             </NavLink>
-            <NavLink to="/wishlist" className={navLinkClass}>
-              <Heart className="w-4 h-4 text-primary-container" aria-hidden />
-              Wishlist
-              {wishlistCount > 0 && (
-                <span className="px-1.5 py-0.5 text-[10px] rounded-full bg-surface-container-high text-on-surface font-label-caps">
-                  {wishlistCount}
-                </span>
-              )}
+            <NavLink to="/about" className={navLinkClass}>
+              {t.nav?.about || 'About Us'}
+            </NavLink>
+            <NavLink to="/faq" className={navLinkClass}>
+              {t.nav?.faq || 'FAQ'}
+            </NavLink>
+            <NavLink to="/contact" className={navLinkClass}>
+              {t.nav?.contact || 'Contact'}
             </NavLink>
           </nav>
 
@@ -154,7 +124,7 @@ export function Navbar() {
                   className={`w-2 h-2 rounded-full ${isAdminRoute ? 'bg-primary-container animate-pulse' : 'bg-outline'}`}
                   aria-hidden
                 />
-                {isAdminRoute ? 'Portal Active' : 'Atelier Portal'}
+                {isAdminRoute ? (t.nav?.portalActive || 'Portal Active') : (t.nav?.atelierPortal || 'Atelier Portal')}
               </Link>
             )}
 
@@ -169,7 +139,7 @@ export function Navbar() {
             >
               <Heart className="w-5 h-5" aria-hidden />
               {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-0.5 rounded-full bg-primary-container text-on-primary-container text-[10px] font-bold flex items-center justify-center">
+                <span className="absolute -top-1 -end-1 min-w-4 h-4 px-0.5 rounded-full bg-primary-container text-on-primary-container text-[10px] font-bold flex items-center justify-center">
                   {wishlistCount > 99 ? '99+' : wishlistCount}
                 </span>
               )}
@@ -185,7 +155,7 @@ export function Navbar() {
               }`}
             >
               <ShoppingBag className="w-5 h-5 text-primary-container" aria-hidden />
-              <span className="text-xs font-medium hidden sm:inline">Bag</span>
+              <span className="text-xs font-medium hidden sm:inline">{t.nav?.bag || 'Bag'}</span>
               <span
                 className={`min-w-5 h-5 px-1 rounded-full text-[11px] font-bold flex items-center justify-center ${
                   cartItemCount > 0
@@ -196,6 +166,27 @@ export function Navbar() {
                 {cartItemCount > 99 ? '99+' : cartItemCount}
               </span>
             </Link>
+
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className="hidden sm:flex relative p-2 sm:p-2.5 rounded-lg border border-outline-variant/40 bg-surface-container-low text-on-surface-variant hover:text-on-surface hover:border-outline transition-all items-center justify-center gap-1.5"
+              aria-label={`Switch to ${language === 'en' ? 'Arabic' : 'English'}`}
+            >
+              <Globe className="w-5 h-5" aria-hidden />
+              <span className="text-[10px] font-bold uppercase leading-none">{language}</span>
+            </button>
+
+            <button
+              type="button"
+              role="switch"
+              aria-checked={theme === 'dark'}
+              onClick={toggleTheme}
+              className="hidden sm:flex relative p-2 sm:p-2.5 rounded-lg border border-outline-variant/40 bg-surface-container-low text-on-surface-variant hover:text-on-surface hover:border-outline transition-all items-center justify-center"
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+            >
+              {theme === 'dark' ? <Sun className="w-5 h-5" aria-hidden /> : <Moon className="w-5 h-5" aria-hidden />}
+            </button>
 
             <div className="relative hidden sm:block" ref={accountRef}>
               <button
@@ -212,7 +203,7 @@ export function Navbar() {
                 <div
                   id={menuId}
                   role="menu"
-                  className="absolute right-0 mt-2 w-56 rounded-lg border border-outline-variant/40 bg-surface-container-lowest py-2 z-50 shadow-xl animate-fade-in"
+                  className="absolute end-0 mt-2 w-56 rounded-lg border border-outline-variant/40 bg-surface-container-lowest py-2 z-50 shadow-xl animate-fade-in"
                 >
                   {isAuthenticated && user ? (
                     <>
@@ -227,7 +218,7 @@ export function Navbar() {
                         className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
                       >
                         <Settings className="w-3.5 h-3.5 text-primary-container" aria-hidden />
-                        Profile
+                        {t.nav?.profile || 'Profile'}
                       </Link>
                       <Link
                         role="menuitem"
@@ -236,7 +227,7 @@ export function Navbar() {
                         className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
                       >
                         <Package className="w-3.5 h-3.5 text-primary-container" aria-hidden />
-                        My Orders
+                        {t.nav?.myOrders || 'My Orders'}
                       </Link>
                       <button
                         type="button"
@@ -245,7 +236,7 @@ export function Navbar() {
                         className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-error hover:bg-error-container/20 border-t border-outline-variant/30 mt-1"
                       >
                         <LogOut className="w-3.5 h-3.5" aria-hidden />
-                        Sign out
+                        {t.nav?.signOut || 'Sign out'}
                       </button>
                     </>
                   ) : (
@@ -257,7 +248,7 @@ export function Navbar() {
                         className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
                       >
                         <LogIn className="w-3.5 h-3.5 text-primary-container" aria-hidden />
-                        Sign in
+                        {t.nav?.signIn || 'Sign in'}
                       </Link>
                       <Link
                         role="menuitem"
@@ -266,7 +257,7 @@ export function Navbar() {
                         className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
                       >
                         <User className="w-3.5 h-3.5 text-primary-container" aria-hidden />
-                        Create account
+                        {t.nav?.createAccount || 'Create account'}
                       </Link>
                     </>
                   )}
@@ -295,34 +286,47 @@ export function Navbar() {
         >
           <NavLink to="/products" onClick={closeMobile} className={navLinkClass}>
             <Layers className="w-4 h-4" aria-hidden />
-            The Collection
+            {t.nav?.collection || 'The Collection'}
           </NavLink>
-          <NavLink to="/orders" onClick={closeMobile} className={navLinkClass}>
-            <Compass className="w-4 h-4" aria-hidden />
-            Provenance & Tracker
-          </NavLink>
-          <NavLink to="/wishlist" onClick={closeMobile} className={navLinkClass}>
-            <Heart className="w-4 h-4" aria-hidden />
-            Curated Wishlist
-            {wishlistCount > 0 && (
-              <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-surface-container-high">
-                {wishlistCount}
-              </span>
-            )}
+          <NavLink to="/bespoke" onClick={closeMobile} className={navLinkClass}>
+            {t.nav?.bespoke || 'Bespoke'}
           </NavLink>
           <NavLink to="/about" onClick={closeMobile} className={navLinkClass}>
-            About the Craft
+            {t.nav?.about || 'About Us'}
+          </NavLink>
+          <NavLink to="/faq" onClick={closeMobile} className={navLinkClass}>
+            {t.nav?.faq || 'FAQ'}
           </NavLink>
           <NavLink to="/contact" onClick={closeMobile} className={navLinkClass}>
-            Concierge Support
+            {t.nav?.conciergeSupport || 'Concierge Support'}
           </NavLink>
 
           <div className="pt-2 border-t border-outline-variant/30 space-y-1">
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className="w-full flex items-center gap-2 px-3.5 py-2 text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded-lg transition-colors"
+            >
+              <Globe className="w-4 h-4" aria-hidden />
+              {language === 'en' ? 'العربية (Arabic)' : 'English'}
+            </button>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={theme === 'dark'}
+              onClick={toggleTheme}
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+              className="w-full flex items-center gap-2 px-3.5 py-2 text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded-lg transition-colors"
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4" aria-hidden /> : <Moon className="w-4 h-4" aria-hidden />}
+              {theme === 'dark' ? (t.nav?.lightMode || 'Light Mode') : (t.nav?.darkMode || 'Dark Mode')}
+            </button>
+            
             {isAuthenticated ? (
               <>
                 <NavLink to="/profile" onClick={closeMobile} className={navLinkClass}>
                   <Settings className="w-4 h-4" aria-hidden />
-                  Profile
+                  {t.nav?.profile || 'Profile'}
                 </NavLink>
                 <button
                   type="button"
@@ -330,17 +334,17 @@ export function Navbar() {
                   className="w-full flex items-center gap-2 px-3.5 py-2 text-sm text-error rounded-lg hover:bg-error-container/20"
                 >
                   <LogOut className="w-4 h-4" aria-hidden />
-                  Sign out
+                  {t.nav?.signOut || 'Sign out'}
                 </button>
               </>
             ) : (
               <>
                 <NavLink to="/login" onClick={closeMobile} className={navLinkClass}>
                   <LogIn className="w-4 h-4" aria-hidden />
-                  Sign in
+                  {t.nav?.signIn || 'Sign in'}
                 </NavLink>
                 <NavLink to="/register" onClick={closeMobile} className={navLinkClass}>
-                  Create account
+                  {t.nav?.createAccount || 'Create account'}
                 </NavLink>
               </>
             )}
@@ -352,9 +356,9 @@ export function Navbar() {
               >
                 <span className="flex items-center gap-2">
                   <Sliders className="w-3.5 h-3.5" aria-hidden />
-                  Atelier Management
+                  {t.nav?.atelierManagement || 'Atelier Management'}
                 </span>
-                <span className="text-[10px] uppercase tracking-wider text-outline">Admin</span>
+                <span className="text-[10px] uppercase tracking-wider text-outline">{t.nav?.admin || 'Admin'}</span>
               </Link>
             )}
           </div>

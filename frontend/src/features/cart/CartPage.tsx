@@ -32,7 +32,7 @@ function CartItemSkeleton() {
 }
 
 export function CartPage() {
-  const { t } = useLanguage() as any;
+  const { t, formatCurrency } = useLanguage();
   const { cart, updateQty, removeFromCart, addItem, isLoading: cartLoading } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -71,7 +71,7 @@ export function CartPage() {
         if (e.name === 'CanceledError' || e.name === 'AbortError' || e.code === 'ERR_CANCELED') return;
         // Fall back to context cart so the page stays usable offline-ish
         setValidated(cart);
-        showToast({ message: 'Could not re-check stock. Showing saved bag.', type: 'info' });
+        showToast({ message: t.cart?.couldNotRecheckStock || 'Could not re-check stock. Showing saved bag.', type: 'info' });
       } finally {
         if (!signal?.aborted) setLoading(false);
       }
@@ -124,7 +124,7 @@ export function CartPage() {
         else {
           setPromoCode(null);
           setDiscountAmount(0);
-          setPromoError('Code no longer applies to this bag.');
+          setPromoError(t.cart?.codeNoLongerApplies || 'Code no longer applies to this bag.');
         }
       })
       .catch(() => {
@@ -141,14 +141,14 @@ export function CartPage() {
     if (newQty < 1 || pendingId) return;
     const capped = Math.min(newQty, maxStock, MAX_QTY);
     if (newQty > maxStock) {
-      showToast({ message: `Only ${maxStock} available in the vault`, type: 'error' });
+      showToast({ message: (t.cart?.onlyStockAvailable || 'Only {{stock}} available in the vault').replace('{{stock}}', String(maxStock)), type: 'error' });
       return;
     }
     setPendingId(productId);
     try {
       await updateQty(productId, capped);
     } catch {
-      showToast({ message: 'Could not update quantity', type: 'error' });
+      showToast({ message: t.cart?.couldNotUpdateQuantity || 'Could not update quantity', type: 'error' });
     } finally {
       setPendingId(null);
     }
@@ -159,9 +159,9 @@ export function CartPage() {
     setPendingId(productId);
     try {
       await removeFromCart(productId);
-      showToast({ message: 'Removed from bag', type: 'info' });
+      showToast({ message: t.cart?.removedFromBag || 'Removed from bag', type: 'info' });
     } catch {
-      showToast({ message: 'Could not remove item', type: 'error' });
+      showToast({ message: t.cart?.couldNotRemoveItem || 'Could not remove item', type: 'error' });
     } finally {
       setPendingId(null);
     }
@@ -171,7 +171,7 @@ export function CartPage() {
     e.preventDefault();
     const code = promoInput.trim().toUpperCase().slice(0, 20);
     if (!code || code.length < 3) {
-      setPromoError('Enter a valid collector code.');
+      setPromoError(t.cart?.enterValidCode || 'Enter a valid collector code.');
       return;
     }
     if (validated.length === 0) return;
@@ -184,7 +184,7 @@ export function CartPage() {
         validated.map((i) => ({ product: i.productId, quantity: i.quantity }))
       );
       if (!res.applied || res.discountAmount <= 0) {
-        setPromoError('Invalid or expired code.');
+        setPromoError(t.cart?.invalidOrExpiredCode || 'Invalid or expired code.');
         setPromoCode(null);
         setDiscountAmount(0);
         return;
@@ -192,9 +192,9 @@ export function CartPage() {
       setPromoCode(code);
       setDiscountAmount(res.discountAmount);
       setPromoInput('');
-      showToast({ message: 'Collector code applied', type: 'success' });
+      showToast({ message: t.cart?.collectorCodeApplied || 'Collector code applied', type: 'success' });
     } catch {
-      setPromoError('Invalid or expired code.');
+      setPromoError(t.cart?.invalidOrExpiredCode || 'Invalid or expired code.');
       setPromoCode(null);
       setDiscountAmount(0);
     } finally {
@@ -207,9 +207,9 @@ export function CartPage() {
     setAddingRecId(product._id);
     try {
       await addItem(product, 1);
-      showToast({ message: 'Added to bag', type: 'success' });
+      showToast({ message: t.cart?.addedToBag || 'Added to bag', type: 'success' });
     } catch {
-      showToast({ message: 'Could not add edition', type: 'error' });
+      showToast({ message: t.cart?.couldNotAddEdition || 'Could not add edition', type: 'error' });
     } finally {
       setAddingRecId(null);
     }
@@ -217,7 +217,7 @@ export function CartPage() {
 
   const handleCheckout = () => {
     if (!isAuthenticated) {
-      showToast({ message: 'Sign in to complete checkout', type: 'info' });
+      showToast({ message: t.cart?.signInToComplete || 'Sign in to complete checkout', type: 'info' });
       navigate('/login', { state: { from: '/checkout' } });
       return;
     }
@@ -280,18 +280,18 @@ export function CartPage() {
             {qualifiesForFreeShipping ? (
               <p className="text-xs font-semibold text-primary flex items-center gap-1.5">
                 <Icon name="check" size={16} />
-                You qualify for complimentary white-glove delivery
+                {t.cart?.freeShippingQualify || 'You qualify for complimentary white-glove delivery'}
               </p>
             ) : (
               <p className="text-xs text-on-surface">
-                Add{' '}
+                {(t.cart?.freeShippingAdd || 'Add {{amount}} more for complimentary white-glove delivery.').split('{{amount}}')[0]}
                 <span className="text-primary font-semibold">
-                  ${remainingForFreeShipping.toFixed(2)}
-                </span>{' '}
-                more for complimentary white-glove delivery.
+                  {formatCurrency(remainingForFreeShipping)}
+                </span>
+                {(t.cart?.freeShippingAdd || 'Add {{amount}} more for complimentary white-glove delivery.').split('{{amount}}')[1]}
               </p>
             )}
-            <p className="text-[11px] text-outline mt-0.5">Dispatched in a wax-sealed archival box.</p>
+            <p className="text-[11px] text-outline mt-0.5">{t.cart?.dispatchedWax || 'Dispatched in a wax-sealed archival box.'}</p>
           </div>
         </div>
         <div
@@ -303,7 +303,7 @@ export function CartPage() {
           aria-label="Progress toward free shipping"
         >
           <div
-            className="h-full bg-gradient-to-r from-primary-container to-primary transition-all duration-500 ease-out"
+            className="h-full bg-gradient-to-r from-primary-container to-primary transition-all duration-500 ease-out rtl:-scale-x-100"
             style={{ width: `${shippingProgress}%` }}
           />
         </div>
@@ -357,12 +357,12 @@ export function CartPage() {
                             </h2>
                             <p className="text-[11px] text-outline">
                               {item.stock > 0
-                                ? `${item.stock} remaining in vault`
-                                : 'Out of stock'}
+                                ? `${item.stock} ${t.cart?.remainingInVault || 'remaining in vault'}`
+                                : t.cart?.outOfStock || 'Out of stock'}
                             </p>
                             {busy && (
                               <span className="inline-flex items-center gap-1.5 text-[11px] text-primary">
-                                <Spinner size="sm" /> Updating…
+                                <Spinner size="sm" /> {t.cart?.updating || 'Updating…'}
                               </span>
                             )}
                           </div>
@@ -400,7 +400,7 @@ export function CartPage() {
                           <div className="text-right min-w-[72px]">
                             <PriceDisplay amount={lineTotal} size="md" className="text-primary" />
                             <p className="text-[10px] text-outline tabular-nums">
-                              ${item.price.toFixed(2)} each
+                              {formatCurrency(item.price)} {t.cart?.each || 'each'}
                             </p>
                           </div>
 
@@ -422,9 +422,9 @@ export function CartPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
             {[
-              { icon: 'security', label: 'Registered Lost Piece Guarantee' },
-              { icon: 'verified', label: 'Heirloom Archival Presentation Box' },
-              { icon: 'lock', label: 'Encrypted Vault Payment Checkout' },
+              { icon: 'security', label: t.cart?.registeredLostPiece || 'Registered Lost Piece Guarantee' },
+              { icon: 'verified', label: t.cart?.heirloomArchival || 'Heirloom Archival Presentation Box' },
+              { icon: 'lock', label: t.cart?.encryptedVault || 'Encrypted Vault Payment Checkout' },
             ].map((prop) => (
               <div
                 key={prop.label}
@@ -439,8 +439,8 @@ export function CartPage() {
           {/* Recommendations */}
           <div className="pt-8 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="font-headline-sm text-xl text-on-surface">You May Also Like</h2>
-              <span className="text-xs text-outline">Curated recommendations</span>
+              <h2 className="font-headline-sm text-xl text-on-surface">{t.cart?.youMayAlsoLike || 'You May Also Like'}</h2>
+              <span className="text-xs text-outline">{t.cart?.curatedRecommendations || 'Curated recommendations'}</span>
             </div>
             {recsLoading ? (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" aria-busy="true">
@@ -466,8 +466,8 @@ export function CartPage() {
                             loading="lazy"
                           />
                         ) : null}
-                        <span className="absolute top-2 right-2 text-[10px] px-2 py-0.5 rounded bg-surface/80 text-primary-container border border-primary-container/20">
-                          ${puzzle.price.toFixed(0)}
+                        <span className="absolute top-2 end-2 text-[10px] px-2 py-0.5 rounded bg-surface/80 text-primary-container border border-primary-container/20">
+                          {formatCurrency(puzzle.price)}
                         </span>
                       </Link>
                       <div>
@@ -490,7 +490,7 @@ export function CartPage() {
                         ) : (
                           <Icon name="add" size={14} />
                         )}
-                        <span>{puzzle.stock < 1 ? 'Out of stock' : 'Add to Bag'}</span>
+                        <span>{puzzle.stock < 1 ? (t.cart?.outOfStock || 'Out of stock') : (t.cart?.addToBag || 'Add to Bag')}</span>
                       </button>
                     </div>
                   </Motion>
@@ -510,36 +510,36 @@ export function CartPage() {
             <div className="space-y-3 text-xs">
               <div className="flex items-center justify-between text-on-surface-variant">
                 <span>
-                  Editions Subtotal ({itemCount} {itemCount === 1 ? 'item' : 'items'})
+                  {t.cart?.editionsSubtotal || 'Editions Subtotal'} ({itemCount} {itemCount === 1 ? (t.cart?.item || 'item') : (t.cart?.items || 'items')})
                 </span>
                 <PriceDisplay amount={subtotal} size="sm" className="text-on-surface" />
               </div>
               {safeDiscount > 0 && (
                 <div className="flex items-center justify-between text-primary">
-                  <span>Collector privilege ({promoCode})</span>
-                  <span className="tabular-nums">−${safeDiscount.toFixed(2)}</span>
+                  <span>{t.cart?.collectorPrivilege || 'Collector privilege'} ({promoCode})</span>
+                  <span className="tabular-nums">−{formatCurrency(safeDiscount)}</span>
                 </div>
               )}
               <div className="flex items-center justify-between text-on-surface-variant">
-                <span>White-glove shipping</span>
+                <span>{t.cart?.whiteGloveShipping || 'White-glove shipping'}</span>
                 <span>
                   {qualifiesForFreeShipping ? (
-                    <span className="text-primary font-medium">Complimentary</span>
+                    <span className="text-primary font-medium">{t.cart?.complimentary || 'Complimentary'}</span>
                   ) : (
                     t.cart?.calculatedAtCheckout || 'Calculated at checkout'
                   )}
                 </span>
               </div>
               <div className="flex items-center justify-between text-on-surface-variant">
-                <span>Lost Piece Guarantee</span>
-                <span className="text-primary-container">Included</span>
+                <span>{t.cart?.lostPieceGuarantee || 'Lost Piece Guarantee'}</span>
+                <span className="text-primary-container">{t.cart?.included || 'Included'}</span>
               </div>
             </div>
 
             <form onSubmit={handleApplyPromo} className="space-y-2 pt-2 border-t border-outline-variant/30" noValidate>
               <label htmlFor="promo-code" className="text-[11px] text-on-surface-variant flex items-center gap-1">
                 <Icon name="bookmark" size={12} className="text-primary-container" />
-                Collector invitation or promo code
+                {t.cart?.collectorPromo || 'Collector invitation or promo code'}
               </label>
               <div
                 className={`flex rounded-lg overflow-hidden border ${
@@ -567,7 +567,7 @@ export function CartPage() {
                   disabled={promoLoading || !promoInput.trim()}
                   className="bg-surface-container-high hover:bg-surface-bright text-primary-container px-3.5 py-2 text-xs font-medium transition-colors shrink-0 disabled:opacity-50"
                 >
-                  {promoLoading ? <Spinner size="sm" /> : 'Apply'}
+                  {promoLoading ? <Spinner size="sm" /> : (t.cart?.apply || 'Apply')}
                 </button>
               </div>
               {promoError && (
@@ -578,16 +578,16 @@ export function CartPage() {
               {promoCode && !promoError && (
                 <p className="text-[11px] text-primary flex items-center gap-1">
                   <Icon name="check" size={12} />
-                  Applied {promoCode}
+                  {t.cart?.applied || 'Applied'} {promoCode}
                   <button
                     type="button"
-                    className="underline ml-1 text-outline hover:text-on-surface"
+                    className="underline ms-1 text-outline hover:text-on-surface"
                     onClick={() => {
                       setPromoCode(null);
                       setDiscountAmount(0);
                     }}
                   >
-                    Remove
+                    {t.cart?.remove || 'Remove'}
                   </button>
                 </p>
               )}
@@ -595,8 +595,8 @@ export function CartPage() {
 
             <div className="pt-4 border-t border-outline-variant/30 flex items-baseline justify-between gap-3">
               <div>
-                <span className="font-headline-sm text-lg text-on-surface">Estimated Total</span>
-                <p className="text-[11px] text-outline">USD · Taxes at checkout</p>
+                <span className="font-headline-sm text-lg text-on-surface">{t.cart?.estimatedTotal || 'Estimated Total'}</span>
+                <p className="text-[11px] text-outline">{t.cart?.taxesAtCheckout || 'USD · Taxes at checkout'}</p>
               </div>
               <PriceDisplay amount={estimatedTotal} size="xl" className="text-primary" />
             </div>
@@ -613,7 +613,7 @@ export function CartPage() {
             </Button>
 
             <p className="text-[11px] text-center text-outline">
-              30-day archival return window · Lifetime registered piece guarantee
+              {t.cart?.returnWindow || '30-day archival return window · Lifetime registered piece guarantee'}
             </p>
           </div>
         </aside>

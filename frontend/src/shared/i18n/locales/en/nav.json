@@ -1,7 +1,10 @@
 {
   "home": "Home",
   "products": "Products",
+  "collection": "The Collection",
+  "bespoke": "Bespoke",
   "about": "About Us",
+  "faq": "FAQ",
   "contact": "Contact",
   "wishlist": "Wishlist",
   "orders": "Orders",
@@ -11,5 +14,17 @@
   "logout": "Logout",
   "cart": "Cart",
   "admin": "Admin",
-  "language": "العربية"
+  "language": "العربية",
+  "bag": "Bag",
+  "signIn": "Sign in",
+  "signOut": "Sign out",
+  "createAccount": "Create account",
+  "myOrders": "My Orders",
+  "portalActive": "Portal Active",
+  "atelierPortal": "Atelier Portal",
+  "atelierManagement": "Atelier Management",
+  "lightMode": "Light Mode",
+  "darkMode": "Dark Mode",
+  "conciergeSupport": "Concierge Support",
+  "tagline": "Artisanal Wooden Jigsaw Atelier"
 }

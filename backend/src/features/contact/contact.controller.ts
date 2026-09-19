@@ -31,6 +31,8 @@ export const getContacts = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
+import { logAdminAction } from "../audit/audit.service.js";
+
 /**
  * Update contact message status (Admin only)
  * PATCH /api/contact/:id/status
@@ -38,13 +40,55 @@ export const getContacts = async (req: Request, res: Response, next: NextFunctio
 export const updateContactStatus = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { status } = contactStatusSchema.parse(req.body);
-    const contact = await contactService.updateContactStatus(req.params["id"] as string, status);
+    const contactId = req.params["id"] as string;
+    const contact = await contactService.updateContactStatus(contactId, status);
 
     if (!contact) {
       const err: AppError = new Error("Contact message not found");
       err.statusCode = 404;
       throw err;
     }
+
+    await logAdminAction({
+      adminId: req.userId!,
+      action: "UPDATE_CONTACT_STATUS",
+      resourceId: contactId,
+      resourceModel: "Contact",
+      details: { status },
+      ipAddress: req.ip,
+    });
+
+    res.status(200).json({ success: true, data: contact });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Update contact details like assignedTo or adminNotes (Admin only)
+ * PATCH /api/contact/:id
+ */
+export const updateContactDetailsHandler = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const contactId = req.params["id"] as string;
+    const { assignedTo, adminNotes, status } = req.body;
+    
+    const contact = await contactService.updateContactDetails(contactId, { assignedTo, adminNotes, status });
+
+    if (!contact) {
+      const err: AppError = new Error("Contact message not found");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    await logAdminAction({
+      adminId: req.userId!,
+      action: "UPDATE_CONTACT_DETAILS",
+      resourceId: contactId,
+      resourceModel: "Contact",
+      details: { assignedTo, adminNotes, status },
+      ipAddress: req.ip,
+    });
 
     res.status(200).json({ success: true, data: contact });
   } catch (error) {

@@ -27,7 +27,7 @@ export const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputPro
           {icon && !multiline && (
             <Icon 
               name={icon} 
-              className="absolute left-space-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-lg pointer-events-none" 
+              className="absolute start-space-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-lg pointer-events-none" 
             />
           )}
           {multiline ? (
@@ -55,7 +55,7 @@ export const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputPro
                 py-space-xs rounded font-body-sm text-body-sm text-on-surface 
                 placeholder:text-on-surface-variant 
                 focus:outline-none focus:bg-surface-bright focus:ring-1 focus:ring-primary shadow-sm
-                ${icon ? 'ps-10 pr-space-md' : 'px-space-md'}
+                ${icon ? 'ps-10 pe-space-md' : 'px-space-md'}
                 ${error ? 'border border-error focus:ring-error focus:border-error' : 'border-none'}
                 ${className}
               `}

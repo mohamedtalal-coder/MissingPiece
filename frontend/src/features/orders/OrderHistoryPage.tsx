@@ -33,7 +33,7 @@ function OrderListSkeleton() {
 }
 
 export function OrderHistoryPage() {
-  const { t } = useLanguage() as any;
+  const { t, formatDate } = useLanguage();
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
@@ -57,7 +57,7 @@ export function OrderHistoryPage() {
       } catch (err: unknown) {
         const e = err as { name?: string; code?: string };
         if (e.name === 'CanceledError' || e.name === 'AbortError' || e.code === 'ERR_CANCELED') return;
-        setError('Failed to load orders');
+        setError(t.orderHistory?.loadError || 'Failed to load orders');
       } finally {
         if (!signal?.aborted) setLoading(false);
       }
@@ -89,23 +89,23 @@ export function OrderHistoryPage() {
       >
         <div className="flex flex-col gap-space-xs">
           <span className="font-label-caps text-label-caps text-primary tracking-widest uppercase">
-            Client Archive &amp; Dispatch
+            {t.orderHistory?.clientArchive || 'Client Archive & Dispatch'}
           </span>
           <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight">
-            Order Archive &amp; Provenance
+            {t.orderHistory?.orderArchive || 'Order Archive & Provenance'}
           </h1>
         </div>
         <div className="flex items-center gap-space-md text-body-sm">
           <div className="flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-low rounded-xl">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" aria-hidden />
             <span className="font-label-md text-label-md text-on-surface">
-              {activeOrders.length} In Progress
+              {activeOrders.length} {t.orderHistory?.inProgress || 'In Progress'}
             </span>
           </div>
           <div className="flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-low rounded-xl">
             <span className="w-2 h-2 rounded-full bg-outline" aria-hidden />
             <span className="font-label-md text-label-md text-on-surface-variant">
-              {archivalOrders.length} Archived
+              {archivalOrders.length} {t.orderHistory?.archived || 'Archived'}
             </span>
           </div>
         </div>
@@ -129,21 +129,21 @@ export function OrderHistoryPage() {
               className="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg bg-surface-container-high text-primary font-label-md text-label-md"
             >
               <Icon name="package_2" size={18} />
-              My Orders
+              {t.orderHistory?.myOrders || 'My Orders'}
             </Link>
             <Link
               to="/wishlist"
               className="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all font-label-md text-label-md"
             >
               <Icon name="favorite" size={18} />
-              Wishlist
+              {t.orderHistory?.wishlist || 'Wishlist'}
             </Link>
             <Link
               to="/profile"
               className="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all font-label-md text-label-md"
             >
               <Icon name="person" size={18} />
-              Profile
+              {t.orderHistory?.profile || 'Profile'}
             </Link>
           </nav>
 
@@ -151,11 +151,11 @@ export function OrderHistoryPage() {
             <div className="flex items-center gap-space-xs text-primary">
               <Icon name="verified" size={18} />
               <span className="font-label-caps text-label-caps uppercase tracking-wider">
-                Missing Piece Guarantee
+                {t.orderHistory?.guarantee || 'Missing Piece Guarantee'}
               </span>
             </div>
             <p className="font-body-sm text-body-sm text-on-surface-variant">
-              Open any delivered order to register a lost-piece claim for free archival replacement.
+              {t.orderHistory?.guaranteeDesc || 'Open any delivered order to register a lost-piece claim for free archival replacement.'}
             </p>
           </div>
         </aside>
@@ -167,15 +167,15 @@ export function OrderHistoryPage() {
             <div className="py-12 text-center bg-error-container/20 border border-error/30 rounded-xl space-y-4 animate-fade-in">
               <p className="text-error">{error}</p>
               <Button type="button" onClick={() => fetchOrders()}>
-                Try Again
+                {t.orderHistory?.tryAgain || 'Try Again'}
               </Button>
             </div>
           ) : orders.length === 0 ? (
             <EmptyState
               icon="inventory_2"
-              title={t.orders?.emptyTitle || 'No commissions yet'}
-              description={t.orders?.emptyDesc || "You haven't commissioned any masterworks yet."}
-              actionText={t.orders?.explore || 'Explore the Catalog'}
+              title={t.orderHistory?.emptyTitle || 'No commissions yet'}
+              description={t.orderHistory?.emptyDesc || "You haven't commissioned any masterworks yet."}
+              actionText={t.orderHistory?.explore || 'Explore the Catalog'}
               onAction={() => navigate('/products')}
             />
           ) : (
@@ -187,7 +187,7 @@ export function OrderHistoryPage() {
                       <div>
                         <div className="flex items-center gap-space-sm flex-wrap">
                           <h2 className="font-headline-md text-headline-md text-on-surface">
-                            Order #{orderShortId(featured._id)}
+                            {t.orderHistory?.orderNumber || 'Order #'} {orderShortId(featured._id)}
                           </h2>
                           <StatusBadge status={featured.status} type="order" />
                           <span className="text-xs text-on-surface-variant">
@@ -195,15 +195,17 @@ export function OrderHistoryPage() {
                           </span>
                         </div>
                         <p className="text-sm text-on-surface-variant mt-1">
-                          {new Date(featured.createdAt).toLocaleDateString(undefined, {
-                            dateStyle: 'medium',
+                          {formatDate(featured.createdAt, {
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric',
                           })}{' '}
-                          · {featured.items.length} artifact(s) ·{' '}
+                          · {featured.items.length} {t.orderHistory?.artifacts || 'artifact(s)'} ·{' '}
                           <PriceDisplay amount={featured.total} size="sm" className="inline" />
                         </p>
                       </div>
                       <Button as="link" to={`/orders/${featured._id}`} icon="visibility">
-                        Open Provenance
+                        {t.orderHistory?.openProvenance || 'Open Provenance'}
                       </Button>
                     </div>
 
@@ -211,7 +213,7 @@ export function OrderHistoryPage() {
                       <div className="bg-surface-container-low p-space-lg rounded-xl border border-outline-variant/10">
                         <div className="flex items-center justify-between mb-3">
                           <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest">
-                            Fulfillment journey
+                            {t.orderHistory?.fulfillmentJourney || 'Fulfillment journey'}
                           </span>
                           <span className="text-xs text-on-surface-variant tabular-nums">
                             {progressPercent(featured.status)}%
@@ -253,9 +255,9 @@ export function OrderHistoryPage() {
                             </div>
                             <div className="min-w-0 flex-1">
                               <p className="font-headline-sm text-sm text-on-surface truncate">
-                                {item.title || 'Edition'}
+                                {item.title || t.orderHistory?.edition || 'Edition'}
                               </p>
-                              <p className="text-xs text-on-surface-variant">Qty {item.quantity}</p>
+                              <p className="text-xs text-on-surface-variant">{t.orderHistory?.qty || 'Qty'} {item.quantity}</p>
                             </div>
                             <PriceDisplay
                               amount={(item.price || 0) * item.quantity}
@@ -275,9 +277,9 @@ export function OrderHistoryPage() {
                   <div className="flex items-end justify-between gap-4">
                     <div>
                       <h2 className="font-headline-md text-headline-md text-on-surface">
-                        Archived commissions
+                        {t.orderHistory?.archivedCommissions || 'Archived commissions'}
                       </h2>
-                      <p className="text-sm text-on-surface-variant">Past masterworks safely homed</p>
+                      <p className="text-sm text-on-surface-variant">{t.orderHistory?.pastMasterworks || 'Past masterworks safely homed'}</p>
                     </div>
                   </div>
 
@@ -288,19 +290,19 @@ export function OrderHistoryPage() {
                           <div>
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="font-headline-sm text-sm text-on-surface font-semibold">
-                                Order #{orderShortId(order._id)}
+                                {t.orderHistory?.orderNumber || 'Order #'} {orderShortId(order._id)}
                               </span>
                               <StatusBadge status={order.status} type="order" />
                             </div>
                             <p className="text-xs text-on-surface-variant mt-1">
-                              {order.items.length} item(s) ·{' '}
-                              {new Date(order.createdAt).toLocaleDateString()}
+                              {order.items.length} {t.orderHistory?.items || 'item(s)'} ·{' '}
+                              {formatDate(order.createdAt)}
                             </p>
                           </div>
                           <div className="flex items-center justify-between md:justify-end gap-space-md">
                             <PriceDisplay amount={order.total} size="md" />
                             <Button as="link" to={`/orders/${order._id}`} variant="ghost" size="sm" icon="receipt_long">
-                              Provenance
+                              {t.orderHistory?.provenance || 'Provenance'}
                             </Button>
                           </div>
                         </li>
@@ -318,10 +320,10 @@ export function OrderHistoryPage() {
                     disabled={page === 1}
                     variant="secondary"
                   >
-                    Previous
+                    {t.orderHistory?.previous || 'Previous'}
                   </Button>
                   <span className="font-label-md text-label-md text-on-surface-variant">
-                    Page {page} of {totalPages}
+                    {t.orderHistory?.pageOf ? t.orderHistory.pageOf.replace('{{page}}', page.toString()).replace('{{totalPages}}', totalPages.toString()) : `Page ${page} of ${totalPages}`}
                   </span>
                   <Button
                     type="button"
@@ -329,7 +331,7 @@ export function OrderHistoryPage() {
                     disabled={page === totalPages}
                     variant="secondary"
                   >
-                    Next
+                    {t.orderHistory?.next || 'Next'}
                   </Button>
                 </div>
               )}

@@ -56,13 +56,13 @@ export const Button: React.FC<ButtonProps> = ({
       {isLoading ? (
         <span className="w-4 h-4 me-2 border-2 border-current border-t-transparent rounded-md animate-spin" />
       ) : icon && iconPosition === 'left' ? (
-        <Icon name={icon} className={`text-[18px] ${children ? 'mr-space-xs' : ''}`} />
+        <Icon name={icon} className={`text-[18px] ${children ? 'me-space-xs' : ''}`} />
       ) : null}
       
       {children}
       
       {!isLoading && icon && iconPosition === 'right' ? (
-        <Icon name={icon} className={`text-[18px] ${children ? 'ml-space-xs' : ''}`} />
+        <Icon name={icon} className={`text-[18px] ${children ? 'ms-space-xs' : ''}`} />
       ) : null}
     </>
   );

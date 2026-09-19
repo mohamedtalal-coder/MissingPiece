@@ -4,11 +4,22 @@ import { createDiscountSchema, updateDiscountSchema, validateCodeSchema } from "
 import { paginationSchema } from "../orders/order.validation.js";
 import { Product } from "../products/product.model.js";
 import type { AppError } from "../../shared/middleware/errorHandler.js";
+import { logAdminAction } from "../audit/audit.service.js";
 
 export async function createDiscount(req: Request, res: Response, next: NextFunction) {
   try {
     const input = createDiscountSchema.parse(req.body);
     const discount = await discountService.createDiscount(input);
+
+    await logAdminAction({
+      adminId: req.userId!,
+      action: "CREATE_DISCOUNT",
+      resourceId: discount._id.toString(),
+      resourceModel: "Discount",
+      details: { code: input.code },
+      ipAddress: req.ip,
+    });
+
     res.status(201).json({ success: true, discount });
   } catch (error) {
     next(error);
@@ -27,8 +38,22 @@ export async function listDiscounts(req: Request, res: Response, next: NextFunct
 
 export async function updateDiscount(req: Request, res: Response, next: NextFunction) {
   try {
+    const id = req.params["id"] as string;
     const input = updateDiscountSchema.parse(req.body);
-    const discount = await discountService.updateDiscount(req.params["id"] as string, input as Parameters<typeof discountService.updateDiscount>[1]);
+    const discount = await discountService.updateDiscount(
+      id,
+      input as Parameters<typeof discountService.updateDiscount>[1]
+    );
+
+    await logAdminAction({
+      adminId: req.userId!,
+      action: "UPDATE_DISCOUNT",
+      resourceId: id,
+      resourceModel: "Discount",
+      details: input,
+      ipAddress: req.ip,
+    });
+
     res.status(200).json({ success: true, discount });
   } catch (error) {
     next(error);
@@ -37,7 +62,18 @@ export async function updateDiscount(req: Request, res: Response, next: NextFunc
 
 export async function softDeleteDiscount(req: Request, res: Response, next: NextFunction) {
   try {
-    await discountService.softDeleteDiscount(req.params["id"] as string);
+    const id = req.params["id"] as string;
+    await discountService.softDeleteDiscount(id);
+
+    await logAdminAction({
+      adminId: req.userId!,
+      action: "DELETE_DISCOUNT",
+      resourceId: id,
+      resourceModel: "Discount",
+      details: { soft: true },
+      ipAddress: req.ip,
+    });
+
     res.status(200).json({ success: true, message: "Discount deleted" });
   } catch (error) {
     next(error);
@@ -47,7 +83,7 @@ export async function softDeleteDiscount(req: Request, res: Response, next: Next
 export async function validateDiscount(req: Request, res: Response, next: NextFunction) {
   try {
     const { code, items } = validateCodeSchema.parse(req.body);
-    
+
     const discount = await discountService.findValidDiscountByCode(code);
     if (!discount) {
       const err: AppError = new Error("Invalid or expired code");
@@ -57,7 +93,7 @@ export async function validateDiscount(req: Request, res: Response, next: NextFu
 
     const productIds = items.map((i: { product: string }) => i.product);
     const products = await Product.find({ _id: { $in: productIds } }).lean();
-    const productMap = new Map(products.map(p => [p._id.toString(), p.price]));
+    const productMap = new Map(products.map((p) => [p._id.toString(), p.price]));
 
     const calcItems = items.map((i: { product: string; quantity: number }) => {
       const price = productMap.get(i.product);

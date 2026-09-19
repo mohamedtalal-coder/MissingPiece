@@ -14,6 +14,10 @@ import reviewRoutes from "./features/reviews/review.routes.js";
 import { webhookHandler } from "./features/payments/payment.controller.js";
 import paymentRoutes from "./features/payments/payment.routes.js";
 import cartRoutes from "./features/cart/cart.routes.js";
+import auditRoutes from "./features/audit/audit.routes.js";
+import faqRoutes from "./features/faq/faq.routes.js";
+import adminUserRoutes from "./features/account/admin.routes.js";
+import adminDashboardRoutes from "./features/admin/admin.routes.js";
 
 const app: Application = express();
 
@@ -54,6 +58,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/audit-logs", auditRoutes);
+app.use("/api/faq", faqRoutes);
+app.use("/api/admin/users", adminUserRoutes);
+app.use("/api/admin", adminDashboardRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

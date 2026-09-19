@@ -55,7 +55,7 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       
       {/* Toast UI */}
       <div 
-        className={`fixed bottom-6 right-6 z-50 transform transition-all duration-300 pointer-events-none 
+        className={`fixed bottom-6 end-6 z-50 transform transition-all duration-300 pointer-events-none 
           bg-inverse-surface text-inverse-on-surface px-space-lg py-space-md rounded-lg shadow-xl 
           flex items-center gap-space-sm font-label-md text-label-md
           ${toast && toast.visible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}

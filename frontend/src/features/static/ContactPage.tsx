@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Mail, Send, MapPin, Phone, Loader2 } from 'lucide-react';
+import { Mail, Send, MapPin, Phone, Loader2, MessageSquare } from 'lucide-react';
 import { useLanguage } from '../../shared/context/LanguageContext';
 import { staticApi } from './staticApi';
+import { Motion } from '../../shared/components/ui/Motion';
 
 export function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { t } = useLanguage();
+  const { t } = useLanguage() as any;
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -35,138 +36,197 @@ export function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] font-serif py-16 px-6">
-      <div className="max-w-4xl mx-auto space-y-10 bg-[var(--bg-card)] border border-[var(--border-main)] p-10 md:p-14 rounded-md shadow-xl">
-        <div className="text-center space-y-3">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-wide text-[var(--text-main)]">
-            {t.contact.title}
-          </h1>
+    <div className="w-full flex flex-col relative overflow-hidden bg-surface pb-space-2xl min-h-screen">
+      {/* Background Effects */}
+      <div
+        className="absolute top-0 end-0 w-full max-w-[800px] h-[600px] bg-[radial-gradient(ellipse_at_top_right,_color-mix(in_srgb,var(--color-primary)_15%,transparent)_0%,_transparent_60%)] blur-2xl pointer-events-none"
+        aria-hidden
+      />
+      <div
+        className="absolute bottom-0 start-0 w-96 h-96 bg-primary-container/10 blur-[120px] rounded-full pointer-events-none mix-blend-screen"
+        aria-hidden
+      />
 
-          <p className="text-sm font-sans text-[var(--text-muted)]">
-            {t.contact.subtitle}
-          </p>
+      <div className="relative pt-space-3xl pb-space-xl px-margin-mobile lg:px-margin max-w-7xl mx-auto w-full">
+        {/* Header */}
+        <div className="text-center mb-space-2xl">
+          <Motion preset="up" className="inline-flex items-center gap-2 mb-space-md">
+            <span className="h-px w-8 bg-primary/40" />
+            <span className="font-label-caps text-label-caps text-primary uppercase tracking-[0.2em]">
+              {t.contact?.conciergeSupport || 'Concierge Support'}
+            </span>
+            <span className="h-px w-8 bg-primary/40" />
+          </Motion>
+
+          <Motion preset="up" delayMs={100} className="max-w-2xl mx-auto space-y-space-md">
+            <h1 className="font-display-lg text-display-lg-mobile lg:text-display-lg text-on-surface tracking-tight leading-[1.1]">
+              {t.contact?.title || 'Get in Touch'}
+            </h1>
+            <p className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+              {t.contact?.subtitle || 'Whether you have a question about our collections or need assistance with an order, our concierge team is here to help.'}
+            </p>
+          </Motion>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 font-sans">
-          <div className="space-y-6">
-            <h3 className="text-lg font-bold font-serif text-[var(--text-main)]">
-              {t.contact.getInTouch}
-            </h3>
+        <div className="grid lg:grid-cols-5 gap-space-xl lg:gap-space-2xl">
+          {/* Contact Info */}
+          <div className="lg:col-span-2 space-y-space-lg">
+            <Motion preset="right" delayMs={200} className="bg-surface-container-low/50 backdrop-blur-sm border border-outline-variant/30 p-space-xl rounded-2xl h-full">
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-space-md">
+                {t.contact?.getInTouch || 'Contact Information'}
+              </h3>
+              
+              <p className="font-body-sm text-on-surface-variant leading-relaxed mb-space-xl">
+                {t.contact?.description || 'We aim to respond to all inquiries within 24 hours. For immediate assistance, please reference our FAQ section.'}
+              </p>
 
-            <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-              {t.contact.description}
-            </p>
+              <div className="space-y-space-lg">
+                <div className="flex gap-4 group">
+                  <div className="w-10 h-10 rounded-full bg-primary-container/10 border border-primary-container/20 flex items-center justify-center shrink-0 group-hover:bg-primary-container/20 group-hover:scale-110 transition-all">
+                    <Mail className="w-4 h-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-label-caps text-[10px] uppercase tracking-wider text-outline mb-1">{t.contact?.emailLabel || 'Email'}</p>
+                    <p className="font-body-md text-on-surface">{t.contact?.supportEmail || 'concierge@missingpiece.com'}</p>
+                  </div>
+                </div>
 
-            <div className="space-y-4 text-xs text-[var(--text-main)]">
-              <div className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-[#c084fc]" />
-                <span>{t.contact.supportEmail}</span>
+                <div className="flex gap-4 group">
+                  <div className="w-10 h-10 rounded-full bg-primary-container/10 border border-primary-container/20 flex items-center justify-center shrink-0 group-hover:bg-primary-container/20 group-hover:scale-110 transition-all">
+                    <Phone className="w-4 h-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-label-caps text-[10px] uppercase tracking-wider text-outline mb-1">{t.contact?.phoneLabel || 'Phone'}</p>
+                    <p className="font-body-md text-on-surface">{t.contact?.phone || '+1 (800) 123-4567'}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 group">
+                  <div className="w-10 h-10 rounded-full bg-primary-container/10 border border-primary-container/20 flex items-center justify-center shrink-0 group-hover:bg-primary-container/20 group-hover:scale-110 transition-all">
+                    <MapPin className="w-4 h-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-label-caps text-[10px] uppercase tracking-wider text-outline mb-1">{t.contact?.atelierLabel || 'Atelier'}</p>
+                    <p className="font-body-md text-on-surface max-w-[200px]">{t.contact?.location || '123 Artisan Way, Design District, NY 10001'}</p>
+                  </div>
+                </div>
               </div>
-
-              <div className="flex items-center gap-3">
-                <Phone className="w-4 h-4 text-[#c084fc]" />
-                <span>{t.contact.phone}</span>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <MapPin className="w-4 h-4 text-[#c084fc]" />
-                <span>{t.contact.location}</span>
-              </div>
-            </div>
+            </Motion>
           </div>
 
-          <div className="bg-[var(--bg-main)] p-6 rounded-md border border-[var(--border-main)]">
-            {submitted ? (
-              <div className="text-center py-10 space-y-3">
-                <div className="w-12 h-12 bg-emerald-950 text-emerald-400 border border-emerald-800 rounded-md flex items-center justify-center mx-auto text-lg font-bold">
-                  ✓
-                </div>
+          {/* Form */}
+          <div className="lg:col-span-3">
+            <Motion preset="left" delayMs={300}>
+              <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-space-lg sm:p-space-xl shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 start-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-50" />
+                
+                {submitted ? (
+                  <div className="text-center py-space-3xl space-y-space-md animate-fade-in">
+                    <div className="w-16 h-16 bg-primary-container/20 text-primary border border-primary-container/40 rounded-full flex items-center justify-center mx-auto mb-space-lg">
+                      <MessageSquare className="w-8 h-8" />
+                    </div>
 
-                <h4 className="text-sm font-bold text-[var(--text-main)]">
-                  {t.contact.messageSent}
-                </h4>
+                    <h4 className="font-headline-md text-headline-md text-on-surface">
+                      {t.contact?.messageSent || 'Message Sent Successfully'}
+                    </h4>
 
-                <p className="text-xs text-[var(--text-muted)]">
-                  {t.contact.thankYou}
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {error && (
-                  <div className="p-3 rounded-md bg-rose-950/40 border border-rose-800/50 text-rose-300 text-xs">
-                    {error}
+                    <p className="font-body-md text-on-surface-variant max-w-md mx-auto">
+                      {t.contact?.thankYou || 'Thank you for reaching out. A member of our concierge team will be in touch with you shortly.'}
+                    </p>
+                    
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSubmitted(false);
+                        setName('');
+                        setEmail('');
+                        setSubject('');
+                        setMessage('');
+                      }}
+                      className="mt-space-xl px-6 py-2.5 border border-outline-variant/50 rounded-lg text-sm font-label-caps uppercase tracking-widest hover:bg-surface-container hover:text-on-surface transition-colors"
+                    >
+                      {t.contact?.sendAnother || 'Send Another Message'}
+                    </button>
                   </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-space-md">
+                    {error && (
+                      <div className="p-4 rounded-xl bg-error-container/20 border border-error/30 text-error text-sm font-medium flex items-center gap-2 animate-fade-in">
+                        <span className="w-1.5 h-1.5 rounded-full bg-error shrink-0" />
+                        {error}
+                      </div>
+                    )}
+                    
+                    <div className="grid sm:grid-cols-2 gap-space-md">
+                      <div className="space-y-2">
+                        <label className="font-label-caps text-[10px] uppercase tracking-wider text-outline block">
+                          {t.contact?.name || 'Full Name'}
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          placeholder={t.contact?.namePlaceholder || 'Jane Doe'}
+                          className="w-full bg-surface-container-low border border-outline-variant/40 rounded-xl px-4 py-3 text-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="font-label-caps text-[10px] uppercase tracking-wider text-outline block">
+                          {t.contact?.email || 'Email Address'}
+                        </label>
+                        <input
+                          type="email"
+                          required
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder={t.contact?.emailPlaceholder || 'jane@example.com'}
+                          className="w-full bg-surface-container-low border border-outline-variant/40 rounded-xl px-4 py-3 text-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="font-label-caps text-[10px] uppercase tracking-wider text-outline block">
+                        {t.contact?.subject || 'Subject'}
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={subject}
+                        onChange={(e) => setSubject(e.target.value)}
+                        placeholder={t.contact?.subjectPlaceholder || 'What is this regarding?'}
+                        className="w-full bg-surface-container-low border border-outline-variant/40 rounded-xl px-4 py-3 text-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="font-label-caps text-[10px] uppercase tracking-wider text-outline block">
+                        {t.contact?.message || 'Message'}
+                      </label>
+                      <textarea
+                        required
+                        rows={5}
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        placeholder={t.contact?.messagePlaceholder || 'How can we help you?'}
+                        className="w-full bg-surface-container-low border border-outline-variant/40 rounded-xl px-4 py-3 text-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none"
+                      ></textarea>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full mt-4 py-3.5 bg-primary text-on-primary rounded-xl text-sm font-label-caps uppercase tracking-widest hover:bg-primary-container hover:text-on-primary-container transition-all flex items-center justify-center gap-2 shadow-[0_4px_14px_color-mix(in_srgb,var(--color-primary)_20%,transparent)] hover:shadow-[0_6px_20px_color-mix(in_srgb,var(--color-primary)_30%,transparent)] disabled:opacity-50 disabled:hover:shadow-none"
+                    >
+                      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                      <span>{loading ? (t.contact?.sending || 'Sending...') : (t.contact?.sendMessage || 'Send Message')}</span>
+                    </button>
+                  </form>
                 )}
-                <div className="space-y-1">
-                  <label className="text-[11px] font-medium text-[var(--text-muted)]">
-                    {t.contact.name}
-                  </label>
-
-                  <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder={t.contact.namePlaceholder}
-                    className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-md px-3.5 py-2 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-border"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[11px] font-medium text-[var(--text-muted)]">
-                    {t.contact.email}
-                  </label>
-
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={t.contact.emailPlaceholder}
-                    className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-md px-3.5 py-2 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-border"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[11px] font-medium text-[var(--text-muted)]">
-                    Subject
-                  </label>
-
-                  <input
-                    type="text"
-                    required
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    placeholder="What is this regarding?"
-                    className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-md px-3.5 py-2 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-border"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[11px] font-medium text-[var(--text-muted)]">
-                    {t.contact.message}
-                  </label>
-
-                  <textarea
-                    required
-                    rows={4}
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder={t.contact.messagePlaceholder}
-                    className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-md px-3.5 py-2 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-border resize-none"
-                  ></textarea>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-2.5 bg-primary from-[#7e22ce] to-[#a855f7] text-white rounded-md text-xs font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-md disabled:opacity-50"
-                >
-                  {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-                  <span>{loading ? 'Sending...' : t.contact.sendMessage}</span>
-                </button>
-              </form>
-            )}
+              </div>
+            </Motion>
           </div>
         </div>
       </div>

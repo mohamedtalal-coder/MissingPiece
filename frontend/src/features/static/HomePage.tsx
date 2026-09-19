@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '../../shared/components/ui/Icon';
 import { Button } from '../../shared/components/ui/Button';
@@ -7,62 +7,65 @@ import { ProductCard } from '../products/components/ProductCard';
 import { ProductCardSkeleton } from '../products/components/ProductCardSkeleton';
 import { productsApi, type Product } from '../products/productsApi';
 import { useReducedMotion } from '../../shared/hooks/useReducedMotion';
+import { useLanguage } from '../../shared/context/LanguageContext';
 
 const HERO_IMAGE =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuDcG08k9yZVrEVfodbBg7iy8eZcVT0YRfrX7FPn3nGGmd9r8HZedc_M8fLwpGg_ihYKQcQ355P74xuOXWtvo66DNzkYC6k5vIEmTVmr2LTabxunSat27yA-3d0hjC4pjKP0hchELKct7ah2WAOAjwPTUOM6gqhJxaGPSIolEL76d_mwQHRmDkBig-AVA-c33_tMV_zXOyJXH-0WCPBROhHsdwVdYpyYTIoMskBlCU3eauVnHn68_6NnXA';
 
-const CATEGORIES = [
-  {
-    to: '/products?category=jigsaw',
-    icon: 'photo_library',
-    title: 'Classic Jigsaws',
-    blurb: 'Fine-art prints on museum-grade board with anti-glare finish.',
-  },
-  {
-    to: '/products?category=3d',
-    icon: 'account_balance',
-    title: 'Architectural 3D',
-    blurb: 'Kinetic interlocking structural sculptures engineered in birch.',
-  },
-  {
-    to: '/products?category=wooden',
-    icon: 'forest',
-    title: 'Wooden Puzzles',
-    blurb: 'Heirloom cherry and walnut whimsy pieces cut with zero splintering.',
-  },
-  {
-    to: '/products?category=mystery',
-    icon: 'search_insights',
-    title: 'Mystery Puzzles',
-    blurb: 'Image-less boxes with cipher narratives and mechanical compartments.',
-  },
-] as const;
-
-const STANDARDS = [
-  {
-    icon: 'precision_manufacturing',
-    title: 'Zero False Fits',
-    blurb: 'Micro-machined dies crafted uniquely. Two pieces only interlock if they belong.',
-  },
-  {
-    icon: 'texture',
-    title: 'Linen Emulsion',
-    blurb: 'Anti-glare eggshell emulsion designed for serene assembly under warm light.',
-  },
-  {
-    icon: 'security',
-    title: 'Lost Piece Guarantee',
-    blurb: 'If a piece is ever lost, we mill and mail the exact coordinate replacement for life.',
-  },
-  {
-    icon: 'eco',
-    title: 'Plastic-Free Vault',
-    blurb: 'Cloth-bound box with magnetic brass catch and organic cotton satchel.',
-  },
-] as const;
-
 export default function HomePage() {
+  const { t, language } = useLanguage() as any;
   const reducedMotion = useReducedMotion();
+
+  const CATEGORIES = useMemo(() => [
+    {
+      to: '/products?category=jigsaw',
+      icon: 'photo_library',
+      title: t.home?.jigsawTitle || 'Classic Jigsaws',
+      blurb: t.home?.jigsawBlurb || 'Fine-art prints on museum-grade board with anti-glare finish.',
+    },
+    {
+      to: '/products?category=3d',
+      icon: 'account_balance',
+      title: t.home?.threeDTitle || 'Architectural 3D',
+      blurb: t.home?.threeDBlurb || 'Kinetic interlocking structural sculptures engineered in birch.',
+    },
+    {
+      to: '/products?category=wooden',
+      icon: 'forest',
+      title: t.home?.woodenTitle || 'Wooden Puzzles',
+      blurb: t.home?.woodenBlurb || 'Heirloom cherry and walnut whimsy pieces cut with zero splintering.',
+    },
+    {
+      to: '/products?category=mystery',
+      icon: 'search_insights',
+      title: t.home?.mysteryTitle || 'Mystery Puzzles',
+      blurb: t.home?.mysteryBlurb || 'Image-less boxes with cipher narratives and mechanical compartments.',
+    },
+  ], [t]);
+
+  const STANDARDS = useMemo(() => [
+    {
+      icon: 'precision_manufacturing',
+      title: t.home?.standards?.precisionTitle || 'Zero False Fits',
+      blurb: t.home?.standards?.precisionBlurb || 'Micro-machined dies crafted uniquely. Two pieces only interlock if they belong.',
+    },
+    {
+      icon: 'texture',
+      title: t.home?.standards?.textureTitle || 'Linen Emulsion',
+      blurb: t.home?.standards?.textureBlurb || 'Anti-glare eggshell emulsion designed for serene assembly under warm light.',
+    },
+    {
+      icon: 'security',
+      title: t.home?.standards?.securityTitle || 'Lost Piece Guarantee',
+      blurb: t.home?.standards?.securityBlurb || 'If a piece is ever lost, we mill and mail the exact coordinate replacement for life.',
+    },
+    {
+      icon: 'eco',
+      title: t.home?.standards?.ecoTitle || 'Plastic-Free Vault',
+      blurb: t.home?.standards?.ecoBlurb || 'Cloth-bound box with magnetic brass catch and organic cotton satchel.',
+    },
+  ], [t]);
+
   const [featured, setFeatured] = useState<Product[]>([]);
   const [loadingFeatured, setLoadingFeatured] = useState(true);
   const [featuredError, setFeaturedError] = useState<string | null>(null);
@@ -79,7 +82,7 @@ export default function HomePage() {
         if (err?.name === 'CanceledError' || err?.name === 'AbortError' || err?.code === 'ERR_CANCELED') {
           return;
         }
-        setFeaturedError('Featured editions could not be loaded.');
+        setFeaturedError(t.home?.loadError || 'Featured editions could not be loaded.');
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoadingFeatured(false);
@@ -109,17 +112,21 @@ export default function HomePage() {
               MissingPiece
             </p>
             <h1 className="font-headline-md text-headline-lg sm:text-headline-lg text-on-surface/95 font-medium tracking-tight max-w-xl">
-              Every picture is <span className="italic text-primary font-normal">missing just one</span> piece.
+              {language === 'ar' ? (
+                <>{t.home?.heroTitle}</>
+              ) : (
+                <>Every picture is <span className="italic text-primary font-normal">missing just one</span> piece.</>
+              )}
             </h1>
             <p className="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
-              Heirloom wooden jigsaws engineered for quiet mastery and lifelong replacement of any lost piece.
+              {t.home?.heroDescription || 'Heirloom wooden jigsaws engineered for quiet mastery and lifelong replacement of any lost piece.'}
             </p>
             <div className="flex flex-wrap items-center gap-space-md pt-space-xs">
-              <Button as="link" to="/products" size="lg" icon="arrow_forward" iconPosition="right">
-                Explore Collection
+              <Button as="link" to="/products" size="lg" icon={language === 'ar' ? 'arrow_back' : 'arrow_forward'} iconPosition="right">
+                {t.home?.exploreCollection || 'Explore Collection'}
               </Button>
               <Button as="link" to="/about" variant="outline" size="lg">
-                Our Story
+                {t.home?.ourStory || 'Our Story'}
               </Button>
             </div>
           </div>
@@ -131,11 +138,11 @@ export default function HomePage() {
         <div className="max-w-[1360px] mx-auto flex flex-col gap-space-xl">
           <Motion className="flex flex-col items-center text-center gap-space-xs max-w-xl mx-auto">
             <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest">
-              Explore by Style
+              {t.home?.exploreByStyle || 'Explore by Style'}
             </span>
-            <h2 className="font-headline-md text-headline-lg text-on-surface tracking-tight">Shop by Category</h2>
+            <h2 className="font-headline-md text-headline-lg text-on-surface tracking-tight">{t.home?.shopByCategory || 'Shop by Category'}</h2>
             <p className="font-body-md text-body-md text-on-surface-variant">
-              Mindful tactile engagement across four craftsmanship traditions.
+              {t.home?.categoryDescription || 'Mindful tactile engagement across four craftsmanship traditions.'}
             </p>
           </Motion>
 
@@ -168,14 +175,14 @@ export default function HomePage() {
           <Motion className="flex flex-col sm:flex-row sm:items-end justify-between gap-space-md">
             <div className="flex flex-col gap-1">
               <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest">
-                Selected Masterworks
+                {t.home?.selectedMasterworks || 'Selected Masterworks'}
               </span>
               <h2 className="font-headline-md text-headline-lg text-on-surface tracking-tight">
-                Latest from the Atelier
+                {t.home?.bestSellers || 'Latest from the Atelier'}
               </h2>
             </div>
             <Button as="link" to="/products" variant="outline">
-              View All
+              {t.home?.viewAll || 'View All'}
             </Button>
           </Motion>
 
@@ -193,11 +200,11 @@ export default function HomePage() {
                   productsApi
                     .getAll({ sort: 'newest', limit: 3, page: 1 })
                     .then((data) => setFeatured(data.items))
-                    .catch(() => setFeaturedError('Featured editions could not be loaded.'))
+                    .catch(() => setFeaturedError(t.home?.loadError || 'Featured editions could not be loaded.'))
                     .finally(() => setLoadingFeatured(false));
                 }}
               >
-                Try Again
+                {t.home?.tryAgain || 'Try Again'}
               </Button>
             </div>
           ) : loadingFeatured ? (
@@ -212,7 +219,7 @@ export default function HomePage() {
             </div>
           ) : featured.length === 0 ? (
             <p className="font-body-md text-on-surface-variant text-center py-space-xl">
-              New editions are being cut. Check the full collection soon.
+              {t.home?.newEditions || 'New editions are being cut. Check the full collection soon.'}
             </p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
@@ -231,13 +238,13 @@ export default function HomePage() {
         <div className="max-w-[1360px] mx-auto flex flex-col gap-space-2xl">
           <Motion className="text-center max-w-2xl mx-auto flex flex-col items-center gap-space-xs">
             <span className="font-label-caps text-label-caps text-primary tracking-widest uppercase">
-              The Atelier Standards
+              {t.home?.atelierStandards || 'The Atelier Standards'}
             </span>
             <h2 className="font-headline-md text-headline-lg text-on-surface tracking-tight">
-              The Anatomy of a MissingPiece
+              {t.home?.anatomyTitle || 'The Anatomy of a MissingPiece'}
             </h2>
             <p className="font-body-md text-body-md text-on-surface-variant">
-              Horological precision, tactile materials, and heirloom woodworking.
+              {t.home?.anatomyDesc || 'Horological precision, tactile materials, and heirloom woodworking.'}
             </p>
           </Motion>
 

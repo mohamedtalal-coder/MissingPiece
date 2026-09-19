@@ -18,6 +18,7 @@ import { Button } from '../../shared/components/ui/Button';
 import { PriceDisplay } from '../../shared/components/ui/PriceDisplay';
 import { StatusBadge } from '../../shared/components/ui/StatusBadge';
 import { useReducedMotion } from '../../shared/hooks/useReducedMotion';
+import { useLanguage } from '../../shared/context/LanguageContext';
 
 function DetailSkeleton() {
   return (
@@ -34,6 +35,7 @@ function DetailSkeleton() {
 
 export function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { formatDate } = useLanguage();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { showToast } = useToast();
@@ -199,11 +201,11 @@ export function OrderDetailPage() {
             </h1>
             <p className="text-xs text-on-surface-variant mt-1">
               Commissioned{' '}
-              {new Date(order.createdAt).toLocaleString(undefined, {
-                dateStyle: 'long',
-                timeStyle: 'short',
-              })}
-            </p>
+              {formatDate(order.createdAt, {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+              })}</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -261,7 +263,7 @@ export function OrderDetailPage() {
                 <div
                   className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${
                     step.current
-                      ? 'border-primary-container bg-primary-container text-on-primary-container shadow-[0_0_15px_rgba(212,163,115,0.35)]'
+                      ? 'border-primary-container bg-primary-container text-on-primary-container shadow-[0_0_15px_color-mix(in_srgb,var(--color-primary-container)_35%,transparent)]'
                       : step.completed
                         ? 'border-primary/40 bg-primary/10 text-primary'
                         : 'border-outline-variant/40 bg-surface-container text-outline'

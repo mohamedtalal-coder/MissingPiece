@@ -156,3 +156,10 @@ export const paymentLimiter = rateLimit({
   limit: 10,
   keyGenerator: (req) => `payment:${keyByUser(req)}`,
 });
+
+export const adminRateLimiter = rateLimit({
+  ...sharedOpts,
+  windowMs: 15 * 60 * 1000,
+  limit: 50,
+  keyGenerator: (req) => `admin_action:${keyByUser(req)}`,
+});

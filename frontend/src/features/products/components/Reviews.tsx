@@ -8,6 +8,7 @@ import { StarRating } from '../../../shared/components/ui/StarRating';
 import { Pagination } from '../../../shared/components/ui/Pagination';
 import { Button } from '../../../shared/components/ui/Button';
 import { Spinner } from '../../../shared/components/ui/Spinner';
+import { useLanguage } from '../../../shared/context/LanguageContext';
 
 interface ReviewsProps {
   productId: string;
@@ -15,6 +16,7 @@ interface ReviewsProps {
 
 export const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
   const { user, isAuthenticated } = useAuth();
+  const { formatDate } = useLanguage();
   const { showToast } = useToast();
   
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -179,7 +181,7 @@ export const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
                       </div>
                       <div className="flex flex-col">
                         <span className="font-label-md text-label-md text-on-surface font-semibold">{review.user?.name || 'Unknown User'}</span>
-                        <span className="font-label-sm text-label-sm text-outline">{new Date(review.createdAt).toLocaleDateString()}</span>
+                        <span className="font-label-sm text-label-sm text-outline">{formatDate(review.createdAt)}</span>
                       </div>
                     </div>
                     <div className="flex items-center text-primary text-[14px]">

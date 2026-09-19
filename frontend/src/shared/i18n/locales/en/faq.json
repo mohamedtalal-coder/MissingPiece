@@ -1,0 +1,9 @@
+{
+  "title": "Frequently Asked Questions",
+  "subtitle": "Everything you need to know about our atelier, materials, and process.",
+  "loading": "Loading…",
+  "empty": "No FAQs published yet.",
+  "stillQuestions": "Still have questions?",
+  "contactCta": "Contact Concierge Support",
+  "fetchError": "Could not load FAQs"
+}

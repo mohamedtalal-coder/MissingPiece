@@ -91,7 +91,7 @@ function WishlistItemCard({ item, pendingAction, onRemove, onMoveToCart, t }: Wi
         </Link>
 
         <div
-          className={`absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-lowest/80 backdrop-blur-md font-label-caps text-[10px] tracking-wider uppercase shadow ${
+          className={`absolute top-3 start-3 flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-lowest/80 backdrop-blur-md font-label-caps text-[10px] tracking-wider uppercase shadow ${
             item.stock > 0 ? 'text-primary' : 'text-error'
           }`}
         >
@@ -108,7 +108,7 @@ function WishlistItemCard({ item, pendingAction, onRemove, onMoveToCart, t }: Wi
           onClick={() => onRemove(item)}
           disabled={isPending}
           aria-label="Remove from wishlist"
-          className="absolute top-3 right-3 w-8 h-8 rounded bg-surface-container-lowest/80 backdrop-blur-md text-on-surface-variant hover:text-error hover:bg-surface-container-lowest flex items-center justify-center transition-colors shadow disabled:opacity-50 disabled:cursor-not-allowed"
+          className="absolute top-3 end-3 w-8 h-8 rounded bg-surface-container-lowest/80 backdrop-blur-md text-on-surface-variant hover:text-error hover:bg-surface-container-lowest flex items-center justify-center transition-colors shadow disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Icon name="close" className="text-[18px]" />
         </button>
@@ -205,9 +205,9 @@ export function WishlistPage() {
     setPending(id, 'remove');
     try {
       await toggleWishlist(product);
-      showToast({ message: 'Removed from wishlist', type: 'success' });
+      showToast({ message: t.wishlist?.removedSuccess || 'Removed from wishlist', type: 'success' });
     } catch {
-      showToast({ message: 'Failed to remove from wishlist', type: 'error' });
+      showToast({ message: t.wishlist?.removedError || 'Failed to remove from wishlist', type: 'error' });
     } finally {
       setPending(id, null);
     }
@@ -218,7 +218,7 @@ export function WishlistPage() {
     if (pendingItems[id]) return;
 
     if (product.stock === 0) {
-      showToast({ message: 'Item is out of stock', type: 'error' });
+      showToast({ message: t.wishlist?.outOfStockToast || 'Item is out of stock', type: 'error' });
       return;
     }
 
@@ -226,9 +226,9 @@ export function WishlistPage() {
     try {
       await addItem(product, 1);
       await toggleWishlist(product);
-      showToast({ message: 'Moved to cart', type: 'success' });
+      showToast({ message: t.wishlist?.movedSuccess || 'Moved to cart', type: 'success' });
     } catch {
-      showToast({ message: 'Failed to move to cart', type: 'error' });
+      showToast({ message: t.wishlist?.movedError || 'Failed to move to cart', type: 'error' });
     } finally {
       setPending(id, null);
     }
@@ -237,7 +237,7 @@ export function WishlistPage() {
   const handleMoveAllToCart = async () => {
     const availableItems = filteredItems.filter((p) => p.stock > 0);
     if (availableItems.length === 0) {
-      showToast({ message: 'No available items to move', type: 'error' });
+      showToast({ message: t.wishlist?.noItemsToMove || 'No available items to move', type: 'error' });
       return;
     }
 
@@ -252,7 +252,7 @@ export function WishlistPage() {
         await toggleWishlist(item);
         movedCount++;
       } catch {
-        showToast({ message: `Failed to move ${item.name}`, type: 'error' });
+        showToast({ message: t.wishlist?.failedToMove ? t.wishlist.failedToMove.replace('{{name}}', item.name) : `Failed to move ${item.name}`, type: 'error' });
       } finally {
         setPending(item._id, null);
       }
@@ -260,7 +260,7 @@ export function WishlistPage() {
 
     setIsMovingAll(false);
     if (movedCount > 0) {
-      showToast({ message: `Moved ${movedCount} item(s) to cart`, type: 'success' });
+      showToast({ message: t.wishlist?.movedItemsToCart ? t.wishlist.movedItemsToCart.replace('{{count}}', movedCount.toString()) : `Moved ${movedCount} item(s) to cart`, type: 'success' });
     }
   };
 
@@ -332,15 +332,15 @@ export function WishlistPage() {
 
           <div className="flex items-center gap-space-sm flex-wrap shrink-0">
             <div className="flex items-center bg-surface-container-low rounded px-space-sm py-1 shadow-sm border border-outline-variant/20">
-              <span className="font-label-caps text-label-caps text-outline uppercase mr-2">Category:</span>
+              <span className="font-label-caps text-label-caps text-outline uppercase me-2">{t.wishlist?.category || 'Category:'}</span>
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
                 disabled={isMovingAll}
-                className="bg-transparent text-on-surface font-label-md text-label-md focus:outline-none cursor-pointer py-1 pr-2 disabled:opacity-50"
+                className="bg-transparent text-on-surface font-label-md text-label-md focus:outline-none cursor-pointer py-1 pe-2 disabled:opacity-50"
               >
                 <option className="bg-surface-container-high text-on-surface" value="all">
-                  All Disciplines
+                  {t.wishlist?.allDisciplines || 'All Disciplines'}
                 </option>
                 {categories.map((cat) => (
                   <option key={cat} className="bg-surface-container-high text-on-surface" value={cat}>
@@ -351,21 +351,21 @@ export function WishlistPage() {
             </div>
 
             <div className="flex items-center bg-surface-container-low rounded px-space-sm py-1 shadow-sm border border-outline-variant/20">
-              <span className="font-label-caps text-label-caps text-outline uppercase mr-2">Sort:</span>
+              <span className="font-label-caps text-label-caps text-outline uppercase me-2">{t.wishlist?.sort || 'Sort:'}</span>
               <select
                 value={sortOption}
                 onChange={(e) => setSortOption(e.target.value)}
                 disabled={isMovingAll}
-                className="bg-transparent text-on-surface font-label-md text-label-md focus:outline-none cursor-pointer py-1 pr-2 disabled:opacity-50"
+                className="bg-transparent text-on-surface font-label-md text-label-md focus:outline-none cursor-pointer py-1 pe-2 disabled:opacity-50"
               >
                 <option className="bg-surface-container-high text-on-surface" value="recent">
-                  Recently Saved
+                  {t.wishlist?.recentlySaved || 'Recently Saved'}
                 </option>
                 <option className="bg-surface-container-high text-on-surface" value="price-asc">
-                  Price: Low to High
+                  {t.wishlist?.priceLowHigh || 'Price: Low to High'}
                 </option>
                 <option className="bg-surface-container-high text-on-surface" value="price-desc">
-                  Price: High to Low
+                  {t.wishlist?.priceHighLow || 'Price: High to Low'}
                 </option>
               </select>
             </div>

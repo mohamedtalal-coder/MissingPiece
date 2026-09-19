@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ShieldCheck, Compass, Award, Sparkles, ArrowUpRight } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../../features/auth/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -16,17 +17,18 @@ export function Footer() {
   const [submitting, setSubmitting] = useState(false);
   const { showToast } = useToast();
   const { isAdmin } = useAuth();
+  const { t } = useLanguage() as any;
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
     const cleaned = sanitizeEmail(email);
 
     if (!cleaned) {
-      setError('Please enter your email.');
+      setError(t.footer?.enterEmail || 'Please enter your email.');
       return;
     }
     if (!EMAIL_RE.test(cleaned)) {
-      setError('Enter a valid email address.');
+      setError(t.footer?.enterValidEmail || 'Enter a valid email address.');
       return;
     }
 
@@ -35,7 +37,7 @@ export function Footer() {
     // Client-only subscribe for now — no PII sent until a backend endpoint exists
     window.setTimeout(() => {
       showToast({
-        message: 'You are on the Atelier Dispatch list.',
+        message: t.footer?.subscribeSuccess || 'You are on the Atelier Dispatch list.',
         type: 'success',
       });
       setEmail('');
@@ -52,9 +54,9 @@ export function Footer() {
               <ShieldCheck className="w-5 h-5" aria-hidden />
             </div>
             <div>
-              <h2 className="font-headline-sm text-sm text-on-surface">Lifetime Lost Piece Guarantee</h2>
+              <h2 className="font-headline-sm text-sm text-on-surface">{t.footer?.guaranteeTitle || 'Lifetime Lost Piece Guarantee'}</h2>
               <p className="text-xs text-outline mt-1 leading-relaxed">
-                If a wooden piece goes missing, we re-laser the exact vector from your registered edition matrix.
+                {t.footer?.guaranteeDesc || 'If a wooden piece goes missing, we re-laser the exact vector from your registered edition matrix.'}
               </p>
             </div>
           </div>
@@ -64,9 +66,9 @@ export function Footer() {
               <Award className="w-5 h-5" aria-hidden />
             </div>
             <div>
-              <h2 className="font-headline-sm text-sm text-on-surface">4.2mm Nordic Birch Hardwood</h2>
+              <h2 className="font-headline-sm text-sm text-on-surface">{t.footer?.materialTitle || '4.2mm Nordic Birch Hardwood'}</h2>
               <p className="text-xs text-outline mt-1 leading-relaxed">
-                FSC-certified Scandinavian timber with a soft-touch matte finish. Zero plastic; archival grade.
+                {t.footer?.materialDesc || 'FSC-certified Scandinavian timber with a soft-touch matte finish. Zero plastic; archival grade.'}
               </p>
             </div>
           </div>
@@ -76,9 +78,9 @@ export function Footer() {
               <Compass className="w-5 h-5" aria-hidden />
             </div>
             <div>
-              <h2 className="font-headline-sm text-sm text-on-surface">Bespoke Whimsical Tessellations</h2>
+              <h2 className="font-headline-sm text-sm text-on-surface">{t.footer?.bespokeTitle || 'Bespoke Whimsical Tessellations'}</h2>
               <p className="text-xs text-outline mt-1 leading-relaxed">
-                Each edition includes thematic silhouette pieces designed for the illustration&apos;s narrative.
+                {t.footer?.bespokeDesc || 'Each edition includes thematic silhouette pieces designed for the illustration\'s narrative.'}
               </p>
             </div>
           </div>
@@ -95,23 +97,22 @@ export function Footer() {
               <span className="font-headline-sm text-lg text-on-surface tracking-tight">MissingPiece</span>
             </div>
             <p className="text-xs text-outline leading-relaxed max-w-xs">
-              Quiet craftsmanship and enigmatic precision. Designed in our Nordic and Pacific workshops for
-              collectors of tactile art.
+              {t.footer?.tagline || 'Quiet craftsmanship and enigmatic precision. Designed in our Nordic and Pacific workshops for collectors of tactile art.'}
             </p>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] bg-surface-container border border-outline-variant/40 text-primary-container">
               <Sparkles className="w-3 h-3" aria-hidden />
-              Est. 2026 Atelier
+              {t.footer?.est || 'Est. 2026 Atelier'}
             </span>
           </div>
 
           <div className="space-y-3">
             <h2 className="font-headline-sm text-xs text-on-surface uppercase tracking-wider">
-              Curated Editions
+              {t.footer?.curatedEditions || 'Curated Editions'}
             </h2>
             <ul className="space-y-2 text-xs">
               <li>
                 <Link to="/products" className="hover:text-primary-container transition-colors">
-                  Full Collection
+                  {t.footer?.fullCollection || 'Full Collection'}
                 </Link>
               </li>
               <li>
@@ -119,12 +120,12 @@ export function Footer() {
                   to="/products?category=jigsaw"
                   className="hover:text-primary-container transition-colors"
                 >
-                  Classic Jigsaws
+                  {t.footer?.classicJigsaws || 'Classic Jigsaws'}
                 </Link>
               </li>
               <li>
                 <Link to="/products?category=3d" className="hover:text-primary-container transition-colors">
-                  Architectural 3D
+                  {t.footer?.architectural3d || 'Architectural 3D'}
                 </Link>
               </li>
               <li>
@@ -132,7 +133,7 @@ export function Footer() {
                   to="/products?category=wooden"
                   className="hover:text-primary-container transition-colors"
                 >
-                  Heirloom Wooden
+                  {t.footer?.heirloomWooden || 'Heirloom Wooden'}
                 </Link>
               </li>
             </ul>
@@ -140,7 +141,7 @@ export function Footer() {
 
           <div className="space-y-3">
             <h2 className="font-headline-sm text-xs text-on-surface uppercase tracking-wider">
-              Collector Services
+              {t.footer?.collectorServices || 'Collector Services'}
             </h2>
             <ul className="space-y-2 text-xs">
               <li>
@@ -148,23 +149,23 @@ export function Footer() {
                   to="/orders"
                   className="hover:text-primary-container transition-colors inline-flex items-center gap-1"
                 >
-                  Track Provenance &amp; Order
+                  {t.footer?.trackOrder || 'Track Provenance & Order'}
                   <ArrowUpRight className="w-3 h-3 text-outline" aria-hidden />
                 </Link>
               </li>
               <li>
                 <Link to="/wishlist" className="hover:text-primary-container transition-colors">
-                  Concierge Wishlist
+                  {t.footer?.conciergeWishlist || 'Concierge Wishlist'}
                 </Link>
               </li>
               <li>
                 <Link to="/contact" className="hover:text-primary-container transition-colors">
-                  Missing Piece Registration
+                  {t.footer?.registration || 'Missing Piece Registration'}
                 </Link>
               </li>
               <li>
                 <Link to="/about" className="hover:text-primary-container transition-colors">
-                  About the Craft
+                  {t.footer?.aboutCraft || 'About the Craft'}
                 </Link>
               </li>
               {isAdmin && (
@@ -173,8 +174,8 @@ export function Footer() {
                     to="/admin/orders"
                     className="hover:text-primary transition-colors inline-flex items-center gap-1 text-primary-container"
                   >
-                    Atelier Management
-                    <span className="text-[9px] px-1 py-0.5 bg-primary-container/20 rounded">Admin</span>
+                    {t.footer?.atelierManagement || 'Atelier Management'}
+                    <span className="text-[9px] px-1 py-0.5 bg-primary-container/20 rounded">{t.footer?.admin || 'Admin'}</span>
                   </Link>
                 </li>
               )}
@@ -183,10 +184,10 @@ export function Footer() {
 
           <div className="space-y-3">
             <h2 className="font-headline-sm text-xs text-on-surface uppercase tracking-wider">
-              Atelier Dispatches
+              {t.footer?.dispatches || 'Atelier Dispatches'}
             </h2>
             <p className="text-xs text-outline">
-              Private invitations for numbered preview cuts and limited archival releases.
+              {t.footer?.dispatchDesc || 'Private invitations for numbered preview cuts and limited archival releases.'}
             </p>
             <form onSubmit={handleSubscribe} className="space-y-2" noValidate>
               <div
@@ -204,7 +205,7 @@ export function Footer() {
                   autoComplete="email"
                   inputMode="email"
                   maxLength={254}
-                  placeholder="collector@domain.com"
+                  placeholder={t.footer?.emailPlaceholder || 'collector@domain.com'}
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
@@ -219,7 +220,7 @@ export function Footer() {
                   disabled={submitting}
                   className="bg-primary-container hover:bg-primary text-on-primary-container px-3 py-2 text-xs font-semibold transition-colors shrink-0 disabled:opacity-60"
                 >
-                  {submitting ? '…' : 'Join'}
+                  {submitting ? '…' : (t.footer?.join || 'Join')}
                 </button>
               </div>
               {error ? (
@@ -228,7 +229,7 @@ export function Footer() {
                 </p>
               ) : (
                 <p id="footer-dispatch-hint" className="text-[10px] text-outline">
-                  Never commercialized. Unsubscribe anytime.
+                  {t.footer?.neverCommercialized || 'Never commercialized. Unsubscribe anytime.'}
                 </p>
               )}
             </form>
@@ -236,18 +237,18 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-6 border-t border-outline-variant/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-outline">
-          <p>© {new Date().getFullYear()} MissingPiece Atelier Inc. All rights reserved.</p>
+          <p>{t.footer?.copyright ? t.footer.copyright.replace('{{year}}', new Date().getFullYear().toString()) : `© ${new Date().getFullYear()} MissingPiece Atelier Inc. All rights reserved.`}</p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link to="/contact" className="hover:text-on-surface-variant transition-colors">
-              Privacy &amp; Support
+              {t.footer?.privacy || 'Privacy & Support'}
             </Link>
             <span className="h-1 w-1 rounded-full bg-outline-variant" aria-hidden />
             <Link to="/about" className="hover:text-on-surface-variant transition-colors">
-              Artisan Terms
+              {t.footer?.terms || 'Artisan Terms'}
             </Link>
             <span className="h-1 w-1 rounded-full bg-outline-variant" aria-hidden />
             <Link to="/about" className="hover:text-on-surface-variant transition-colors">
-              Provenance &amp; Sustainability
+              {t.footer?.sustainability || 'Provenance & Sustainability'}
             </Link>
           </div>
         </div>

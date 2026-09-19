@@ -36,3 +36,11 @@ export async function updateContactStatus(id: string, status: string) {
     { new: true, runValidators: true }
   ).lean();
 }
+
+export async function updateContactDetails(id: string, updates: { assignedTo?: string; adminNotes?: string; status?: string }) {
+  return Contact.findByIdAndUpdate(
+    id,
+    { $set: updates },
+    { new: true, runValidators: true }
+  ).lean();
+}

@@ -125,7 +125,7 @@ export function RegisterForm() {
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             className={`absolute right-space-md top-[34px] text-on-surface-variant hover:text-on-surface focus:outline-none ${
-              language === 'ar' ? 'left-space-md right-auto' : ''
+              language === 'ar' ? 'left-space-md end-auto' : ''
             }`}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
@@ -133,7 +133,7 @@ export function RegisterForm() {
           </button>
         </div>
         <p className="font-body-sm text-body-sm text-outline -mt-2">
-          Use at least 8 characters.
+          {t.auth?.passwordHint || 'Use at least 8 characters.'}
         </p>
       </div>
 

@@ -3,6 +3,7 @@ import {
   submitContact,
   getContacts,
   updateContactStatus,
+  updateContactDetailsHandler,
 } from "./contact.controller.js";
 import { requireAuth } from "../../shared/middleware/requireAuth.js";
 import { requireAdmin } from "../../shared/middleware/requireAdmin.js";
@@ -16,5 +17,6 @@ router.post("/", contactSubmitLimiter, submitContact);
 // Admin routes to view and manage messages
 router.get("/", requireAuth, requireAdmin, getContacts);
 router.patch("/:id/status", requireAuth, requireAdmin, updateContactStatus);
+router.patch("/:id", requireAuth, requireAdmin, updateContactDetailsHandler);
 
 export default router;

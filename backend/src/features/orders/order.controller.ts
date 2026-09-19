@@ -1,7 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
-import { createOrderSchema, orderStatusSchema, paginationSchema } from "./order.validation.js";
+import { createOrderSchema, orderStatusSchema, paginationSchema, adminOrdersQuerySchema } from "./order.validation.js";
 import * as orderService from "./order.service.js";
 import type { AppError } from "../../shared/middleware/errorHandler.js";
+import { logAdminAction } from "../audit/audit.service.js";
 
 function getUserId(req: Request): string {
   const userId = req.userId;
@@ -69,13 +70,23 @@ export const getOrderById = async (req: Request, res: Response, next: NextFuncti
 export const updateOrderStatus = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { status } = orderStatusSchema.parse(req.body);
-    const order = await orderService.updateOrderStatus(req.params["id"] as string, status);
+    const orderId = req.params["id"] as string;
+    const order = await orderService.updateOrderStatus(orderId, status);
 
     if (!order) {
       const err: AppError = new Error("Order not found");
       err.statusCode = 404;
       throw err;
     }
+
+    await logAdminAction({
+      adminId: getUserId(req),
+      action: status === "refunded" ? "REFUND_ORDER" : "UPDATE_ORDER_STATUS",
+      resourceId: orderId,
+      resourceModel: "Order",
+      details: { newStatus: status },
+      ipAddress: req.ip,
+    });
 
     res.status(200).json({ success: true, data: order });
   } catch (error) {
@@ -89,9 +100,53 @@ export const updateOrderStatus = async (req: Request, res: Response, next: NextF
  */
 export const getAllOrdersAdmin = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const query = paginationSchema.parse(req.query);
+    const query = adminOrdersQuerySchema.parse(req.query);
     const result = await orderService.getAllOrdersAdmin(query);
     res.status(200).json({ success: true, ...result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Export orders as CSV (Admin only)
+ * GET /api/orders/admin/export
+ */
+export const exportOrdersAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const query = adminOrdersQuerySchema.omit({ page: true, limit: true }).parse(req.query);
+    const items = await orderService.exportOrdersAdmin(query);
+
+    const header = "id,customer,email,status,totalAmount,createdAt,city,country\n";
+    const rows = items
+      .map((o) => {
+        const user = o.user as { name?: string; email?: string } | null;
+        const escape = (v: string) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+        return [
+          o._id,
+          escape(user?.name ?? ""),
+          escape(user?.email ?? ""),
+          o.status,
+          o.totalAmount,
+          o.createdAt?.toISOString?.() ?? "",
+          escape(o.shippingAddress?.city ?? ""),
+          escape(o.shippingAddress?.country ?? ""),
+        ].join(",");
+      })
+      .join("\n");
+
+    await logAdminAction({
+      adminId: getUserId(req),
+      action: "EXPORT_ORDERS",
+      resourceId: "orders",
+      resourceModel: "Order",
+      details: { count: items.length, filters: query },
+      ipAddress: req.ip,
+    });
+
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", 'attachment; filename="orders-export.csv"');
+    res.status(200).send(header + rows);
   } catch (error) {
     next(error);
   }

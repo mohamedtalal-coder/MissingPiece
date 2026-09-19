@@ -7,6 +7,7 @@ import {
 } from "./product.validation.js";
 import * as productService from "./product.service.js";
 import { uploadImage } from "../../shared/utils/cloudinary.js";
+import { logAdminAction } from "../audit/audit.service.js";
 
 export async function listProductsHandler(req: Request, res: Response, next: NextFunction) {
   try {
@@ -66,11 +67,21 @@ export async function createProductHandler(req: Request, res: Response, next: Ne
 
     const product = await productService.createProduct(input);
 
+    await logAdminAction({
+      adminId: req.userId!,
+      action: "CREATE_PRODUCT",
+      resourceId: String(product.id ?? (product as { _id?: unknown })._id ?? ""),
+      resourceModel: "Product",
+      details: { name: input.name },
+      ipAddress: req.ip,
+    });
+
     res.status(201).json({ success: true, product });
   } catch (err) {
     next(err);
   }
 }
+
 export async function updateProductHandler(req: Request, res: Response, next: NextFunction) {
   try {
     const files = (req.files as Express.Multer.File[] | undefined) ?? [];
@@ -84,16 +95,23 @@ export async function updateProductHandler(req: Request, res: Response, next: Ne
       ...(images ? { images } : {}),
     });
 
-    const product = await productService.updateProduct(
-      req.params["id"] as string,
-      input
-    );
+    const id = req.params["id"] as string;
+    const product = await productService.updateProduct(id, input);
 
     if (!product) {
       const err: AppError = new Error("Product not found");
       err.statusCode = 404;
       throw err;
     }
+
+    await logAdminAction({
+      adminId: req.userId!,
+      action: "UPDATE_PRODUCT",
+      resourceId: id,
+      resourceModel: "Product",
+      details: input,
+      ipAddress: req.ip,
+    });
 
     res.json({ success: true, product });
   } catch (err) {
@@ -103,12 +121,23 @@ export async function updateProductHandler(req: Request, res: Response, next: Ne
 
 export async function deleteProductHandler(req: Request, res: Response, next: NextFunction) {
   try {
-    const product = await productService.softDeleteProduct(req.params["id"] as string);
+    const id = req.params["id"] as string;
+    const product = await productService.softDeleteProduct(id);
     if (!product) {
       const err: AppError = new Error("Product not found");
       err.statusCode = 404;
       throw err;
     }
+
+    await logAdminAction({
+      adminId: req.userId!,
+      action: "DELETE_PRODUCT",
+      resourceId: id,
+      resourceModel: "Product",
+      details: { soft: true },
+      ipAddress: req.ip,
+    });
+
     res.json({ success: true, product });
   } catch (err) {
     next(err);

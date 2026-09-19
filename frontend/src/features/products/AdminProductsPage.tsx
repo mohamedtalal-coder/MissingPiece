@@ -249,7 +249,7 @@ export const AdminProductsPage: React.FC = () => {
 
       <div className="bg-surface-container-low rounded-lg p-4 mb-6 border border-outline-variant/20">
         <div className="relative max-w-md">
-          <Icon name="search" className="absolute left-3.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none" size={18} />
+          <Icon name="search" className="absolute start-3.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none" size={18} />
           <label htmlFor="admin-product-search" className="sr-only">
             Search products
           </label>
@@ -257,7 +257,7 @@ export const AdminProductsPage: React.FC = () => {
             id="admin-product-search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-surface-container text-on-surface placeholder:text-outline text-sm pl-10 pr-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-primary/40"
+            className="w-full bg-surface-container text-on-surface placeholder:text-outline text-sm ps-10 pe-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-primary/40"
             placeholder="Search by title, category, or id…"
             type="search"
           />
@@ -277,7 +277,7 @@ export const AdminProductsPage: React.FC = () => {
                   <th className="py-3.5 px-4">Price</th>
                   <th className="py-3.5 px-4">Stock</th>
                   <th className="py-3.5 px-4">State</th>
-                  <th className="py-3.5 pr-6 pl-4 text-right">Actions</th>
+                  <th className="py-3.5 pe-6 ps-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant/20">
@@ -330,7 +330,7 @@ export const AdminProductsPage: React.FC = () => {
                           {product.isActive ? 'Active' : 'Archived'}
                         </span>
                       </td>
-                      <td className="py-4 pr-6 pl-4 text-right">
+                      <td className="py-4 pe-6 ps-4 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <Button
                             onClick={() => handleEditClick(product)}

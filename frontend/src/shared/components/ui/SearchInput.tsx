@@ -47,7 +47,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
     <div className={`relative w-full max-w-md ${className}`}>
       <Icon 
         name="search" 
-        className="absolute left-space-md top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" 
+        className="absolute start-space-md top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" 
         size={18}
       />
       
@@ -57,13 +57,13 @@ export const SearchInput: React.FC<SearchInputProps> = ({
         onChange={(e) => setLocalValue(e.target.value)}
         placeholder={placeholder}
         autoFocus={autoFocus}
-        className="w-full bg-surface-container-lowest border-b border-outline-variant/30 py-3 pl-10 pr-10 font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary transition-colors"
+        className="w-full bg-surface-container-lowest border-b border-outline-variant/30 py-3 ps-10 pe-10 font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary transition-colors"
       />
       
       {localValue && (
         <button
           onClick={handleClear}
-          className="absolute right-space-sm top-1/2 -translate-y-1/2 p-1.5 text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+          className="absolute end-space-sm top-1/2 -translate-y-1/2 p-1.5 text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
           aria-label="Clear search"
         >
           <Icon name="close" size={16} />

@@ -33,7 +33,7 @@ export function RegisterPage() {
         <div className="bg-surface-container-low/90 border border-outline-variant/25 rounded-xl p-space-xl shadow-lg backdrop-blur-sm">
           <div className="flex items-center gap-2 mb-space-lg text-on-surface-variant">
             <Icon name="person_outline" size={16} className="text-primary" />
-            <span className="font-label-caps text-label-caps uppercase tracking-wider">Collector membership</span>
+            <span className="font-label-caps text-label-caps uppercase tracking-wider">{t.auth?.collectorMembership || 'Collector membership'}</span>
           </div>
           <RegisterForm />
         </div>

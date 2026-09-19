@@ -9,11 +9,19 @@ import { WishlistProvider } from '../shared/WishlistContext';
 import HomePage from '../features/static/HomePage';
 import { AboutPage } from '../features/static/AboutPage';
 import { ContactPage } from '../features/static/ContactPage';
+import { FAQPage } from '../features/static/FAQPage';
+import { BespokePage } from '../features/static/BespokePage';
 import { AdminMessagesPage } from '../features/static/AdminMessagesPage';
 
 import { ProductListPage } from '../features/products/ProductListPage';
 import { ProductDetailPage } from '../features/products/ProductDetailPage';
 import { AdminProductsPage } from '../features/products/AdminProductsPage';
+import { AdminDashboardPage } from '../features/admin/AdminDashboardPage';
+import { AdminUsersPage } from '../features/admin/AdminUsersPage';
+import { AdminFAQPage } from '../features/admin/AdminFAQPage';
+import { AdminReviewsPage } from '../features/admin/AdminReviewsPage';
+import { AdminAuditLogsPage } from '../features/admin/AdminAuditLogsPage';
+import { AdminDiscountsPage } from '../features/admin/AdminDiscountsPage';
 
 import { CartPage } from '../features/cart/CartPage';
 import { WishlistPage } from '../features/wishlist/WishlistPage';
@@ -86,10 +94,53 @@ export function App() {
 
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} />
+                <Route path="/faq" element={<FAQPage />} />
+                <Route path="/bespoke" element={<BespokePage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
+
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <AdminDashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/users"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <AdminUsersPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/faq"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <AdminFAQPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/reviews"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <AdminReviewsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/audit"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <AdminAuditLogsPage />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route
                   path="/admin/products"
                   element={
@@ -111,6 +162,14 @@ export function App() {
                   element={
                     <ProtectedRoute adminOnly>
                       <AdminMessagesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/discounts"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <AdminDiscountsPage />
                     </ProtectedRoute>
                   }
                 />

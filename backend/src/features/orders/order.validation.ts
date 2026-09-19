@@ -13,10 +13,19 @@ export const createOrderSchema = z.object({
 });
 
 export const orderStatusSchema = z.object({
-  status: z.enum(["pending", "paid", "shipped", "delivered", "cancelled"]),
+  status: z.enum(["pending", "paid", "shipped", "delivered", "cancelled", "refunded"]),
 });
 
 export const paginationSchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(50).default(10),
+});
+
+export const adminOrdersQuerySchema = paginationSchema.extend({
+  status: z.enum(["pending", "paid", "shipped", "delivered", "cancelled", "refunded"]).optional(),
+  search: z.string().trim().max(100).optional(),
+  dateFrom: z.string().optional(),
+  dateTo: z.string().optional(),
+  minAmount: z.coerce.number().min(0).optional(),
+  maxAmount: z.coerce.number().min(0).optional(),
 });

@@ -68,7 +68,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
               id="catalog-category"
               value={selectedCategory}
               onChange={(e) => onCategoryChange(e.target.value)}
-              className="w-full bg-surface-container-high text-on-surface text-label-md px-3.5 py-2.5 rounded appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all pr-9 border border-outline-variant/20"
+              className="w-full bg-surface-container-high text-on-surface text-label-md px-3.5 py-2.5 rounded appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all pe-9 border border-outline-variant/20"
             >
               <option value="">{t.productFilters?.allCategories || 'All Categories'}</option>
               {categories.map((cat) => (
@@ -79,7 +79,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
             </select>
             <Icon
               name="expand_more"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-outline text-[18px] pointer-events-none"
+              className="absolute end-3 top-1/2 -translate-y-1/2 text-outline text-[18px] pointer-events-none"
             />
           </div>
 
@@ -109,7 +109,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
               id="catalog-sort"
               value={sortBy}
               onChange={(e) => onSortChange(e.target.value)}
-              className="w-full bg-surface-container-high text-on-surface text-label-md px-3.5 py-2.5 rounded appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all pr-9 border border-outline-variant/20"
+              className="w-full bg-surface-container-high text-on-surface text-label-md px-3.5 py-2.5 rounded appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all pe-9 border border-outline-variant/20"
             >
               <option value="newest">{t.productFilters?.newest || 'Newest Arrivals'}</option>
               <option value="price_asc">{t.productFilters?.priceLowToHigh || 'Price: Low to High'}</option>
@@ -117,7 +117,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
             </select>
             <Icon
               name="sort"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-outline text-[18px] pointer-events-none"
+              className="absolute end-3 top-1/2 -translate-y-1/2 text-outline text-[18px] pointer-events-none"
             />
           </div>
         </div>

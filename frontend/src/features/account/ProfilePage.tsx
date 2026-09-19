@@ -61,7 +61,7 @@ export function ProfilePage() {
       setError(null);
     } catch (err) {
       console.error(err);
-      setError('Failed to load profile');
+      setError(t.profile?.loadError || 'Failed to load profile');
     } finally {
       setLoading(false);
     }
@@ -76,11 +76,11 @@ export function ProfilePage() {
     const cleanName = sanitize(name, 80);
     const cleanEmail = sanitize(email, 254).toLowerCase();
     if (cleanName.length < 2) {
-      setError('Name must be at least 2 characters.');
+      setError(t.profile?.nameLengthError || 'Name must be at least 2 characters.');
       return;
     }
     if (!EMAIL_RE.test(cleanEmail)) {
-      setError('Please enter a valid email address.');
+      setError(t.profile?.emailError || 'Please enter a valid email address.');
       return;
     }
     await saveChanges({ name: cleanName, email: cleanEmail, addresses });
@@ -95,11 +95,11 @@ export function ProfilePage() {
       setName(updated.name || '');
       setEmail(updated.email || '');
       setAddresses(updated.addresses || []);
-      showToast({ message: 'Profile updated', type: 'success' });
+      showToast({ message: t.profile?.updateSuccess || 'Profile updated', type: 'success' });
     } catch (err) {
       console.error(err);
-      setError('Failed to update profile');
-      showToast({ message: 'Failed to update profile', type: 'error' });
+      setError(t.profile?.updateError || 'Failed to update profile');
+      showToast({ message: t.profile?.updateError || 'Failed to update profile', type: 'error' });
     } finally {
       setSaving(false);
     }
@@ -107,7 +107,7 @@ export function ProfilePage() {
 
   const openAddAddressModal = () => {
     if (addresses.length >= 10) {
-      setError('You can only have up to 10 addresses.');
+      setError(t.profile?.maxAddresses || 'You can only have up to 10 addresses.');
       return;
     }
     setStreet('');
@@ -149,7 +149,7 @@ export function ProfilePage() {
       newAddr.zipCode.length < 2 ||
       newAddr.country.length < 2
     ) {
-      setAddressError('Please complete all address fields.');
+      setAddressError(t.profile?.addressIncomplete || 'Please complete all address fields.');
       return;
     }
 
@@ -190,15 +190,15 @@ export function ProfilePage() {
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-space-xs">
                 <span className="font-label-caps text-label-caps text-primary tracking-widest uppercase">
-                  Member Profile
+                  {t.profile?.memberProfile || 'Member Profile'}
                 </span>
                 <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
                 <span className="font-label-caps text-label-caps text-outline uppercase tracking-wider">
-                  Master Collector
+                  {t.profile?.masterCollector || 'Master Collector'}
                 </span>
               </div>
               <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight">
-                {user?.name || 'Guest'}
+                {user?.name || t.profile?.guest || 'Guest'}
               </h1>
               <p className="font-body-sm text-body-sm text-on-surface-variant">{user?.email}</p>
             </div>
@@ -252,7 +252,7 @@ export function ProfilePage() {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-md text-label-md text-on-surface-variant" htmlFor="profile-email">
-                    Email Address
+                    {t.profile?.emailAddress || 'Email Address'}
                   </label>
                   <input
                     id="profile-email"
@@ -267,7 +267,7 @@ export function ProfilePage() {
                 </div>
 
                 <Button type="submit" disabled={saving} isLoading={saving} className="w-full mt-2" icon="save">
-                  Save Profile
+                  {t.profile?.saveProfile || 'Save Profile'}
                 </Button>
               </form>
             </section>
@@ -283,14 +283,14 @@ export function ProfilePage() {
                   className="flex items-center gap-3 px-space-md py-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors border border-transparent hover:border-outline-variant/20"
                 >
                   <Icon name="receipt_long" className="text-primary text-[20px]" />
-                  <span>My Commissions</span>
+                  <span>{t.profile?.myCommissions || 'My Commissions'}</span>
                 </Link>
                 <Link
                   to="/wishlist"
                   className="flex items-center gap-3 px-space-md py-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors border border-transparent hover:border-outline-variant/20"
                 >
                   <Icon name="favorite" className="text-primary text-[20px]" />
-                  <span>Curated Wishlist</span>
+                  <span>{t.profile?.curatedWishlist || 'Curated Wishlist'}</span>
                 </Link>
               </div>
             </section>
@@ -301,17 +301,17 @@ export function ProfilePage() {
               <div className="flex items-center justify-between border-b border-outline-variant/20 pb-space-sm mb-space-md">
                 <h2 className="text-on-surface font-title-editorial text-title-editorial flex items-center gap-2">
                   <Icon name="home_work" className="text-primary text-[20px]" />
-                  Dispatch Destinations
+                  {t.profile?.dispatchDestinations || 'Dispatch Destinations'}
                 </h2>
                 <span className="font-label-caps text-label-caps text-outline uppercase tracking-wider">
-                  {addresses.length} of 10
+                  {t.profile?.ofTotal ? t.profile.ofTotal.replace('{{count}}', addresses.length.toString()) : `${addresses.length} of 10`}
                 </span>
               </div>
 
               {addresses.length >= 8 && addresses.length < 10 && (
                 <div className="bg-secondary-container/20 border border-secondary-container/30 text-secondary text-body-sm p-3 rounded-md flex items-center gap-2 mb-4">
                   <Icon name="warning" className="text-[18px] shrink-0" />
-                  <span>You are approaching the maximum limit of 10 saved addresses.</span>
+                  <span>{t.profile?.limitWarning || 'You are approaching the maximum limit of 10 saved addresses.'}</span>
                 </div>
               )}
 
@@ -324,11 +324,11 @@ export function ProfilePage() {
                     <div className="flex flex-col gap-1 mb-4 font-body-sm text-body-sm text-on-surface-variant">
                       <div className="flex items-center justify-between mb-2">
                         <p className="text-on-surface font-label-md text-label-md uppercase tracking-wider">
-                          Destination {idx + 1}
+                          {t.profile?.destination ? t.profile.destination.replace('{{count}}', (idx + 1).toString()) : `Destination ${idx + 1}`}
                         </p>
                         {idx === 0 && (
                           <span className="bg-primary/20 text-primary font-label-caps text-[10px] px-2 py-0.5 rounded uppercase tracking-wider">
-                            Primary
+                            {t.profile?.primary || 'Primary'}
                           </span>
                         )}
                       </div>
@@ -346,7 +346,7 @@ export function ProfilePage() {
                         icon="edit"
                         className="text-primary hover:text-primary-fixed"
                       >
-                        Edit
+                        {t.profile?.edit || 'Edit'}
                       </Button>
                       <Button
                         onClick={() => handleDeleteAddress(idx)}
@@ -356,7 +356,7 @@ export function ProfilePage() {
                         className="text-error hover:text-error/80"
                         disabled={saving}
                       >
-                        Remove
+                        {t.profile?.remove || 'Remove'}
                       </Button>
                     </div>
                   </div>
@@ -371,7 +371,7 @@ export function ProfilePage() {
                     <div className="w-10 h-10 rounded-full bg-surface-container-high group-hover:bg-primary-container text-on-surface-variant group-hover:text-primary flex items-center justify-center transition-colors">
                       <Icon name="add" className="text-[24px]" />
                     </div>
-                    <span className="font-label-md text-label-md uppercase tracking-wider">Add New Destination</span>
+                    <span className="font-label-md text-label-md uppercase tracking-wider">{t.profile?.addDestination || 'Add New Destination'}</span>
                   </button>
                 )}
               </div>
@@ -395,10 +395,10 @@ export function ProfilePage() {
             <div className="flex items-center justify-between p-space-md border-b border-outline-variant/20">
               <div>
                 <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest">
-                  {editingAddressIndex !== null ? 'Update' : 'New'}
+                  {editingAddressIndex !== null ? (t.profile?.update || 'Update') : (t.profile?.new || 'New')}
                 </span>
                 <h3 id="address-modal-title" className="font-headline-sm text-headline-sm text-on-surface">
-                  Dispatch Address
+                  {t.profile?.dispatchAddress || 'Dispatch Address'}
                 </h3>
               </div>
               <Button
@@ -418,7 +418,7 @@ export function ProfilePage() {
               )}
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="street" className="font-label-md text-label-md text-on-surface-variant">
-                  Street Address <span className="text-primary">*</span>
+                  {t.profile?.streetAddress || 'Street Address'} <span className="text-primary">*</span>
                 </label>
                 <input
                   id="street"
@@ -434,7 +434,7 @@ export function ProfilePage() {
               <div className="grid grid-cols-2 gap-space-md">
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="city" className="font-label-md text-label-md text-on-surface-variant">
-                    City <span className="text-primary">*</span>
+                    {t.profile?.city || 'City'} <span className="text-primary">*</span>
                   </label>
                   <input
                     id="city"
@@ -448,7 +448,7 @@ export function ProfilePage() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="state" className="font-label-md text-label-md text-on-surface-variant">
-                    State/Province <span className="text-primary">*</span>
+                    {t.profile?.stateProvince || 'State/Province'} <span className="text-primary">*</span>
                   </label>
                   <input
                     id="state"
@@ -465,7 +465,7 @@ export function ProfilePage() {
               <div className="grid grid-cols-2 gap-space-md">
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="zipCode" className="font-label-md text-label-md text-on-surface-variant">
-                    Zip/Postal Code <span className="text-primary">*</span>
+                    {t.profile?.zipCode || 'Zip/Postal Code'} <span className="text-primary">*</span>
                   </label>
                   <input
                     id="zipCode"
@@ -479,7 +479,7 @@ export function ProfilePage() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="country" className="font-label-md text-label-md text-on-surface-variant">
-                    Country <span className="text-primary">*</span>
+                    {t.profile?.country || 'Country'} <span className="text-primary">*</span>
                   </label>
                   <input
                     id="country"
@@ -495,10 +495,10 @@ export function ProfilePage() {
 
               <div className="flex justify-end gap-3 pt-space-md mt-space-md border-t border-outline-variant/20">
                 <Button type="button" onClick={() => setIsAddressModalOpen(false)} variant="ghost" disabled={saving}>
-                  Cancel
+                  {t.profile?.cancel || 'Cancel'}
                 </Button>
                 <Button type="submit" icon="check" isLoading={saving}>
-                  Save
+                  {t.profile?.save || 'Save'}
                 </Button>
               </div>
             </form>

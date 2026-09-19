@@ -5,7 +5,7 @@
   "createProduct": "Create New Product",
   "productTitle": "Product Title",
   "productDescription": "Description",
-  "price": "Price ($)",
+  "price": "Price",
   "stock": "Stock",
   "imageUrl": "Image URL (optional)",
   "saveProduct": "Save Product",
