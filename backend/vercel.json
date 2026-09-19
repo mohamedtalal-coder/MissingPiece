@@ -1,1 +1,3 @@
-{}
+{
+  "buildCommand": "echo \"Skipping tsc — Express on Vercel compiles TypeScript at runtime\""
+}

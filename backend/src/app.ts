@@ -1,7 +1,13 @@
-import express, { type Application, type NextFunction, type Request, type Response } from "express";
+import express, {
+  type Application,
+  type NextFunction,
+  type Request,
+  type RequestHandler,
+  type Response,
+} from "express";
 import cors from "cors";
 import morgan from "morgan";
-import * as helmetNs from "helmet";
+import helmetImport from "helmet";
 import authRoutes from "./features/auth/auth.routes.js";
 import { errorHandler, notFound } from "./shared/middleware/errorHandler.js";
 import productRoutes from "./features/products/product.routes.js";
@@ -19,6 +25,10 @@ import faqRoutes from "./features/faq/faq.routes.js";
 import adminUserRoutes from "./features/account/admin.routes.js";
 import adminDashboardRoutes from "./features/admin/admin.routes.js";
 import { connectDB } from "./config/db.js";
+
+// helmet publishes only CJS types (index.d.cts); under NodeNext the default
+// export is typed as the module namespace on some resolvers (e.g. Vercel CI).
+const helmet = helmetImport as unknown as (options?: object) => RequestHandler;
 
 const app: Application = express();
 
@@ -51,7 +61,7 @@ app.post(
   webhookHandler
 );
 
-app.use(helmetNs.default());
+app.use(helmet());
 app.use(express.json({ limit: "100kb" }));
 app.use(morgan("dev"));
 
