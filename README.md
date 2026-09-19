@@ -31,7 +31,7 @@ Create a `.env` file in the `backend/` directory using `backend/.env.example` as
 
 **Frontend (`frontend/.env`)**
 Create a `.env` file in the `frontend/` directory using `frontend/.env.example` as a template:
-- `VITE_API_URL`
+- `VITE_API_BASE_URL` (e.g. `http://localhost:5000/api` locally, or your Vercel backend `/api` URL in production)
 
 ### Installation
 

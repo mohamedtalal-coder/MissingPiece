@@ -46,9 +46,14 @@ app.use(async (_req: Request, _res: Response, next: NextFunction) => {
 
 app.use(
   cors({
-    origin: process.env["CORS_ORIGIN"] 
-      ? process.env["CORS_ORIGIN"].split(',') 
-      : ["http://localhost:3000", "http://localhost:5173", "http://localhost:5174"],
+    origin: process.env["CORS_ORIGIN"]
+      ? process.env["CORS_ORIGIN"].split(",").map((origin) => origin.trim())
+      : [
+          "http://localhost:3000",
+          "http://localhost:5173",
+          "http://localhost:5174",
+          "https://missing-piece-xwd8.vercel.app",
+        ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
@@ -61,9 +66,22 @@ app.post(
   webhookHandler
 );
 
-app.use(helmet());
+// Allow the separate frontend origin to read API responses.
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
 app.use(express.json({ limit: "100kb" }));
 app.use(morgan("dev"));
+
+app.get("/", (_req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "MissingPiece API",
+    health: "/api/health",
+  });
+});
 
 app.get("/api/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
