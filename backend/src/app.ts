@@ -1,7 +1,7 @@
 import express, { type Application, type NextFunction, type Request, type Response } from "express";
 import cors from "cors";
 import morgan from "morgan";
-import helmet from "helmet";
+import * as helmetNs from "helmet";
 import authRoutes from "./features/auth/auth.routes.js";
 import { errorHandler, notFound } from "./shared/middleware/errorHandler.js";
 import productRoutes from "./features/products/product.routes.js";
@@ -51,7 +51,7 @@ app.post(
   webhookHandler
 );
 
-app.use(helmet());
+app.use(helmetNs.default());
 app.use(express.json({ limit: "100kb" }));
 app.use(morgan("dev"));
 
