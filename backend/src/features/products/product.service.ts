@@ -62,7 +62,7 @@ export async function listProducts(params: ListProductsParams) {
   const sortOption = sortMap[params.sort ?? "newest"];
   const skip = params.cursor ? 0 : (params.page - 1) * params.limit;
 
-  let query = Product.find(filter);
+  const query = Product.find(filter);
 
   const [items, total] = await Promise.all([
     query.sort(sortOption as Record<string, 1 | -1>).skip(skip).limit(params.limit).lean(),

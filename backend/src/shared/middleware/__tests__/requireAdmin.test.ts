@@ -1,6 +1,7 @@
 import { requireAdmin } from '../requireAdmin.js';
 import type { Request, Response, NextFunction } from 'express';
 import { jest } from '@jest/globals';
+import type { AppError } from '../errorHandler.js';
 
 describe('requireAdmin middleware', () => {
   let mockRequest: Partial<Request>;
@@ -10,10 +11,10 @@ describe('requireAdmin middleware', () => {
   beforeEach(() => {
     mockRequest = {};
     mockResponse = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    } as any;
-    nextFunction = jest.fn();
+      status: jest.fn().mockReturnThis() as unknown as Response['status'],
+      json: jest.fn() as unknown as Response['json'],
+    };
+    nextFunction = jest.fn() as unknown as NextFunction;
   });
 
   it('should call next if userRole is admin', () => {
@@ -32,7 +33,7 @@ describe('requireAdmin middleware', () => {
     requireAdmin(mockRequest as Request, mockResponse as Response, nextFunction);
 
     expect(nextFunction).toHaveBeenCalledTimes(1);
-    const err = (nextFunction as jest.Mock).mock.calls[0]![0] as any;
+    const err = (nextFunction as jest.Mock).mock.calls[0]![0] as AppError;
     expect(err).toBeInstanceOf(Error);
     expect(err.message).toBe('Admin access required');
     expect(err.statusCode).toBe(403);
@@ -43,7 +44,7 @@ describe('requireAdmin middleware', () => {
     requireAdmin(mockRequest as Request, mockResponse as Response, nextFunction);
 
     expect(nextFunction).toHaveBeenCalledTimes(1);
-    const err = (nextFunction as jest.Mock).mock.calls[0]![0] as any;
+    const err = (nextFunction as jest.Mock).mock.calls[0]![0] as AppError;
     expect(err.message).toBe('Admin access required');
     expect(err.statusCode).toBe(403);
   });

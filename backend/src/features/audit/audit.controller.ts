@@ -7,9 +7,9 @@ export const getAuditLogs = async (req: Request, res: Response, next: NextFuncti
     const limit = parseInt(req.query.limit as string) || 20;
     const skip = (page - 1) * limit;
 
-    const query: any = {};
-    if (req.query.action) query.action = req.query.action;
-    if (req.query.adminId) query.adminId = req.query.adminId;
+    const query: Record<string, unknown> = {};
+    if (req.query.action) query["action"] = req.query.action;
+    if (req.query.adminId) query["adminId"] = req.query.adminId;
 
     const [logs, total] = await Promise.all([
       AuditLog.find(query)

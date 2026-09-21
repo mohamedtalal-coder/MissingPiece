@@ -2,16 +2,34 @@ import { Cart } from "./cart.model.js";
 import { Product } from "../products/product.model.js";
 import mongoose from "mongoose";
 
+type PopulatedCartProduct = {
+  _id: mongoose.Types.ObjectId;
+  name?: string;
+  price?: number;
+  images?: string[];
+  stock?: number;
+  [key: string]: unknown;
+};
+
+type LeanCartItem = {
+  productId: mongoose.Types.ObjectId | PopulatedCartProduct;
+  quantity: number;
+};
+
 export async function getCart(userId: string) {
   const cart = await Cart.findOne({ userId }).populate("items.productId").lean();
   if (!cart || !cart.items) return [];
 
-  return cart.items
-    .filter((item: any) => item.productId != null)
-    .map((item: any) => {
-      const isPopulated = item.productId && typeof item.productId === "object" && "_id" in item.productId;
+  return (cart.items as (LeanCartItem | { productId: null; quantity: number })[])
+    .filter((item): item is LeanCartItem => item.productId != null)
+    .map((item) => {
+      const isPopulated =
+        typeof item.productId === "object" &&
+        "_id" in item.productId;
       return {
-        productId: isPopulated ? item.productId._id : item.productId,
+        productId: isPopulated
+          ? (item.productId as PopulatedCartProduct)._id
+          : (item.productId as mongoose.Types.ObjectId),
         quantity: item.quantity,
         product: isPopulated ? item.productId : null,
       };

@@ -13,7 +13,7 @@ export const logAdminAction = async ({
   action: string;
   resourceId?: string | undefined;
   resourceModel?: string | undefined;
-  details?: Record<string, any> | undefined;
+  details?: Record<string, unknown> | undefined;
   ipAddress?: string | undefined;
 }) => {
   try {

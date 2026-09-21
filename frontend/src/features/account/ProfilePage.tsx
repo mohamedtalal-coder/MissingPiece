@@ -165,7 +165,7 @@ export function ProfilePage() {
       return;
     }
 
-    let newAddresses = [...addresses];
+    const newAddresses = [...addresses];
     if (editingAddressIndex !== null) {
       newAddresses[editingAddressIndex] = newAddr;
     } else {
