@@ -4,6 +4,46 @@ import { WebhookEvent } from "./webhookEvent.model.js";
 import { ApiError } from "../../shared/middleware/errorHandler.js";
 import Stripe from "stripe";
 
+const DEFAULT_PRODUCTION_FRONTEND = "https://missing-piece-xwd8.vercel.app";
+
+/**
+ * Resolve the public storefront origin used in Stripe success/cancel URLs.
+ * Never allow localhost redirects when running on Vercel / production.
+ */
+export function getFrontendBaseUrl(): string {
+  const configured = process.env["FRONTEND_URL"]?.trim().replace(/\/$/, "");
+  const isProd =
+    process.env["VERCEL"] === "1" ||
+    process.env["NODE_ENV"] === "production";
+
+  const isLocalhost = (url: string) =>
+    /^(https?:\/\/)?(localhost|127\.0\.0\.1)(:\d+)?/i.test(url);
+
+  if (configured && !(isProd && isLocalhost(configured))) {
+    return configured;
+  }
+
+  if (configured && isProd && isLocalhost(configured)) {
+    console.warn(
+      `[payments] FRONTEND_URL is localhost in production ("${configured}"); falling back to a public origin`
+    );
+  }
+
+  const corsOrigins =
+    process.env["CORS_ORIGIN"]?.split(",").map((o) => o.trim().replace(/\/$/, "")).filter(Boolean) ??
+    [];
+  const publicCorsOrigin = corsOrigins.find((o) => !isLocalhost(o));
+  if (publicCorsOrigin) {
+    return publicCorsOrigin;
+  }
+
+  if (isProd) {
+    return DEFAULT_PRODUCTION_FRONTEND;
+  }
+
+  return configured || "http://localhost:5173";
+}
+
 export const createCheckoutSessionForOrder = async (
   orderId: string,
   userId: string,
@@ -20,6 +60,8 @@ export const createCheckoutSessionForOrder = async (
       "This order cannot be paid for in its current state",
     );
   }
+
+  const frontendUrl = getFrontendBaseUrl();
 
   // order.totalAmount is already the server-verified, discount-adjusted total
   // computed in order.service.createOrder — reconstructing itemized line items
@@ -39,8 +81,8 @@ export const createCheckoutSessionForOrder = async (
           quantity: 1,
         },
       ],
-      success_url: `${process.env["FRONTEND_URL"]}/orders/${order._id}?payment=success`,
-      cancel_url: `${process.env["FRONTEND_URL"]}/orders/${order._id}?payment=cancelled`,
+      success_url: `${frontendUrl}/orders/${order._id}?payment=success`,
+      cancel_url: `${frontendUrl}/orders/${order._id}?payment=cancelled`,
       metadata: { orderId: order._id.toString() },
     });
   } catch (error: unknown) {

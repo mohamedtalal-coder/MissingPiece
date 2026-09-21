@@ -65,7 +65,10 @@ export function RegisterForm() {
       if (data.user.isEmailVerified) {
         navigate(from, { replace: true });
       } else {
-        navigate('/verify-email', { replace: true, state: { email: data.user.email, from } });
+        navigate('/verify-email', {
+          replace: true,
+          state: { email: data.user.email, from, emailSent: data.emailSent !== false },
+        });
       }
     } catch (err: any) {
       const serverErrors = err?.response?.data?.errors;

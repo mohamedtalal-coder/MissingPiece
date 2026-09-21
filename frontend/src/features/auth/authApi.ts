@@ -13,6 +13,7 @@ export interface LoginCredentials {
 
 export interface AuthResponse {
   token: string;
+  emailSent?: boolean;
   user: {
     id: string | number;
     name: string;

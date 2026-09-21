@@ -7,7 +7,11 @@ import { jest } from "@jest/globals";
 process.env["STRIPE_SECRET_KEY"] = "sk_test_123";
 process.env["STRIPE_WEBHOOK_SECRET"] = "whsec_test";
 
-import { createCheckoutSessionForOrder, handleStripeWebhook } from "../../../features/payments/payment.service.js";
+import {
+  createCheckoutSessionForOrder,
+  getFrontendBaseUrl,
+  handleStripeWebhook,
+} from "../../../features/payments/payment.service.js";
 import { stripe } from "../../../shared/config/stripe.js";
 import { ApiError } from "../../../shared/middleware/errorHandler.js";
 import Stripe from "stripe";
@@ -17,6 +21,8 @@ let mongoServer: MongoMemoryServer;
 beforeAll(async () => {
   process.env["FRONTEND_URL"] = "http://localhost:5173";
   process.env["STRIPE_WEBHOOK_SECRET"] = "whsec_test";
+  delete process.env["VERCEL"];
+  process.env["NODE_ENV"] = "test";
   mongoServer = await MongoMemoryServer.create();
   const uri = mongoServer.getUri();
   await mongoose.connect(uri);
@@ -29,11 +35,30 @@ afterAll(async () => {
 
 afterEach(async () => {
   jest.clearAllMocks();
+  process.env["FRONTEND_URL"] = "http://localhost:5173";
+  delete process.env["VERCEL"];
+  process.env["NODE_ENV"] = "test";
+  delete process.env["CORS_ORIGIN"];
   const collections = mongoose.connection.collections;
   for (const key in collections) {
     const collection = collections[key];
     await collection?.deleteMany({});
   }
+});
+
+describe("getFrontendBaseUrl", () => {
+  it("uses FRONTEND_URL in non-production", () => {
+    process.env["FRONTEND_URL"] = "http://localhost:5173";
+    expect(getFrontendBaseUrl()).toBe("http://localhost:5173");
+  });
+
+  it("rejects localhost FRONTEND_URL on Vercel and uses CORS/public fallback", () => {
+    process.env["VERCEL"] = "1";
+    process.env["FRONTEND_URL"] = "http://localhost:5173";
+    process.env["CORS_ORIGIN"] =
+      "http://localhost:5173,https://missing-piece-xwd8.vercel.app";
+    expect(getFrontendBaseUrl()).toBe("https://missing-piece-xwd8.vercel.app");
+  });
 });
 
 describe("Payment Service", () => {
@@ -108,7 +133,8 @@ describe("Payment Service", () => {
       expect(stripe.checkout.sessions.create).toHaveBeenCalledWith(
         expect.objectContaining({
           mode: "payment",
-          success_url: expect.stringContaining("/orders/"),
+          success_url: `http://localhost:5173/orders/${orderId.toString()}?payment=success`,
+          cancel_url: `http://localhost:5173/orders/${orderId.toString()}?payment=cancelled`,
           metadata: { orderId: orderId.toString() },
         })
       );

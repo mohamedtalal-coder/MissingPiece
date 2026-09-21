@@ -15,14 +15,20 @@ export function VerifyEmailPage() {
   const location = useLocation();
   const { user, updateUser, isAuthenticated } = useAuth();
 
-  const state = location.state as { email?: string; from?: string } | null;
+  const state = location.state as { email?: string; from?: string; emailSent?: boolean } | null;
   const email = state?.email || user?.email || '';
   const from = state?.from && state.from.startsWith('/') ? state.from : '/';
+  const emailSendFailed = state?.emailSent === false;
 
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    emailSendFailed
+      ? (t.auth?.verify?.errEmailNotSent ||
+          'We could not send the verification email. Check spam, then use Resend code. If it keeps failing, email delivery is misconfigured on the server.')
+      : null
+  );
   const [success, setSuccess] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
 
