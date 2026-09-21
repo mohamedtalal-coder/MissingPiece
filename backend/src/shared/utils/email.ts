@@ -1,9 +1,30 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const resend = new Resend(process.env["RESEND_API_KEY"] || "re_dummy");
+// ---------------------------------------------------------------------------
+// Transporter — Gmail SMTP with App Password (no domain needed)
+// ---------------------------------------------------------------------------
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env["GMAIL_USER"],
+    pass: process.env["GMAIL_APP_PASSWORD"],
+  },
+});
 
-function isResendSandboxRestriction(message: string): boolean {
-  return message.includes("You can only send testing emails to your own email address");
+// ---------------------------------------------------------------------------
+// Dev fallback: if credentials are missing, log OTP to console
+// ---------------------------------------------------------------------------
+function logDevFallback(to: string, subject: string, otp: string) {
+  console.warn(`
+╔══════════════════════════════════════════════════════════╗
+║            📧  DEV EMAIL FALLBACK (no credentials)       ║
+╠══════════════════════════════════════════════════════════╣
+║  To      : ${to.padEnd(44)} ║
+║  Subject : ${subject.padEnd(44)} ║
+║  OTP     : ${otp.padEnd(44)} ║
+╚══════════════════════════════════════════════════════════╝
+⚠️  Set GMAIL_USER and GMAIL_APP_PASSWORD in .env to send real emails.
+`);
 }
 
 async function sendEmail({
@@ -15,49 +36,47 @@ async function sendEmail({
   subject: string;
   otp: string;
 }) {
-  const { error } = await resend.emails.send({
-    from: process.env["RESEND_FROM_EMAIL"] || "onboarding@resend.dev",
+  const gmailUser = process.env["GMAIL_USER"];
+  const gmailPass = process.env["GMAIL_APP_PASSWORD"];
+
+  // No credentials configured — use console fallback in dev, throw in prod
+  if (!gmailUser || !gmailPass) {
+    if (process.env["NODE_ENV"] === "production") {
+      throw new Error("Email credentials not configured");
+    }
+    logDevFallback(to, subject, otp);
+    return;
+  }
+
+  await transporter.sendMail({
+    from: `"MissingPiece" <${gmailUser}>`,
     to,
     subject,
     html: `
-      <h2>${subject}</h2>
-      <p>Your code is:</p>
-      <h1>${otp}</h1>
-      <p>This code will expire in 10 minutes.</p>
+      <div style="font-family: sans-serif; max-width: 480px; margin: auto; padding: 32px;">
+        <h2 style="color: #1a1a1a;">${subject}</h2>
+        <p style="color: #555;">Use the code below. It expires in <strong>10 minutes</strong>.</p>
+        <div style="
+          font-size: 36px;
+          font-weight: bold;
+          letter-spacing: 8px;
+          color: #1a1a1a;
+          background: #f4f4f5;
+          border-radius: 8px;
+          padding: 16px 24px;
+          text-align: center;
+          margin: 24px 0;
+        ">${otp}</div>
+        <p style="color: #999; font-size: 12px;">If you didn't request this, ignore this email.</p>
+      </div>
     `,
   });
-
-  if (error) {
-    const isDevelopment = process.env["NODE_ENV"] !== "production";
-    if (isDevelopment && isResendSandboxRestriction(error.message)) {
-      console.warn(`
-╔══════════════════════════════════════════════════════════╗
-║            📧  DEV EMAIL FALLBACK (Resend sandbox)       ║
-╠══════════════════════════════════════════════════════════╣
-║  To      : ${to.padEnd(44)} ║
-║  Subject : ${subject.padEnd(44)} ║
-║  OTP     : ${otp.padEnd(44)} ║
-╚══════════════════════════════════════════════════════════╝
-⚠️  Resend sandbox only sends to your own account email.
-   Add a verified domain at https://resend.com/domains to fix this.
-`);
-      return;
-    }
-
-    throw new Error(error.message);
-  }
 }
 
-export async function sendPasswordResetEmail(
-  email: string,
-  otp: string
-) {
+export async function sendPasswordResetEmail(email: string, otp: string) {
   await sendEmail({ to: email, otp, subject: "Reset Your Password" });
 }
 
-export async function sendEmailVerificationCode(
-  email: string,
-  otp: string
-) {
+export async function sendEmailVerificationCode(email: string, otp: string) {
   await sendEmail({ to: email, otp, subject: "Verify Your Email" });
 }
