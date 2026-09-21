@@ -4,6 +4,7 @@ import { ShieldCheck, Compass, Award, Sparkles, ArrowUpRight } from 'lucide-reac
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../../features/auth/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
+import logo from '../../../assets/Logo.png';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -90,12 +91,7 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           <div className="space-y-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded border border-primary-container/50 bg-surface-container flex items-center justify-center font-headline-sm text-primary-container font-bold text-sm">
-                MP
-              </div>
-              <span className="font-headline-sm text-lg text-on-surface tracking-tight">{t.footer?.missingPiece || 'MissingPiece'}</span>
-            </div>
+            <img src={logo} alt="MissingPiece" className="h-16 w-auto max-w-[190px] object-contain object-left" />
             <p className="text-xs text-outline leading-relaxed max-w-xs">
               {t.footer?.tagline || 'Quiet craftsmanship and enigmatic precision. Designed in our Nordic and Pacific workshops for collectors of tactile art.'}
             </p>

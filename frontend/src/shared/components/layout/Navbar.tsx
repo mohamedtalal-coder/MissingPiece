@@ -23,6 +23,7 @@ import { useClickOutside } from '../../hooks/useClickOutside';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
+import logo from '../../../assets/Logo.png';
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `relative px-3.5 py-2 text-sm font-medium transition-all rounded-lg flex items-center gap-2 ${
@@ -67,27 +68,14 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16 sm:h-20 gap-3">
           <Link
             to="/"
-            className="flex items-center gap-3 group select-none shrink-0"
+            className="flex items-center group select-none shrink-0"
             onClick={closeMobile}
           >
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-md border border-primary-container/40 bg-gradient-to-br from-surface-container to-surface-container-lowest flex items-center justify-center group-hover:border-primary-container transition-colors">
-              <span className="font-headline-sm text-primary-container tracking-widest text-sm sm:text-base font-bold">
-                MP
-              </span>
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-headline-sm text-lg sm:text-2xl tracking-tight text-on-surface group-hover:text-primary transition-colors">
-                  MissingPiece
-                </span>
-                <span className="hidden xs:inline text-[10px] uppercase tracking-widest px-1.5 py-0.5 rounded bg-surface-container text-primary-container border border-primary-container/20 font-label-caps">
-                  Est. 2026
-                </span>
-              </div>
-              <p className="hidden sm:block text-[11px] uppercase tracking-widest text-outline font-label-caps">
-                {t.nav?.tagline || 'Artisanal Wooden Jigsaw Atelier'}
-              </p>
-            </div>
+            <img
+              src={logo}
+              alt="MissingPiece"
+              className="h-16 sm:h-20 w-auto max-w-[190px] sm:max-w-[240px] object-contain object-left transition-transform duration-300 group-hover:scale-[1.02]"
+            />
           </Link>
 
           <nav className="hidden lg:flex items-center gap-1" aria-label={t?.common?.primaryNav || "Primary Navigation"}>
