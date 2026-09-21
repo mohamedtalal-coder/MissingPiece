@@ -30,9 +30,17 @@ async function sendEmail({
   if (error) {
     const isDevelopment = process.env["NODE_ENV"] !== "production";
     if (isDevelopment && isResendSandboxRestriction(error.message)) {
-      console.warn(
-        `[Email development fallback] Resend sandbox rejected ${to}. Use OTP ${otp} from this log.`
-      );
+      console.warn(`
+╔══════════════════════════════════════════════════════════╗
+║            📧  DEV EMAIL FALLBACK (Resend sandbox)       ║
+╠══════════════════════════════════════════════════════════╣
+║  To      : ${to.padEnd(44)} ║
+║  Subject : ${subject.padEnd(44)} ║
+║  OTP     : ${otp.padEnd(44)} ║
+╚══════════════════════════════════════════════════════════╝
+⚠️  Resend sandbox only sends to your own account email.
+   Add a verified domain at https://resend.com/domains to fix this.
+`);
       return;
     }
 
