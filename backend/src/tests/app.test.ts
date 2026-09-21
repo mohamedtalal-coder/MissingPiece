@@ -1,12 +1,13 @@
 import { jest } from "@jest/globals";
 
-// Mock connectDB so the per-request middleware doesn't require a real MONGO_URI
-jest.mock("../config/db.js", () => ({
-  connectDB: jest.fn().mockResolvedValue(undefined),
+// ESM: jest.mock() is not hoisted — use unstable_mockModule + dynamic import
+// so connectDB is mocked before app loads.
+await jest.unstable_mockModule("../config/db.js", () => ({
+  connectDB: jest.fn(async () => undefined),
 }));
 
-import request from "supertest";
-import app from "../app.js";
+const { default: request } = await import("supertest");
+const { default: app } = await import("../app.js");
 
 describe("Application smoke tests", () => {
   it("reports a healthy API", async () => {

@@ -241,7 +241,7 @@ export function ProfilePage() {
     setCity('');
     setState('');
     setZipCode('');
-    setCountry('US');
+    setCountry('United States');
     setAddrErrors({});
     setEditingAddressId(null);
     setIsAddressModalOpen(true);

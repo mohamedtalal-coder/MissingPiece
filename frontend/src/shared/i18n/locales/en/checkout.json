@@ -65,5 +65,14 @@
   "addrFixFields": "Please fix the address fields before saving.",
   "addrMaxReached": "You have reached the maximum of 10 saved addresses. Remove one first.",
   "addrSaveSuccess": "Address saved to your account!",
-  "addrSaveError": "Could not save address to your account. Try again."
+  "addrSaveError": "Could not save address to your account. Try again.",
+  "verifyEmailTitle": "Verify your email to check out",
+  "verifyEmailDesc": "We sent a verification code to {{email}}. Confirm it before placing an order — your cart is saved.",
+  "verifyEmailBtn": "Verify Email",
+  "savedAddresses": "Your saved addresses",
+  "addressNum": "Address {{idx}}",
+  "selected": "Selected",
+  "enterNewAddress": "Enter new address",
+  "saving": "Saving…",
+  "saveToAccount": "Save this address to my account"
 }

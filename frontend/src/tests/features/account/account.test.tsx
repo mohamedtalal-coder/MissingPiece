@@ -79,18 +79,18 @@ describe('Account Profile Feature', () => {
     fireEvent.change(streetInput, { target: { value: 'New Street' } });
     fireEvent.change(cityInput, { target: { value: 'New City' } });
     fireEvent.change(stateInput, { target: { value: 'New State' } });
-    fireEvent.change(zipInput, { target: { value: 'New Zip' } });
-    fireEvent.change(countryInput, { target: { value: 'New Country' } });
+    fireEvent.change(zipInput, { target: { value: '12345' } });
+    fireEvent.change(countryInput, { target: { value: 'United States' } });
 
     // Mock save response
     (accountApi.updateProfile as any).mockResolvedValueOnce({
       id: 'user1',
       name: 'Test User',
       email: 'test@example.com',
-      addresses: [...mockAddresses, { street: 'New Street', city: 'New City', state: 'New State', zipCode: 'New Zip', country: 'New Country' }]
+      addresses: [...mockAddresses, { street: 'New Street', city: 'New City', state: 'New State', zipCode: '12345', country: 'United States' }]
     });
 
-    fireEvent.click(screen.getByText('Save'));
+    fireEvent.click(screen.getByRole('button', { name: /^Save$/i }));
 
     await waitFor(() => {
       expect(screen.getByText('10 of 10')).toBeInTheDocument();

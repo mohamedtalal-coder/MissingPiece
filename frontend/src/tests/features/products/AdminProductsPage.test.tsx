@@ -27,6 +27,33 @@ vi.mock('../../../api/client', () => ({
 vi.mock('../../../shared/context/LanguageContext', () => ({
   useLanguage: () => ({
     t: {
+      adminPanel: {
+        products: {
+          pageTitle: 'Product Management',
+          pageDesc: 'Manage products',
+          addNew: 'Add New Puzzle Edition',
+          deleteConfirm: 'Are you sure?',
+          deletedSuccess: 'Edition removed',
+          deleteFailed: 'Failed to delete product',
+          vaultTitle: 'Atelier Vault & Stock',
+          searchPlaceholder: 'Search products',
+          colEdition: 'Puzzle Edition',
+          colCategory: 'Category',
+          colPrice: 'Price',
+          colStock: 'Stock',
+          colState: 'State',
+          colActions: 'Actions',
+          statusActive: 'Active',
+          statusDraft: 'Draft',
+          catJigsaw: 'Jigsaw Puzzles',
+          cat3D: '3D Architectural',
+          catWooden: 'Wooden Puzzles',
+          catMystery: 'Mystery Atelier',
+          cancel: 'Cancel',
+          saveChanges: 'Save Changes',
+          createEdition: 'Create Edition',
+        },
+      },
       adminProducts: {
         title: 'Product Management',
         description: 'Manage products',

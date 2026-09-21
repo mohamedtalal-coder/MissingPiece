@@ -7,11 +7,14 @@ import { revokeAllUserTokens } from "../../shared/utils/tokenRevocation.js";
 
 export async function getUserProfile(userId: string) {
   const user = await User.findById(userId).lean();
-  if (user && Array.isArray(user.addresses)) {
-    // Only expose addresses that haven't been soft-deleted
-    (user as { addresses: Array<{ deletedAt?: Date }> }).addresses = user.addresses.filter((a: { deletedAt?: Date }) => !a.deletedAt);
-  }
-  return user;
+  if (!user) return null;
+
+  // Only expose addresses that haven't been soft-deleted
+  const addresses = Array.isArray(user.addresses)
+    ? user.addresses.filter((a) => a.deletedAt == null)
+    : [];
+
+  return { ...user, addresses };
 }
 
 export async function updateUserProfile(userId: string, data: z.infer<typeof updateProfileSchema>) {

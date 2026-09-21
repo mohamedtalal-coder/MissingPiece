@@ -6,7 +6,6 @@ import {
   Layers,
   Menu,
   X,
-  Sliders,
   User,
   LogOut,
   LogIn,
@@ -50,7 +49,6 @@ export function Navbar() {
   useScrollLock(mobileOpen);
 
   const wishlistCount = wishlistItems.length;
-  const isAdminRoute = location.pathname.startsWith('/admin');
 
   const closeMobile = () => setMobileOpen(false);
 

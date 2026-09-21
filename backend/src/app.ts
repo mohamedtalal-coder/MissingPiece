@@ -34,16 +34,6 @@ const app: Application = express();
 
 app.set("trust proxy", 1);
 
-// Ensure Mongo is connected on serverless (Vercel) before handling a request.
-app.use(async (_req: Request, _res: Response, next: NextFunction) => {
-  try {
-    await connectDB();
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
-
 app.use(
   cors({
     origin: process.env["CORS_ORIGIN"]
@@ -58,6 +48,29 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// Liveness probes must not depend on Mongo (or any other backend service).
+app.get("/", (_req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "MissingPiece API",
+    health: "/api/health",
+  });
+});
+
+app.get("/api/health", (_req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+// Ensure Mongo is connected on serverless (Vercel) before handling a request.
+app.use(async (_req: Request, _res: Response, next: NextFunction) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 // MUST be before app.use(express.json(...)) below
 app.post(
@@ -74,18 +87,6 @@ app.use(
 );
 app.use(express.json({ limit: "100kb" }));
 app.use(morgan("dev"));
-
-app.get("/", (_req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "MissingPiece API",
-    health: "/api/health",
-  });
-});
-
-app.get("/api/health", (_req, res) => {
-  res.status(200).json({ status: "ok" });
-});
 
 app.use("/api/products", productRoutes);
 app.use("/api/account", accountRoutes);

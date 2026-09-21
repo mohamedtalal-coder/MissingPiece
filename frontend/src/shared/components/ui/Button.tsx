@@ -72,7 +72,6 @@ export const Button: React.FC<ButtonProps> = ({
       <Link 
         to={to} 
         className={combinedClasses}
-        // @ts-expect-error - passing standard button props to Link when acting as button
         {...(props as Record<string, unknown>)}
       >
         {innerContent}
