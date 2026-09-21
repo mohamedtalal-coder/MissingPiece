@@ -68,8 +68,11 @@ export function RegisterForm() {
         navigate('/verify-email', { replace: true, state: { email: data.user.email, from } });
       }
     } catch (err: any) {
+      const serverErrors = err?.response?.data?.errors;
       setError(
-        err.response?.data?.message || t.auth?.registrationFailed || 'Registration failed. Please try again.',
+        (serverErrors && Array.isArray(serverErrors) && serverErrors.length > 0)
+          ? serverErrors[0].message
+          : err.response?.data?.message || t.auth?.registrationFailed || 'Registration failed. Please try again.',
       );
     } finally {
       setLoading(false);
@@ -92,9 +95,10 @@ export function RegisterForm() {
           type="text"
           label={t.auth?.name || 'Full Name'}
           icon="person_outline"
+          inputSize="lg"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Salma Yehia"
+          placeholder={t.auth?.namePlaceholder || "Salma Yehia"}
           required
           maxLength={80}
           autoComplete="name"
@@ -104,9 +108,10 @@ export function RegisterForm() {
           type="email"
           label={t.auth?.email || 'Email Address'}
           icon="mail"
+          inputSize="lg"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="salma@example.com"
+          placeholder={t.auth?.emailPlaceholder || "salma@example.com"}
           required
           maxLength={254}
           autoComplete="email"
@@ -118,6 +123,7 @@ export function RegisterForm() {
             type={showPassword ? 'text' : 'password'}
             label={t.auth?.password || 'Password'}
             icon="lock"
+            inputSize="lg"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
@@ -131,7 +137,7 @@ export function RegisterForm() {
             className={`absolute right-space-md top-[34px] text-on-surface-variant hover:text-on-surface focus:outline-none ${
               language === 'ar' ? 'left-space-md end-auto' : ''
             }`}
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            aria-label={showPassword ? (t.auth?.hidePassword || 'Hide password') : (t.auth?.showPassword || 'Show password')}
           >
             <Icon name={showPassword ? 'eye_off' : 'eye'} size={18} />
           </button>

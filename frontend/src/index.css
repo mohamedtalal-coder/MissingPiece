@@ -2,6 +2,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap');
 
 :root {
   --tw-surface-container-high: #cdd0d8;
@@ -199,6 +200,22 @@
     color: var(--color-on-surface);
     font-family: var(--font-body-md);
     -webkit-font-smoothing: antialiased;
+  }
+  html[lang="ar"] body {
+    font-family: "Cairo", sans-serif;
+  }
+  html[lang="ar"] {
+    --font-headline-sm: "Cairo", sans-serif;
+    --font-headline-md: "Cairo", sans-serif;
+    --font-label-caps: "Cairo", sans-serif;
+    --font-body-lg: "Cairo", sans-serif;
+    --font-body-sm: "Cairo", sans-serif;
+    --font-label-md: "Cairo", sans-serif;
+    --font-body-md: "Cairo", sans-serif;
+    --font-headline-lg: "Cairo", sans-serif;
+    --font-title-editorial: "Cairo", sans-serif;
+    --font-display-lg-mobile: "Cairo", sans-serif;
+    --font-display-lg: "Cairo", sans-serif;
   }
   main > :first-child { margin-top: 0 !important; }
   main > :last-child { margin-bottom: 0 !important; }

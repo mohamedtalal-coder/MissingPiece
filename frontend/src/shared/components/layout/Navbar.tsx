@@ -15,6 +15,7 @@ import {
   Sun,
   Moon,
   Globe,
+  LayoutDashboard,
 } from 'lucide-react';
 import { useCart } from '../../../features/cart/CartContext';
 import { useWishlist } from '../../WishlistContext';
@@ -91,7 +92,7 @@ export function Navbar() {
             </div>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-1" aria-label="Primary">
+          <nav className="hidden lg:flex items-center gap-1" aria-label={t?.common?.primaryNav || "Primary Navigation"}>
             <NavLink to="/products" className={navLinkClass}>
               <Layers className="w-4 h-4 text-primary-container" aria-hidden />
               {t.nav?.collection || 'The Collection'}
@@ -111,22 +112,6 @@ export function Navbar() {
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            {isAdmin && (
-              <Link
-                to={isAdminRoute ? '/products' : '/admin/orders'}
-                className={`hidden md:inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md border transition-all ${
-                  isAdminRoute
-                    ? 'border-primary-container bg-primary-container/15 text-primary'
-                    : 'border-outline-variant/50 bg-surface-container-low text-on-surface-variant hover:border-outline hover:text-on-surface'
-                }`}
-              >
-                <span
-                  className={`w-2 h-2 rounded-full ${isAdminRoute ? 'bg-primary-container animate-pulse' : 'bg-outline'}`}
-                  aria-hidden
-                />
-                {isAdminRoute ? (t.nav?.portalActive || 'Portal Active') : (t.nav?.atelierPortal || 'Atelier Portal')}
-              </Link>
-            )}
 
             <Link
               to="/wishlist"
@@ -229,6 +214,17 @@ export function Navbar() {
                         <Package className="w-3.5 h-3.5 text-primary-container" aria-hidden />
                         {t.nav?.myOrders || 'My Orders'}
                       </Link>
+                      {isAdmin && (
+                        <Link
+                          role="menuitem"
+                          to="/admin/orders"
+                          onClick={() => setAccountOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface border-t border-outline-variant/20"
+                        >
+                          <LayoutDashboard className="w-3.5 h-3.5 text-primary-container" aria-hidden />
+                          {t.nav?.adminPanel || 'Admin Panel'}
+                        </Link>
+                      )}
                       <button
                         type="button"
                         role="menuitem"
@@ -349,17 +345,14 @@ export function Navbar() {
               </>
             )}
             {isAdmin && (
-              <Link
+              <NavLink
                 to="/admin/orders"
                 onClick={closeMobile}
-                className="w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-xs bg-surface-container text-primary-container border border-primary-container/30"
+                className={navLinkClass}
               >
-                <span className="flex items-center gap-2">
-                  <Sliders className="w-3.5 h-3.5" aria-hidden />
-                  {t.nav?.atelierManagement || 'Atelier Management'}
-                </span>
-                <span className="text-[10px] uppercase tracking-wider text-outline">{t.nav?.admin || 'Admin'}</span>
-              </Link>
+                <LayoutDashboard className="w-4 h-4 text-primary-container" aria-hidden />
+                {t.nav?.adminPanel || 'Admin Panel'}
+              </NavLink>
             )}
           </div>
         </div>

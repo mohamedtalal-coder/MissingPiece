@@ -1,7 +1,7 @@
 {
   "home": "الرئيسية",
   "products": "المنتجات",
-  "collection": "المجموعة",
+  "collection": "المنتجات",
   "bespoke": "حسب الطلب",
   "about": "من نحن",
   "faq": "الأسئلة الشائعة",
@@ -22,9 +22,10 @@
   "myOrders": "طلباتي",
   "portalActive": "البوابة نشطة",
   "atelierPortal": "بوابة الإدارة",
+  "adminPanel": "لوحة الإدارة",
   "atelierManagement": "إدارة الورشة",
   "lightMode": "الوضع الفاتح",
   "darkMode": "الوضع الداكن",
   "conciergeSupport": "الدعم المخصص",
-  "tagline": "ورشة البازل الخشبي الحرفي"
+  "tagline": "ورشة الأحجيات الخشبية الحرفي"
 }

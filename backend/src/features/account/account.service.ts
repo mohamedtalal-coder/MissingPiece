@@ -6,7 +6,12 @@ import { ApiError } from "../../shared/middleware/errorHandler.js";
 import { revokeAllUserTokens } from "../../shared/utils/tokenRevocation.js";
 
 export async function getUserProfile(userId: string) {
-  return User.findById(userId).lean();
+  const user = await User.findById(userId).lean();
+  if (user && Array.isArray(user.addresses)) {
+    // Only expose addresses that haven't been soft-deleted
+    (user as { addresses: Array<{ deletedAt?: Date }> }).addresses = user.addresses.filter((a: { deletedAt?: Date }) => !a.deletedAt);
+  }
+  return user;
 }
 
 export async function updateUserProfile(userId: string, data: z.infer<typeof updateProfileSchema>) {

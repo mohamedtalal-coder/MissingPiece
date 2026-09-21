@@ -45,11 +45,11 @@ export function VerifyEmailPage() {
     setSuccess(null);
 
     if (otp.length !== 6) {
-      setError('Please enter the 6-digit verification code.');
+      setError(t.auth?.verify?.errorLength || 'Please enter the 6-digit verification code.');
       return;
     }
     if (!email) {
-      setError('Missing email address. Please log in again.');
+      setError(t.auth?.verify?.errorMissing || 'Missing email address. Please log in again.');
       return;
     }
 
@@ -57,10 +57,10 @@ export function VerifyEmailPage() {
     try {
       await authApi.verifyEmail({ email, otp });
       updateUser({ isEmailVerified: true });
-      setSuccess('Email verified! Redirecting...');
+      setSuccess(t.auth?.verify?.successMsg || 'Email verified! Redirecting...');
       setTimeout(() => navigate(from, { replace: true }), 1200);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid or expired code.');
+      setError(err.response?.data?.message || t.auth?.verify?.errInvalid || 'Invalid or expired code.');
     } finally {
       setLoading(false);
     }
@@ -76,7 +76,7 @@ export function VerifyEmailPage() {
       setSuccess(response.message);
       setCooldown(RESEND_COOLDOWN_SECONDS);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Could not resend the code. Try again shortly.');
+      setError(err.response?.data?.message || t.auth?.verify?.errResend || 'Could not resend the code. Try again shortly.');
     } finally {
       setResending(false);
     }
@@ -85,7 +85,7 @@ export function VerifyEmailPage() {
   if (!isAuthenticated) {
     return (
       <main className="max-w-md mx-auto px-margin-mobile py-space-2xl text-center">
-        <p className="text-on-surface-variant mb-space-md">Please log in to verify your email.</p>
+        <p className="text-on-surface-variant mb-space-md">{t.auth?.verify?.loginReq || 'Please log in to verify your email.'}</p>
         <Button as="link" to="/login">
           {t.auth?.signIn || 'Sign In'}
         </Button>
@@ -105,12 +105,12 @@ export function VerifyEmailPage() {
             <Icon name="mail" size={22} />
           </div>
           <h1 className="font-headline-md text-headline-md text-on-surface tracking-tight mt-space-md">
-            Verify Your Email
+            {t.auth?.verify?.pageTitle || 'Verify Your Email'}
           </h1>
           <p className="font-body-sm text-body-sm text-on-surface-variant mt-1.5">
             {email
-              ? <>We sent a 6-digit code to <span className="text-on-surface font-medium">{email}</span></>
-              : 'We sent a 6-digit code to your email address.'}
+              ? <>{(t.auth?.verify?.sentCode || 'We sent a 6-digit code to {{email}}').split('{{email}}')[0]} <span className="text-on-surface font-medium">{email}</span> {(t.auth?.verify?.sentCode || 'We sent a 6-digit code to {{email}}').split('{{email}}')[1]}</>
+              : (t.auth?.verify?.sentCodeFallback || 'We sent a 6-digit code to your email address.')}
           </p>
         </div>
 
@@ -138,35 +138,36 @@ export function VerifyEmailPage() {
               type="text"
               inputMode="numeric"
               maxLength={6}
-              label="Verification Code"
+              label={t.auth?.verify?.inputLabel || 'Verification Code'}
               icon="lock"
+              inputSize="lg"
               required
               value={otp}
               onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-              placeholder="Enter 6-digit code"
+              placeholder={t.auth?.verify?.inputPlaceholder || 'Enter 6-digit code'}
               autoFocus
             />
             <Button type="submit" fullWidth disabled={loading}>
-              {loading ? 'Verifying...' : 'Verify Email'}
+              {loading ? (t.auth?.verify?.btnVerifying || 'Verifying...') : (t.auth?.verify?.btnVerify || 'Verify Email')}
             </Button>
           </form>
 
           <p className="text-center mt-space-lg font-body-sm text-body-sm text-on-surface-variant">
-            Didn't get the code?{' '}
+            {t.auth?.verify?.noCode || "Didn't get the code? "}
             <button
               type="button"
               onClick={handleResend}
               disabled={cooldown > 0 || resending}
               className="text-primary underline underline-offset-2 hover:text-primary-container disabled:opacity-50 disabled:no-underline disabled:cursor-not-allowed"
             >
-              {resending ? 'Sending...' : cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend code'}
+              {resending ? (t.auth?.verify?.btnSending || 'Sending...') : cooldown > 0 ? (t.auth?.verify?.btnResendWait || `Resend in ${cooldown}s`).replace('{{s}}', cooldown.toString()) : (t.auth?.verify?.btnResend || 'Resend code')}
             </button>
           </p>
         </div>
 
         <p className="text-center mt-space-lg">
           <Link to="/" className="text-xs text-on-surface-variant hover:text-on-surface underline underline-offset-2">
-            Skip for now — I'll browse first
+            {t.auth?.verify?.skip || "Skip for now — I'll browse first"}
           </Link>
         </p>
       </div>

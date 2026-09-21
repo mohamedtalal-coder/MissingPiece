@@ -123,7 +123,7 @@ export function OrderHistoryPage() {
             </div>
           </div>
 
-          <nav className="flex flex-col space-y-1 bg-surface-container-low p-space-xs rounded-xl" aria-label="Account">
+          <nav className="flex flex-col space-y-1 bg-surface-container-low p-space-xs rounded-xl" aria-label={t?.common?.account || 'Account'}>
             <Link
               to="/orders"
               className="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg bg-surface-container-high text-primary font-label-md text-label-md"
@@ -312,7 +312,7 @@ export function OrderHistoryPage() {
                               <PriceDisplay amount={order.total} size="md" />
                               {order.status === 'delivered' && reviewLink && (
                                 <Button as="link" to={reviewLink} variant="ghost" size="sm" icon="star_rate">
-                                  Review item
+                                  {t.orderHistory?.reviewItem || 'Review item'}
                                 </Button>
                               )}
                               <Button as="link" to={`/orders/${order._id}`} variant="ghost" size="sm" icon="receipt_long">

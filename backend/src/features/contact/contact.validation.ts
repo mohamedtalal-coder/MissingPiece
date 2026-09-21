@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 export const contactSchema = z.object({
-  name: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
-  email: z.string().email("Invalid email address").trim().max(100),
-  subject: z.string().trim().min(2, "Subject is required").max(150),
-  message: z.string().trim().min(10, "Message must be at least 10 characters long").max(1000),
+  name: z.string().trim().min(2, "Name must be at least 2 characters long").max(100, "Name must be at most 100 characters"),
+  email: z.string().email("Please enter a valid email address").trim().max(100, "Email must be at most 100 characters"),
+  subject: z.string().trim().min(2, "Subject must be at least 2 characters long").max(150, "Subject must be at most 150 characters"),
+  message: z.string().trim().min(10, "Message must be at least 10 characters long").max(1000, "Message must be at most 1000 characters"),
 });
 
 export const contactStatusSchema = z.object({

@@ -19,5 +19,6 @@
     "threeD": "3D Puzzles",
     "wooden": "Wooden Puzzles",
     "mystery": "Mystery Puzzles"
-  }
+  },
+  "fetchError": "Failed to fetch products"
 }

@@ -112,11 +112,7 @@ export default function HomePage() {
               MissingPiece
             </p>
             <h1 className="font-headline-md text-headline-lg sm:text-headline-lg text-on-surface/95 font-medium tracking-tight max-w-xl">
-              {language === 'ar' ? (
-                <>{t.home?.heroTitle}</>
-              ) : (
-                <>Every picture is <span className="italic text-primary font-normal">missing just one</span> piece.</>
-              )}
+              {t.home?.heroTitle || 'Every picture is missing just one piece.'}
             </h1>
             <p className="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
               {t.home?.heroDescription || 'Heirloom wooden jigsaws engineered for quiet mastery and lifelong replacement of any lost piece.'}

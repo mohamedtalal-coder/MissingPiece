@@ -6,6 +6,7 @@ import { staticApi } from '../static/staticApi';
 import type { Order } from './ordersApi';
 import { orderShortId } from './orderStatus';
 import { useAuth } from '../auth/AuthContext';
+import { useLanguage } from '../../shared/context/LanguageContext';
 
 interface MissingPieceClaimModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ function sanitize(value: string, max: number): string {
 
 export function MissingPieceClaimModal({ isOpen, onClose, order }: MissingPieceClaimModalProps) {
   const { user } = useAuth();
+  const { t } = useLanguage() as any;
   const [productIndex, setProductIndex] = useState(0);
   const [pieceCode, setPieceCode] = useState('');
   const [coordinate, setCoordinate] = useState('');
@@ -57,10 +59,10 @@ export function MissingPieceClaimModal({ isOpen, onClose, order }: MissingPieceC
 
   const validate = () => {
     const next: Record<string, string> = {};
-    if (!selected) next.product = 'Select an edition.';
-    if (sanitize(pieceCode, 40).length < 2) next.pieceCode = 'Enter a piece code (min 2 characters).';
-    if (sanitize(coordinate, 80).length < 3) next.coordinate = 'Enter a matrix coordinate.';
-    if (sanitize(description, 800).length < 10) next.description = 'Describe the missing piece (min 10 characters).';
+    if (!selected) next.product = t.orderHistory?.claim?.errSelectEdition || 'Select an edition.';
+    if (sanitize(pieceCode, 40).length < 2) next.pieceCode = t.orderHistory?.claim?.errCodeLength || 'Enter a piece code (min 2 characters).';
+    if (sanitize(coordinate, 80).length < 3) next.coordinate = t.orderHistory?.claim?.errCoordLength || 'Enter a matrix coordinate.';
+    if (sanitize(description, 800).length < 10) next.description = t.orderHistory?.claim?.errDescLength || 'Describe the missing piece (min 10 characters).';
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -72,7 +74,7 @@ export function MissingPieceClaimModal({ isOpen, onClose, order }: MissingPieceC
     const name = sanitize(user?.name || 'Collector', 100);
     const email = sanitize(user?.email || '', 100);
     if (!email) {
-      setSubmitError('Your account email is required to file a claim.');
+      setSubmitError(t.orderHistory?.claim?.errEmailRequired || 'Your account email is required to file a claim.');
       return;
     }
 
@@ -100,7 +102,7 @@ export function MissingPieceClaimModal({ isOpen, onClose, order }: MissingPieceC
       setSubmitted(true);
       window.setTimeout(() => onClose(), 2200);
     } catch {
-      setSubmitError('Could not register the claim. Please try again or use Contact.');
+      setSubmitError(t.orderHistory?.claim?.errSubmit || 'Could not register the claim. Please try again or use Contact.');
     } finally {
       setSubmitting(false);
     }
@@ -125,9 +127,9 @@ export function MissingPieceClaimModal({ isOpen, onClose, order }: MissingPieceC
             </div>
             <div>
               <h2 id="claim-modal-title" className="font-headline-sm text-lg text-on-surface">
-                Register Lost Piece Claim
+                {t.orderHistory?.claim?.title || 'Register Lost Piece Claim'}
               </h2>
-              <p className="text-[11px] text-outline">Lifetime free replacement for registered editions</p>
+              <p className="text-[11px] text-outline">{t.orderHistory?.claim?.subtitle || 'Lifetime free replacement for registered editions'}</p>
             </div>
           </div>
           <button
@@ -135,7 +137,7 @@ export function MissingPieceClaimModal({ isOpen, onClose, order }: MissingPieceC
             onClick={onClose}
             disabled={submitting}
             className="p-1.5 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors"
-            aria-label="Close"
+            aria-label={t?.common?.closeModal || "Close"}
           >
             <Icon name="close" size={20} />
           </button>
@@ -146,17 +148,16 @@ export function MissingPieceClaimModal({ isOpen, onClose, order }: MissingPieceC
             <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 border border-primary/40 text-primary flex items-center justify-center">
               <Icon name="check" size={28} />
             </div>
-            <h3 className="font-headline-sm text-xl text-on-surface">Claim registered</h3>
+            <h3 className="font-headline-sm text-xl text-on-surface">{t.orderHistory?.claim?.registeredTitle || 'Claim registered'}</h3>
             <p className="text-xs text-on-surface-variant max-w-sm mx-auto leading-relaxed">
-              Our atelier has received your vector request. A replacement will be cut and dispatched in an archival
-              envelope once verified.
+              {t.orderHistory?.claim?.registeredDesc || 'Our atelier has received your vector request. A replacement will be cut and dispatched in an archival envelope once verified.'}
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div className="space-y-1.5">
               <label htmlFor="claim-edition" className="text-xs text-on-surface-variant">
-                Edition from this order
+                {t.orderHistory?.claim?.editionLabel || 'Edition from this order'}
               </label>
               <select
                 id="claim-edition"
@@ -175,14 +176,14 @@ export function MissingPieceClaimModal({ isOpen, onClose, order }: MissingPieceC
 
             <div className="space-y-1.5">
               <label htmlFor="claim-code" className="text-xs text-on-surface-variant">
-                Piece code
+                {t.orderHistory?.claim?.pieceCodeLabel || 'Piece code'}
               </label>
               <input
                 id="claim-code"
                 value={pieceCode}
                 maxLength={40}
                 onChange={(e) => setPieceCode(e.target.value)}
-                placeholder="e.g. P-142"
+                placeholder={t.orderHistory?.claim?.pieceCodePlaceholder || 'e.g. P-142'}
                 className={`w-full bg-surface-container-low border rounded-lg px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40 ${
                   errors.pieceCode ? 'border-error' : 'border-outline-variant/40'
                 }`}
@@ -192,14 +193,14 @@ export function MissingPieceClaimModal({ isOpen, onClose, order }: MissingPieceC
 
             <div className="space-y-1.5">
               <label htmlFor="claim-coord" className="text-xs text-on-surface-variant">
-                Matrix coordinate
+                {t.orderHistory?.claim?.coordLabel || 'Matrix coordinate'}
               </label>
               <input
                 id="claim-coord"
                 value={coordinate}
                 maxLength={80}
                 onChange={(e) => setCoordinate(e.target.value)}
-                placeholder="e.g. Sector C, Row 14"
+                placeholder={t.orderHistory?.claim?.coordPlaceholder || 'e.g. Sector C, Row 14'}
                 className={`w-full bg-surface-container-low border rounded-lg px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40 ${
                   errors.coordinate ? 'border-error' : 'border-outline-variant/40'
                 }`}
@@ -209,7 +210,7 @@ export function MissingPieceClaimModal({ isOpen, onClose, order }: MissingPieceC
 
             <div className="space-y-1.5">
               <label htmlFor="claim-desc" className="text-xs text-on-surface-variant">
-                Description
+                {t.orderHistory?.claim?.descLabel || 'Description'}
               </label>
               <textarea
                 id="claim-desc"
@@ -217,7 +218,7 @@ export function MissingPieceClaimModal({ isOpen, onClose, order }: MissingPieceC
                 maxLength={800}
                 rows={4}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Where was the piece last seen? Any markings on the box or certificate?"
+                placeholder={t.orderHistory?.claim?.descPlaceholder || 'Where was the piece last seen? Any markings on the box or certificate?'}
                 className={`w-full bg-surface-container-low border rounded-lg px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y min-h-[96px] ${
                   errors.description ? 'border-error' : 'border-outline-variant/40'
                 }`}
@@ -232,10 +233,10 @@ export function MissingPieceClaimModal({ isOpen, onClose, order }: MissingPieceC
             )}
 
             <Button type="submit" disabled={submitting} isLoading={submitting} className="w-full" size="lg" icon="security">
-              {submitting ? 'Submitting…' : 'Submit Claim'}
+              {submitting ? (t.orderHistory?.claim?.submitting || 'Submitting…') : (t.orderHistory?.claim?.submit || 'Submit Claim')}
             </Button>
             <p className="text-[10px] text-outline text-center">
-              Claims are reviewed by the atelier. Abuse may result in claim denial.
+              {t.orderHistory?.claim?.footerText || 'Claims are reviewed by the atelier. Abuse may result in claim denial.'}
             </p>
           </form>
         )}

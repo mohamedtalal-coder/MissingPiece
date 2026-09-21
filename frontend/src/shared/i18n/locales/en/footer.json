@@ -30,5 +30,8 @@
   "copyright": "© {{year}} MissingPiece Atelier Inc. All rights reserved.",
   "privacy": "Privacy & Support",
   "terms": "Artisan Terms",
-  "sustainability": "Provenance & Sustainability"
+  "sustainability": "Provenance & Sustainability",
+  "missingPiece": "MissingPiece",
+  "copyRights": "© {{year}} MissingPiece Atelier Inc. All rights reserved.",
+  "artisanTerms": "Artisan Terms"
 }

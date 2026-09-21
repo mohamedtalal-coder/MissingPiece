@@ -35,13 +35,13 @@ export function AdminAtelierNav() {
           MP
         </div>
         <div>
-          <p className="font-label-caps text-label-caps text-primary uppercase tracking-widest">Atelier Vault</p>
-          <p className="text-[11px] text-outline">Admin operations</p>
+          <p className="font-label-caps text-label-caps text-primary uppercase tracking-widest">{t.adminPanel?.nav?.vaultTitle || 'Atelier Vault'}</p>
+          <p className="text-[11px] text-outline">{t.adminPanel?.nav?.vaultDesc || 'Admin operations'}</p>
         </div>
       </div>
       <nav
         className="flex gap-1 overflow-x-auto pb-1 border-b border-outline-variant/30"
-        aria-label="Admin sections"
+        aria-label={t.adminPanel?.nav?.ariaLabel || "Admin sections"}
       >
         {links.map((link) => (
           <NavLink

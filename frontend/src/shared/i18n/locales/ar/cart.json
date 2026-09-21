@@ -48,5 +48,6 @@
   "couldNotAddEdition": "لا يمكن إضافة الإصدار",
   "signInToComplete": "قم بتسجيل الدخول لإكمال الدفع",
   "codeNoLongerApplies": "لم يعد الرمز ينطبق على هذه السلة.",
-  "couldNotRecheckStock": "تعذر إعادة التحقق من المخزون. عرض السلة المحفوظة."
+  "couldNotRecheckStock": "تعذر إعادة التحقق من المخزون. عرض السلة المحفوظة.",
+  "codePlaceholder": "كود الخصم"
 }

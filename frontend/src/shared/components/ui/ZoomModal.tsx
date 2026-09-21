@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Icon } from './Icon';
 import { useScrollLock } from '../../hooks/useScrollLock';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface ZoomModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface ZoomModalProps {
 
 export function ZoomModal({ isOpen, onClose, imageUrl, title }: ZoomModalProps) {
   useScrollLock(isOpen);
+  const { t } = useLanguage() as any;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -29,7 +31,7 @@ export function ZoomModal({ isOpen, onClose, imageUrl, title }: ZoomModalProps) 
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label={`Zoomed view: ${title}`}
+      aria-label={`${t?.common?.zoomedView || 'Zoomed view:'} ${title}`}
     >
       <div
         className="relative max-w-5xl w-full max-h-[90vh] rounded-xl overflow-hidden bg-surface-container border border-outline-variant/40 shadow-2xl flex flex-col animate-scale-in"
@@ -39,14 +41,14 @@ export function ZoomModal({ isOpen, onClose, imageUrl, title }: ZoomModalProps) 
           <div className="min-w-0">
             <p className="font-headline-sm text-sm text-on-surface truncate">{title}</p>
             <p className="text-[10px] font-label-caps uppercase tracking-wider text-primary-container mt-0.5">
-              Archival optical view
+              {t?.common?.zoomArchival || 'Archival optical view'}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="p-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors shrink-0"
-            aria-label="Close zoom"
+            aria-label={t?.common?.closeZoom || 'Close zoom'}
           >
             <Icon name="close" size={20} />
           </button>
@@ -62,7 +64,7 @@ export function ZoomModal({ isOpen, onClose, imageUrl, title }: ZoomModalProps) 
         </div>
 
         <div className="p-3 px-5 bg-surface-container-low border-t border-outline-variant/30 flex items-center justify-between text-[11px] text-outline font-label-caps uppercase tracking-wider">
-          <span>Esc or click outside to close</span>
+          <span>{t?.common?.zoomEscText || 'Esc or click outside to close'}</span>
         </div>
       </div>
     </div>

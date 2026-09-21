@@ -16,16 +16,17 @@ interface ReviewsProps {
 
 export const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
   const { user, isAuthenticated } = useAuth();
-  const { formatDate } = useLanguage();
+  const { formatDate, t } = useLanguage() as any;
   const { showToast } = useToast();
-  
+  const pd = t?.productDetail;
+
   const [reviews, setReviews] = useState<Review[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [canReviewProduct, setCanReviewProduct] = useState(false);
-  
+
   // Form state
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
@@ -39,10 +40,15 @@ export const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
       setReviews(data.items);
       setTotal(data.total);
       setTotalPages(data.totalPages);
-      
+
       // If user is logged in, check if they have a review to edit
       if (user) {
-        const userReview = data.items.find(r => (r.user as any)._id === (user as any)._id || (r.user as any) === (user as any)._id || (r.user as any).id === (user as any).id);
+        const userReview = data.items.find(
+          (r) =>
+            (r.user as any)._id === (user as any)._id ||
+            (r.user as any) === (user as any)._id ||
+            (r.user as any).id === (user as any).id,
+        );
         if (userReview) {
           setEditingReviewId(userReview._id);
           setRating(userReview.rating);
@@ -85,18 +91,18 @@ export const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      showToast({ message: 'Please log in to leave a review', type: 'error' });
+      showToast({ message: pd?.reviewsLoginError || 'Please log in to leave a review', type: 'error' });
       return;
     }
-    
+
     setIsSubmitting(true);
     try {
       if (editingReviewId) {
         await reviewsApi.update(editingReviewId, { rating, comment });
-        showToast({ message: 'Review updated successfully', type: 'success' });
+        showToast({ message: pd?.reviewsUpdateSuccess || 'Review updated successfully', type: 'success' });
       } else {
         await reviewsApi.create({ product: productId, rating, comment });
-        showToast({ message: 'Review submitted successfully', type: 'success' });
+        showToast({ message: pd?.reviewsSubmitSuccess || 'Review submitted successfully', type: 'success' });
       }
       // Reset and refresh
       setRating(5);
@@ -105,78 +111,97 @@ export const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
       setPage(1);
       fetchReviews();
     } catch (err: any) {
-      showToast({ message: err.response?.data?.message || 'Failed to submit review', type: 'error' });
+      showToast({
+        message: err.response?.data?.message || pd?.reviewsSubmitError || 'Failed to submit review',
+        type: 'error',
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
-  
+
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this review?")) return;
+    if (!window.confirm(pd?.reviewsDeleteConfirm || 'Are you sure you want to delete this review?')) return;
     try {
       await reviewsApi.delete(id);
-      showToast({ message: 'Review deleted', type: 'success' });
+      showToast({ message: pd?.reviewsDeleteSuccess || 'Review deleted', type: 'success' });
       setEditingReviewId(null);
       setRating(5);
       setComment('');
       fetchReviews();
     } catch (err) {
-      showToast({ message: 'Failed to delete review', type: 'error' });
+      showToast({ message: pd?.reviewsDeleteError || 'Failed to delete review', type: 'error' });
     }
   };
 
+  const reviewsTitle = pd?.reviewsTitle
+    ? pd.reviewsTitle.replace('{{count}}', String(total))
+    : `Reviews (${total})`;
+
   return (
     <div className="w-full">
-      <h2 className="font-headline-md text-headline-md text-on-surface mb-space-lg">Reviews ({total})</h2>
-      
+      <h2 className="font-headline-md text-headline-md text-on-surface mb-space-lg">{reviewsTitle}</h2>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-xl">
         <div className="lg:col-span-4">
           <div className="bg-surface-container-low border border-outline-variant/30 rounded-lg p-space-lg">
             <h3 className="font-headline-sm text-headline-sm text-on-surface mb-space-md">
-              {editingReviewId ? 'Edit your review' : 'Share your thoughts'}
+              {editingReviewId
+                ? pd?.reviewsEditYours || 'Edit your review'
+                : pd?.reviewsShareThoughts || 'Share your thoughts'}
             </h3>
-            
+
             {!isAuthenticated ? (
               <div className="py-space-md text-center">
-                <p className="font-body-md text-body-md text-on-surface-variant mb-space-md">You must be logged in to leave a review.</p>
+                <p className="font-body-md text-body-md text-on-surface-variant mb-space-md">
+                  {pd?.reviewsLoginRequired || 'You must be logged in to leave a review.'}
+                </p>
               </div>
             ) : !canReviewProduct ? (
               <div className="py-space-md text-center">
-                <p className="font-body-md text-body-md text-on-surface-variant mb-space-md">Reviews unlock after delivery of this item.</p>
+                <p className="font-body-md text-body-md text-on-surface-variant mb-space-md">
+                  {pd?.reviewsDeliveryRequired || 'Reviews unlock after delivery of this item.'}
+                </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-space-md">
                 <div className="flex flex-col gap-space-xs">
-                  <label className="font-label-md text-label-md text-on-surface font-semibold">Rating</label>
-                    <StarRating rating={rating} interactive={true} onChange={setRating} size="md" />
+                  <label className="font-label-md text-label-md text-on-surface font-semibold">
+                    {pd?.reviewsRating || 'Rating'}
+                  </label>
+                  <StarRating rating={rating} interactive={true} onChange={setRating} size="md" />
                 </div>
-                
+
                 <div className="flex flex-col gap-space-xs">
-                  <label className="font-label-md text-label-md text-on-surface font-semibold">Comment</label>
-                  <textarea 
+                  <label className="font-label-md text-label-md text-on-surface font-semibold">
+                    {pd?.reviewsComment || 'Comment'}
+                  </label>
+                  <textarea
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                    placeholder="Tell us what you think about this piece..."
+                    placeholder={pd?.reviewsCommentPlaceholder || 'Tell us what you think about this piece\u2026'}
                     className="w-full bg-surface border border-outline-variant/50 text-on-surface font-body-md text-body-md rounded p-3 focus:outline-none focus:border-primary resize-y min-h-[100px]"
                     maxLength={1000}
-                  ></textarea>
+                  />
                 </div>
-                
+
                 <div className="flex items-center gap-3 mt-space-xs">
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     disabled={isSubmitting}
                     isLoading={isSubmitting}
                     className="flex-1"
                   >
-                    {editingReviewId ? 'Update Review' : 'Submit Review'}
+                    {editingReviewId
+                      ? pd?.reviewsUpdate || 'Update Review'
+                      : pd?.reviewsSubmit || 'Submit Review'}
                   </Button>
                   {editingReviewId && (
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => handleDelete(editingReviewId)}
                       className="px-4 py-2.5 border border-error/40 text-error hover:bg-error/10 rounded transition-colors"
-                      title="Delete Review"
+                      title={pd?.reviewsDeleteTitle || 'Delete Review'}
                     >
                       <Icon name="delete" />
                     </button>
@@ -186,29 +211,46 @@ export const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
             )}
           </div>
         </div>
-        
+
         <div className="lg:col-span-8 flex flex-col gap-space-md">
           {isLoading ? (
-             <div className="flex justify-center p-8">
-               <Spinner />
-             </div>
+            <div className="flex justify-center p-8">
+              <Spinner />
+            </div>
           ) : reviews.length === 0 ? (
             <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-lg p-space-xl flex flex-col items-center justify-center text-center">
               <Icon name="chat_bubble_outline" className="text-4xl text-outline mb-space-sm" />
-              <p className="font-body-md text-body-md text-on-surface-variant">No reviews yet. Be the first to share your experience.</p>
+              <p className="font-body-md text-body-md text-on-surface-variant">
+                {pd?.reviewsEmpty || 'No reviews yet. Be the first to share your experience.'}
+              </p>
             </div>
           ) : (
             <>
-              {reviews.map(review => (
-                <div key={review._id} className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-md flex flex-col gap-space-sm">
+              {reviews.map((review) => (
+                <div
+                  key={review._id}
+                  className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-md flex flex-col gap-space-sm"
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-space-sm">
                       <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-headline-sm overflow-hidden">
-                        {review.user?.avatar ? <img src={review.user.avatar} className="w-full h-full object-cover" alt={review.user?.name} /> : review.user?.name?.[0] || 'U'}
+                        {review.user?.avatar ? (
+                          <img
+                            src={review.user.avatar}
+                            className="w-full h-full object-cover"
+                            alt={review.user?.name}
+                          />
+                        ) : (
+                          review.user?.name?.[0] || (pd?.reviewsUnknownUser || 'U')[0]
+                        )}
                       </div>
                       <div className="flex flex-col">
-                        <span className="font-label-md text-label-md text-on-surface font-semibold">{review.user?.name || 'Unknown User'}</span>
-                        <span className="font-label-sm text-label-sm text-outline">{formatDate(review.createdAt)}</span>
+                        <span className="font-label-md text-label-md text-on-surface font-semibold">
+                          {review.user?.name || pd?.reviewsUnknownUser || 'Anonymous'}
+                        </span>
+                        <span className="font-label-sm text-label-sm text-outline">
+                          {formatDate(review.createdAt)}
+                        </span>
                       </div>
                     </div>
                     <div className="flex items-center text-primary text-[14px]">
@@ -216,11 +258,13 @@ export const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
                     </div>
                   </div>
                   {review.comment && (
-                    <p className="font-body-md text-body-md text-on-surface-variant whitespace-pre-wrap">{review.comment}</p>
+                    <p className="font-body-md text-body-md text-on-surface-variant whitespace-pre-wrap">
+                      {review.comment}
+                    </p>
                   )}
                 </div>
               ))}
-              
+
               {totalPages > 1 && (
                 <div className="mt-space-md">
                   <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />

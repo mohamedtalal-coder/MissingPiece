@@ -29,7 +29,7 @@ function MessageSkeleton() {
 
 export const AdminMessagesPage: React.FC = () => {
   const toast = useToast();
-  const { formatDate } = useLanguage();
+  const { t, formatDate } = useLanguage() as any;
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,8 +52,8 @@ export const AdminMessagesPage: React.FC = () => {
       setTotalPages(data.totalPages || 1);
     } catch (err) {
       console.error('Failed to load contact messages', err);
-      setError('Failed to load messages');
-      toast.showToast({ message: 'Failed to load messages', type: 'error' });
+      setError(t?.adminMessages?.fetchError || 'Failed to load messages');
+      toast.showToast({ message: t?.adminMessages?.fetchError || 'Failed to load messages', type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -71,13 +71,13 @@ export const AdminMessagesPage: React.FC = () => {
     setMessages((msgs) => msgs.map((m) => (m._id === id ? { ...m, status: newStatus } : m)));
     try {
       await staticApi.updateMessageStatus(id, newStatus);
-      toast.showToast({ message: `Marked as ${newStatus}`, type: 'success' });
+      toast.showToast({ message: (t?.adminMessages?.statusUpdated || 'Marked as {{status}}').replace('{{status}}', newStatus), type: 'success' });
     } catch (err) {
       console.error('Failed to update status', err);
       if (previous) {
         setMessages((msgs) => msgs.map((m) => (m._id === id ? { ...m, status: previous } : m)));
       }
-      toast.showToast({ message: 'Failed to update message', type: 'error' });
+      toast.showToast({ message: t?.adminMessages?.updateError || 'Failed to update message', type: 'error' });
     } finally {
       setPendingId(null);
     }
@@ -95,13 +95,13 @@ export const AdminMessagesPage: React.FC = () => {
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8">
         <div>
           <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest">
-            Client Relations
+            {t?.adminMessages?.clientRelations || 'Client Relations'}
           </span>
           <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight mt-1">
-            Customer Messages &amp; Missing Piece Claims
+            {t?.adminMessages?.pageTitle || 'Customer Messages & Missing Piece Claims'}
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-1.5 max-w-2xl">
-            Review and triage customer inquiries, commission requests, and heirloom replacement claims.
+            {t?.adminMessages?.pageSubtitle || 'Review and triage customer inquiries, commission requests, and heirloom replacement claims.'}
           </p>
         </div>
 
@@ -113,7 +113,7 @@ export const AdminMessagesPage: React.FC = () => {
               variant={filter === f ? 'primary' : 'ghost'}
               size="sm"
             >
-              {f.charAt(0).toUpperCase() + f.slice(1)}
+              {t?.adminMessages?.[`filter${f.charAt(0).toUpperCase() + f.slice(1)}`] || f.charAt(0).toUpperCase() + f.slice(1)}
             </Button>
           ))}
         </div>
@@ -123,7 +123,7 @@ export const AdminMessagesPage: React.FC = () => {
         <div className="bg-error-container/20 border border-error/40 text-error p-4 rounded-md flex items-center justify-between gap-3 mb-6">
           <span>{error}</span>
           <Button type="button" size="sm" onClick={() => fetchMessages(page, filter)}>
-            Retry
+            {t?.adminMessages?.retry || 'Retry'}
           </Button>
         </div>
       )}
@@ -134,8 +134,8 @@ export const AdminMessagesPage: React.FC = () => {
         <div className="py-24 bg-surface-container-low rounded-xl shadow-sm">
           <EmptyState
             icon="mail"
-            title="No Correspondence"
-            description="No customer dispatches match the current ledger view."
+            title={t?.adminPanel?.inquiries?.empty || "No Correspondence"}
+            description={t?.adminPanel?.inquiries?.emptyDesc || "No customer dispatches match the current ledger view."}
           />
         </div>
       ) : (
@@ -166,12 +166,12 @@ export const AdminMessagesPage: React.FC = () => {
                 <div className="flex flex-col gap-1 min-w-0">
                   <div className="flex items-center gap-3 flex-wrap">
                     <h3 className="font-headline-sm text-headline-sm text-on-surface">
-                      {msg.subject || 'Unspecified Subject'}
+                      {msg.subject || t?.adminMessages?.unspecifiedSubject || 'Unspecified Subject'}
                     </h3>
                     <StatusBadge type="message" status={msg.status} />
                   </div>
                   <p className="font-body-sm text-body-sm text-on-surface-variant">
-                    From: <span className="font-medium text-on-surface">{msg.name}</span> &lt;{msg.email}&gt;
+                    {t?.adminMessages?.from || 'From:'} <span className="font-medium text-on-surface">{msg.name}</span> &lt;{msg.email}&gt;
                   </p>
                 </div>
 
@@ -202,7 +202,7 @@ export const AdminMessagesPage: React.FC = () => {
                     disabled={!!pendingId}
                     onClick={() => handleStatusChange(msg._id, 'read')}
                   >
-                    Mark Read
+                    {t?.adminMessages?.markRead || 'Mark Read'}
                   </Button>
                 )}
                 {msg.status !== 'resolved' && (
@@ -212,7 +212,7 @@ export const AdminMessagesPage: React.FC = () => {
                     isLoading={pendingId === msg._id}
                     disabled={!!pendingId}
                   >
-                    Archive &amp; Resolve
+                    {t?.adminMessages?.archiveResolve || 'Archive & Resolve'}
                   </Button>
                 )}
                 {msg.status === 'resolved' && (
@@ -222,7 +222,7 @@ export const AdminMessagesPage: React.FC = () => {
                     isLoading={pendingId === msg._id}
                     disabled={!!pendingId}
                   >
-                    Reopen Dispatch
+                    {t?.adminMessages?.reopenDispatch || 'Reopen Dispatch'}
                   </Button>
                 )}
                 {msg.status === 'read' && (
@@ -232,7 +232,7 @@ export const AdminMessagesPage: React.FC = () => {
                     isLoading={pendingId === msg._id}
                     disabled={!!pendingId}
                   >
-                    Mark Unread
+                    {t?.adminMessages?.markUnread || 'Mark Unread'}
                   </Button>
                 )}
               </div>
@@ -246,17 +246,17 @@ export const AdminMessagesPage: React.FC = () => {
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 variant="secondary"
               >
-                Previous
+                {t?.adminMessages?.previous || 'Previous'}
               </Button>
               <span className="font-label-md text-label-md text-on-surface-variant">
-                Page {page} of {totalPages}
+                {t?.adminMessages?.pageOf ? t.adminMessages.pageOf.replace('{{page}}', page.toString()).replace('{{total}}', totalPages.toString()) : `Page ${page} of ${totalPages}`}
               </span>
               <Button
                 disabled={page === totalPages || loading}
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 variant="secondary"
               >
-                Next
+                {t?.adminMessages?.next || 'Next'}
               </Button>
             </div>
           )}

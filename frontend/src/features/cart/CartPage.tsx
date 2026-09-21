@@ -300,7 +300,7 @@ export function CartPage() {
           aria-valuenow={Math.round(shippingProgress)}
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-label="Progress toward free shipping"
+          aria-label={t?.common?.progressFreeShipping || "Progress toward free shipping"}
         >
           <div
             className="h-full bg-gradient-to-r from-primary-container to-primary transition-all duration-500 ease-out rtl:-scale-x-100"
@@ -372,7 +372,7 @@ export function CartPage() {
                           <div className="flex items-center rounded-lg border border-outline-variant/40 bg-surface-container-low p-1">
                             <button
                               type="button"
-                              aria-label="Decrease quantity"
+                              aria-label={t?.common?.decreaseQty || "Decrease quantity"}
                               disabled={item.quantity <= 1 || busy}
                               onClick={() =>
                                 handleUpdateQty(item.productId, item.quantity - 1, item.stock)
@@ -386,7 +386,7 @@ export function CartPage() {
                             </span>
                             <button
                               type="button"
-                              aria-label="Increase quantity"
+                              aria-label={t?.common?.increaseQty || "Increase quantity"}
                               disabled={item.quantity >= maxQty || busy}
                               onClick={() =>
                                 handleUpdateQty(item.productId, item.quantity + 1, item.stock)
@@ -557,7 +557,7 @@ export function CartPage() {
                     setPromoInput(e.target.value.toUpperCase());
                     if (promoError) setPromoError('');
                   }}
-                  placeholder="CODE"
+                  placeholder={t.cart?.codePlaceholder || 'CODE'}
                   className="w-full bg-surface-container-low px-3 py-2 text-xs text-on-surface placeholder:text-outline focus:outline-none uppercase tracking-wider"
                   aria-invalid={Boolean(promoError)}
                   aria-describedby={promoError ? 'promo-error' : undefined}

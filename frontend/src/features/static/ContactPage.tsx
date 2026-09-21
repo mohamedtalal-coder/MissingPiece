@@ -17,19 +17,60 @@ export function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !subject || !message) {
-      setError(t.contact?.fillAllFields || 'Please fill in all fields.');
+
+    // Client-side validation — mirrors backend rules
+    if (!name.trim()) {
+      setError(t.contact?.nameRequired || 'Please enter your full name.');
       return;
     }
-    
+    if (name.trim().length < 2) {
+      setError(t.contact?.nameLength || 'Name must be at least 2 characters long.');
+      return;
+    }
+    if (!email.trim()) {
+      setError(t.contact?.emailRequired || 'Please enter your email address.');
+      return;
+    }
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!emailRe.test(email.trim())) {
+      setError(t.contact?.emailInvalid || 'Please enter a valid email address.');
+      return;
+    }
+    if (!subject.trim()) {
+      setError(t.contact?.subjectRequired || 'Please enter a subject.');
+      return;
+    }
+    if (subject.trim().length < 2) {
+      setError(t.contact?.subjectLength || 'Subject must be at least 2 characters long.');
+      return;
+    }
+    if (!message.trim()) {
+      setError(t.contact?.messageRequired || 'Please write a message.');
+      return;
+    }
+    if (message.trim().length < 10) {
+      setError(t.contact?.messageLength || 'Message must be at least 10 characters long.');
+      return;
+    }
+    if (message.trim().length > 1000) {
+      setError(t.contact?.messageTooLong || 'Message must be at most 1000 characters long.');
+      return;
+    }
+
     try {
       setLoading(true);
       setError('');
-      await staticApi.sendMessage({ name, email, subject, message });
+      await staticApi.sendMessage({ name: name.trim(), email: email.trim().toLowerCase(), subject: subject.trim(), message: message.trim() });
       setSubmitted(true);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError(t.contact?.sendError || 'Failed to send message. Please try again.');
+      // Try to show a specific server-side validation message if available
+      const serverErrors = err?.response?.data?.errors;
+      if (serverErrors && Array.isArray(serverErrors) && serverErrors.length > 0) {
+        setError(serverErrors[0].message);
+      } else {
+        setError(err?.response?.data?.message || t.contact?.sendError || 'Failed to send message. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

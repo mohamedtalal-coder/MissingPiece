@@ -94,7 +94,7 @@ export function Footer() {
               <div className="w-8 h-8 rounded border border-primary-container/50 bg-surface-container flex items-center justify-center font-headline-sm text-primary-container font-bold text-sm">
                 MP
               </div>
-              <span className="font-headline-sm text-lg text-on-surface tracking-tight">MissingPiece</span>
+              <span className="font-headline-sm text-lg text-on-surface tracking-tight">{t.footer?.missingPiece || 'MissingPiece'}</span>
             </div>
             <p className="text-xs text-outline leading-relaxed max-w-xs">
               {t.footer?.tagline || 'Quiet craftsmanship and enigmatic precision. Designed in our Nordic and Pacific workshops for collectors of tactile art.'}

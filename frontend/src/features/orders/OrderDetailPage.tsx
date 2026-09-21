@@ -35,7 +35,7 @@ function DetailSkeleton() {
 
 export function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { formatDate } = useLanguage();
+  const { t, formatDate } = useLanguage() as any;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { showToast } = useToast();
@@ -55,10 +55,10 @@ export function OrderDetailPage() {
     const paymentStatus = searchParams.get('payment');
     if (!id) return;
     if (paymentStatus === 'success') {
-      showToast({ message: 'Payment successful. Your commission is registered.', type: 'success' });
+      showToast({ message: t?.orderHistory?.details?.paymentSuccess || 'Payment successful. Your commission is registered.', type: 'success' });
       window.history.replaceState({}, '', `/orders/${id}`);
     } else if (paymentStatus === 'cancelled') {
-      showToast({ message: 'Payment cancelled.', type: 'error' });
+      showToast({ message: t?.orderHistory?.details?.paymentCancelled || 'Payment cancelled.', type: 'error' });
       window.history.replaceState({}, '', `/orders/${id}`);
     }
   }, [searchParams, id, showToast]);
@@ -76,11 +76,11 @@ export function OrderDetailPage() {
         const e = err as { name?: string; code?: string; response?: { status?: number } };
         if (e.name === 'CanceledError' || e.name === 'AbortError' || e.code === 'ERR_CANCELED') return;
         if (e.response?.status === 403 || e.response?.status === 401) {
-          setError('You do not have permission to view this order.');
+          setError(t?.orderHistory?.details?.permissionError || 'You do not have permission to view this order.');
         } else if (e.response?.status === 404) {
-          setError('Order not found.');
+          setError(t?.orderHistory?.details?.orderNotFound || 'Order not found.');
         } else {
-          setError('Failed to load order details.');
+          setError(t?.orderHistory?.details?.loadError || 'Failed to load order details.');
         }
       } finally {
         if (!signal?.aborted) setLoading(false);
@@ -108,7 +108,7 @@ export function OrderDetailPage() {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      showToast({ message: 'Could not copy reference', type: 'error' });
+      showToast({ message: t?.orderHistory?.details?.copyError || 'Could not copy reference', type: 'error' });
     }
   };
 
@@ -124,14 +124,14 @@ export function OrderDetailPage() {
         .filter((i) => i.productId && /^[a-f\d]{24}$/i.test(i.productId));
 
       if (payloads.length === 0) {
-        showToast({ message: 'Could not re-add items. Browse the catalog instead.', type: 'info' });
+        showToast({ message: t?.orderHistory?.details?.reorderEmpty || 'Could not re-add items. Browse the catalog instead.', type: 'info' });
         navigate('/products');
         return;
       }
 
       const validated = await cartApi.validateCart(payloads);
       if (validated.length === 0) {
-        showToast({ message: 'Those editions are no longer available.', type: 'error' });
+        showToast({ message: t?.orderHistory?.details?.reorderUnavailable || 'Those editions are no longer available.', type: 'error' });
         return;
       }
 
@@ -140,10 +140,10 @@ export function OrderDetailPage() {
       }
 
       await refreshCart();
-      showToast({ message: 'Available items added to bag', type: 'success' });
+      showToast({ message: t?.orderHistory?.details?.reorderSuccess || 'Available items added to bag', type: 'success' });
       navigate('/cart');
     } catch {
-      showToast({ message: 'Some items could not be re-added (stock may have changed).', type: 'error' });
+      showToast({ message: t?.orderHistory?.details?.reorderError || 'Some items could not be re-added (stock may have changed).', type: 'error' });
     } finally {
       setReordering(false);
     }
@@ -151,20 +151,20 @@ export function OrderDetailPage() {
 
   const handleCancelOrder = async () => {
     if (!order || cancelling) return;
-    const confirmed = window.confirm('Cancel this order? This cannot be undone.');
+    const confirmed = window.confirm(t.orderHistory?.details?.cancelConfirm || 'Cancel this order? This cannot be undone.');
     if (!confirmed) return;
 
     setCancelling(true);
     try {
       const updated = await ordersApi.cancelOrder(order._id);
       setOrder(updated);
-      showToast({ message: 'Order cancelled', type: 'success' });
+      showToast({ message: t?.orderHistory?.details?.cancelSuccess || 'Order cancelled', type: 'success' });
     } catch (err: unknown) {
       const e = err as { response?: { status?: number; data?: { message?: string } } };
       if (e.response?.status === 409) {
-        showToast({ message: 'This order can no longer be cancelled.', type: 'error' });
+        showToast({ message: t?.orderHistory?.details?.cancelConflict || 'This order can no longer be cancelled.', type: 'error' });
       } else {
-        showToast({ message: 'Failed to cancel order', type: 'error' });
+        showToast({ message: t?.orderHistory?.details?.cancelError || 'Failed to cancel order', type: 'error' });
       }
     } finally {
       setCancelling(false);
@@ -186,10 +186,10 @@ export function OrderDetailPage() {
       <div className="max-w-xl mx-auto px-margin-mobile py-space-2xl text-center animate-fade-in">
         <Icon name="error" className="text-[40px] text-error mx-auto mb-3" />
         <h1 className="font-headline-sm text-headline-sm text-on-surface mb-4">
-          {error || 'Commission not found.'}
+          {error || t.orderHistory?.details?.notFound || 'Commission not found.'}
         </h1>
         <Button as="link" to="/orders" icon="arrow_back">
-          Return to Ledger
+          {t.orderHistory?.details?.returnLedger || 'Return to Ledger'}
         </Button>
       </div>
     );
@@ -208,7 +208,7 @@ export function OrderDetailPage() {
           className="inline-flex items-center gap-1.5 text-sm text-on-surface-variant hover:text-on-surface transition-colors mb-space-sm"
         >
           <Icon name="arrow_back" size={16} />
-          Back to Archive
+          {t.orderHistory?.backToArchive || 'Back to Archive'}
         </Link>
       </div>
 
@@ -222,16 +222,16 @@ export function OrderDetailPage() {
           <div>
             <div className="flex items-center gap-3 flex-wrap">
               <span className="text-xs uppercase tracking-widest text-primary-container">
-                Atelier Provenance Ledger
+                {t.orderHistory?.details?.provenanceLedger || 'Atelier Provenance Ledger'}
               </span>
               <StatusBadge status={order.status} type="order" />
               <span className="text-xs text-on-surface-variant">{atelierStatusLabel(order.status)}</span>
             </div>
             <h1 className="font-headline-lg text-headline-lg sm:text-display-lg-mobile text-on-surface mt-1">
-              Order #{shortId}
+              {(t.orderHistory?.details?.orderNum || 'Order #{{id}}').replace('{{id}}', shortId)}
             </h1>
             <p className="text-xs text-on-surface-variant mt-1">
-              Commissioned{' '}
+              {t.orderHistory?.details?.commissioned || 'Commissioned '}
               {formatDate(order.createdAt, {
                 month: 'long',
                 day: 'numeric',
@@ -249,12 +249,12 @@ export function OrderDetailPage() {
                 disabled={cancelling}
                 onClick={handleCancelOrder}
               >
-                Cancel Order
+                {t.orderHistory?.details?.cancelOrder || 'Cancel Order'}
               </Button>
             )}
             {canClaim && (
               <Button type="button" variant="outline" icon="warning" onClick={() => setClaimOpen(true)}>
-                Report Missing Piece
+                {t.orderHistory?.details?.reportMissing || 'Report Missing Piece'}
               </Button>
             )}
             <Button
@@ -265,7 +265,7 @@ export function OrderDetailPage() {
               disabled={reordering}
               onClick={handleReorderToCart}
             >
-              Re-add to Bag
+              {t.orderHistory?.details?.readdBag || 'Re-add to Bag'}
             </Button>
           </div>
         </div>
@@ -273,7 +273,7 @@ export function OrderDetailPage() {
         <div className="p-4 rounded-xl bg-surface-container-lowest border border-outline-variant/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2 text-on-surface-variant min-w-0">
             <Icon name="security" size={16} className="text-primary-container shrink-0" />
-            <span className="text-outline shrink-0">Registry reference:</span>
+            <span className="text-outline shrink-0">{t.orderHistory?.details?.registryRef || 'Registry reference:'}</span>
             <span className="text-on-surface font-semibold truncate">{registry}</span>
           </div>
           <button
@@ -282,7 +282,7 @@ export function OrderDetailPage() {
             className="text-primary-container hover:text-primary flex items-center gap-1 transition-colors shrink-0"
           >
             <Icon name={copied ? 'check' : 'copy'} size={14} />
-            {copied ? 'Copied' : 'Copy'}
+            {copied ? (t.orderHistory?.details?.copied || 'Copied') : (t.orderHistory?.details?.copy || 'Copy')}
           </button>
         </div>
 
@@ -290,7 +290,7 @@ export function OrderDetailPage() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-headline-sm text-sm text-on-surface uppercase tracking-wider">
-              Fulfillment stepper
+              {t.orderHistory?.details?.stepper || 'Fulfillment stepper'}
             </h2>
             <span className="text-xs text-outline tabular-nums">{progressPercent(order.status)}%</span>
           </div>
@@ -339,7 +339,7 @@ export function OrderDetailPage() {
           <section className="bg-surface-container-low rounded-xl p-space-lg border border-outline-variant/10">
             <h2 className="font-headline-sm text-title-editorial text-on-surface border-b border-outline-variant/20 pb-space-sm mb-space-md flex items-center gap-2">
               <Icon name="inventory_2" className="text-primary" size={20} />
-              Archival pieces
+              {t.orderHistory?.details?.archivalPieces || 'Archival pieces'}
             </h2>
             <ul className="space-y-3">
               {order.items.map((item, index) => (
@@ -357,11 +357,11 @@ export function OrderDetailPage() {
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="font-label-caps text-label-caps text-primary uppercase">Precision Cut</p>
+                    <p className="font-label-caps text-label-caps text-primary uppercase">{t.orderHistory?.details?.precisionCut || 'Precision Cut'}</p>
                     <h3 className="font-headline-sm text-headline-sm text-on-surface truncate">
-                      {item.title || 'Masterwork'}
+                      {item.title || (t.orderHistory?.details?.masterwork || 'Masterwork')}
                     </h3>
-                    <p className="text-sm text-on-surface-variant">Qty {item.quantity}</p>
+                    <p className="text-sm text-on-surface-variant">{(t.orderHistory?.details?.qty || 'Qty {{qty}}').replace('{{qty}}', item.quantity)}</p>
                   </div>
                   <PriceDisplay
                     amount={(item.price || 0) * item.quantity}
@@ -378,16 +378,16 @@ export function OrderDetailPage() {
           <section className="bg-surface-container-low rounded-xl p-space-lg border border-outline-variant/10">
             <h2 className="font-headline-sm text-sm text-on-surface border-b border-outline-variant/20 pb-space-sm mb-space-md flex items-center gap-2">
               <Icon name="receipt_long" className="text-primary" size={18} />
-              Ledger summary
+              {t.orderHistory?.details?.summary || 'Ledger summary'}
             </h2>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between text-on-surface-variant">
-                <span>Total paid</span>
+                <span>{t.orderHistory?.details?.totalPaid || 'Total paid'}</span>
                 <PriceDisplay amount={order.total} size="sm" className="text-on-surface" />
               </div>
               <div className="border-t border-outline-variant/20 pt-3 flex justify-between items-baseline">
                 <span className="font-label-md uppercase tracking-wider font-semibold text-on-surface">
-                  Commission total
+                  {t.orderHistory?.details?.commissionTotal || 'Commission total'}
                 </span>
                 <PriceDisplay amount={order.total} size="lg" className="text-primary" />
               </div>
@@ -397,7 +397,7 @@ export function OrderDetailPage() {
           <section className="bg-surface-container-low rounded-xl p-space-lg border border-outline-variant/10">
             <h2 className="font-headline-sm text-sm text-on-surface border-b border-outline-variant/20 pb-space-sm mb-space-md flex items-center gap-2">
               <Icon name="local_shipping" className="text-primary" size={18} />
-              Delivery destination
+              {t.orderHistory?.details?.deliveryDestination || 'Delivery destination'}
             </h2>
             <address className="not-italic text-sm text-on-surface-variant leading-relaxed">
               <p className="text-on-surface font-medium mb-1">{order.shippingAddress.street}</p>

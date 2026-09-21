@@ -61,5 +61,9 @@
   "emailInvalid": "Enter a valid email.",
   "fieldRequired": "Required.",
   "phoneInvalid": "Enter a valid phone or leave blank.",
-  "invalidPayment": "Invalid payment redirect"
+  "invalidPayment": "Invalid payment redirect",
+  "addrFixFields": "Please fix the address fields before saving.",
+  "addrMaxReached": "You have reached the maximum of 10 saved addresses. Remove one first.",
+  "addrSaveSuccess": "Address saved to your account!",
+  "addrSaveError": "Could not save address to your account. Try again."
 }

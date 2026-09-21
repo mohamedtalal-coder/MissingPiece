@@ -1,11 +1,13 @@
 import { apiClient } from '../../api/client';
 
 export interface Address {
+  _id?: string;
   street: string;
   city: string;
   state: string;
   zipCode: string;
   country: string;
+  deletedAt?: string | null;
 }
 
 export interface UserProfile {

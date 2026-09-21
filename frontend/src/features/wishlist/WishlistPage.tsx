@@ -112,7 +112,7 @@ function WishlistItemCard({ item, pendingAction, onRemove, onMoveToCart, t }: Wi
           type="button"
           onClick={() => onRemove(item)}
           disabled={isPending}
-          aria-label="Remove from wishlist"
+          aria-label={t?.common?.removeFromWishlist || "Remove from wishlist"}
           className="absolute top-3 end-3 w-8 h-8 rounded bg-surface-container-lowest/80 backdrop-blur-md text-on-surface-variant hover:text-error hover:bg-surface-container-lowest flex items-center justify-center transition-colors shadow disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Icon name="close" className="text-[18px]" />
@@ -306,7 +306,7 @@ export function WishlistPage() {
           <div
             className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md lg:gap-space-lg"
             aria-busy="true"
-            aria-label="Loading wishlist"
+            aria-label={t?.common?.loadingWishlist || "Loading wishlist"}
           >
             {Array.from({ length: 4 }).map((_, i) => (
               <WishlistCardSkeleton key={i} />

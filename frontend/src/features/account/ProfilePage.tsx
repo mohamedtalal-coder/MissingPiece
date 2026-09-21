@@ -8,11 +8,89 @@ import { accountApi, type UserProfile, type Address } from './accountApi';
 import { useAuth } from '../auth/AuthContext';
 import { useScrollLock } from '../../shared/hooks/useScrollLock';
 
+// ── All countries list (shared with CheckoutPage) ──────────────────────────
+const COUNTRIES = [
+  { code: 'AF', name: 'Afghanistan' }, { code: 'AL', name: 'Albania' }, { code: 'DZ', name: 'Algeria' },
+  { code: 'AD', name: 'Andorra' }, { code: 'AO', name: 'Angola' }, { code: 'AG', name: 'Antigua and Barbuda' },
+  { code: 'AR', name: 'Argentina' }, { code: 'AM', name: 'Armenia' }, { code: 'AU', name: 'Australia' },
+  { code: 'AT', name: 'Austria' }, { code: 'AZ', name: 'Azerbaijan' }, { code: 'BS', name: 'Bahamas' },
+  { code: 'BH', name: 'Bahrain' }, { code: 'BD', name: 'Bangladesh' }, { code: 'BB', name: 'Barbados' },
+  { code: 'BY', name: 'Belarus' }, { code: 'BE', name: 'Belgium' }, { code: 'BZ', name: 'Belize' },
+  { code: 'BJ', name: 'Benin' }, { code: 'BT', name: 'Bhutan' }, { code: 'BO', name: 'Bolivia' },
+  { code: 'BA', name: 'Bosnia and Herzegovina' }, { code: 'BW', name: 'Botswana' }, { code: 'BR', name: 'Brazil' },
+  { code: 'BN', name: 'Brunei' }, { code: 'BG', name: 'Bulgaria' }, { code: 'BF', name: 'Burkina Faso' },
+  { code: 'BI', name: 'Burundi' }, { code: 'CV', name: 'Cabo Verde' }, { code: 'KH', name: 'Cambodia' },
+  { code: 'CM', name: 'Cameroon' }, { code: 'CA', name: 'Canada' }, { code: 'CF', name: 'Central African Republic' },
+  { code: 'TD', name: 'Chad' }, { code: 'CL', name: 'Chile' }, { code: 'CN', name: 'China' },
+  { code: 'CO', name: 'Colombia' }, { code: 'KM', name: 'Comoros' }, { code: 'CG', name: 'Congo' },
+  { code: 'CR', name: 'Costa Rica' }, { code: 'HR', name: 'Croatia' }, { code: 'CU', name: 'Cuba' },
+  { code: 'CY', name: 'Cyprus' }, { code: 'CZ', name: 'Czech Republic' }, { code: 'DK', name: 'Denmark' },
+  { code: 'DJ', name: 'Djibouti' }, { code: 'DM', name: 'Dominica' }, { code: 'DO', name: 'Dominican Republic' },
+  { code: 'EC', name: 'Ecuador' }, { code: 'EG', name: 'Egypt' }, { code: 'SV', name: 'El Salvador' },
+  { code: 'GQ', name: 'Equatorial Guinea' }, { code: 'ER', name: 'Eritrea' }, { code: 'EE', name: 'Estonia' },
+  { code: 'SZ', name: 'Eswatini' }, { code: 'ET', name: 'Ethiopia' }, { code: 'FJ', name: 'Fiji' },
+  { code: 'FI', name: 'Finland' }, { code: 'FR', name: 'France' }, { code: 'GA', name: 'Gabon' },
+  { code: 'GM', name: 'Gambia' }, { code: 'GE', name: 'Georgia' }, { code: 'DE', name: 'Germany' },
+  { code: 'GH', name: 'Ghana' }, { code: 'GR', name: 'Greece' }, { code: 'GD', name: 'Grenada' },
+  { code: 'GT', name: 'Guatemala' }, { code: 'GN', name: 'Guinea' }, { code: 'GW', name: 'Guinea-Bissau' },
+  { code: 'GY', name: 'Guyana' }, { code: 'HT', name: 'Haiti' }, { code: 'HN', name: 'Honduras' },
+  { code: 'HU', name: 'Hungary' }, { code: 'IS', name: 'Iceland' }, { code: 'IN', name: 'India' },
+  { code: 'ID', name: 'Indonesia' }, { code: 'IR', name: 'Iran' }, { code: 'IQ', name: 'Iraq' },
+  { code: 'IE', name: 'Ireland' }, { code: 'IL', name: 'Israel' }, { code: 'IT', name: 'Italy' },
+  { code: 'JM', name: 'Jamaica' }, { code: 'JP', name: 'Japan' }, { code: 'JO', name: 'Jordan' },
+  { code: 'KZ', name: 'Kazakhstan' }, { code: 'KE', name: 'Kenya' }, { code: 'KI', name: 'Kiribati' },
+  { code: 'KW', name: 'Kuwait' }, { code: 'KG', name: 'Kyrgyzstan' }, { code: 'LA', name: 'Laos' },
+  { code: 'LV', name: 'Latvia' }, { code: 'LB', name: 'Lebanon' }, { code: 'LS', name: 'Lesotho' },
+  { code: 'LR', name: 'Liberia' }, { code: 'LY', name: 'Libya' }, { code: 'LI', name: 'Liechtenstein' },
+  { code: 'LT', name: 'Lithuania' }, { code: 'LU', name: 'Luxembourg' }, { code: 'MG', name: 'Madagascar' },
+  { code: 'MW', name: 'Malawi' }, { code: 'MY', name: 'Malaysia' }, { code: 'MV', name: 'Maldives' },
+  { code: 'ML', name: 'Mali' }, { code: 'MT', name: 'Malta' }, { code: 'MH', name: 'Marshall Islands' },
+  { code: 'MR', name: 'Mauritania' }, { code: 'MU', name: 'Mauritius' }, { code: 'MX', name: 'Mexico' },
+  { code: 'FM', name: 'Micronesia' }, { code: 'MD', name: 'Moldova' }, { code: 'MC', name: 'Monaco' },
+  { code: 'MN', name: 'Mongolia' }, { code: 'ME', name: 'Montenegro' }, { code: 'MA', name: 'Morocco' },
+  { code: 'MZ', name: 'Mozambique' }, { code: 'MM', name: 'Myanmar' }, { code: 'NA', name: 'Namibia' },
+  { code: 'NR', name: 'Nauru' }, { code: 'NP', name: 'Nepal' }, { code: 'NL', name: 'Netherlands' },
+  { code: 'NZ', name: 'New Zealand' }, { code: 'NI', name: 'Nicaragua' }, { code: 'NE', name: 'Niger' },
+  { code: 'NG', name: 'Nigeria' }, { code: 'NO', name: 'Norway' }, { code: 'OM', name: 'Oman' },
+  { code: 'PK', name: 'Pakistan' }, { code: 'PW', name: 'Palau' }, { code: 'PA', name: 'Panama' },
+  { code: 'PG', name: 'Papua New Guinea' }, { code: 'PY', name: 'Paraguay' }, { code: 'PE', name: 'Peru' },
+  { code: 'PH', name: 'Philippines' }, { code: 'PL', name: 'Poland' }, { code: 'PT', name: 'Portugal' },
+  { code: 'QA', name: 'Qatar' }, { code: 'RO', name: 'Romania' }, { code: 'RU', name: 'Russia' },
+  { code: 'RW', name: 'Rwanda' }, { code: 'KN', name: 'Saint Kitts and Nevis' }, { code: 'LC', name: 'Saint Lucia' },
+  { code: 'VC', name: 'Saint Vincent and the Grenadines' }, { code: 'WS', name: 'Samoa' }, { code: 'SM', name: 'San Marino' },
+  { code: 'ST', name: 'Sao Tome and Principe' }, { code: 'SA', name: 'Saudi Arabia' }, { code: 'SN', name: 'Senegal' },
+  { code: 'RS', name: 'Serbia' }, { code: 'SC', name: 'Seychelles' }, { code: 'SL', name: 'Sierra Leone' },
+  { code: 'SG', name: 'Singapore' }, { code: 'SK', name: 'Slovakia' }, { code: 'SI', name: 'Slovenia' },
+  { code: 'SB', name: 'Solomon Islands' }, { code: 'SO', name: 'Somalia' }, { code: 'ZA', name: 'South Africa' },
+  { code: 'SS', name: 'South Sudan' }, { code: 'ES', name: 'Spain' }, { code: 'LK', name: 'Sri Lanka' },
+  { code: 'SD', name: 'Sudan' }, { code: 'SR', name: 'Suriname' }, { code: 'SE', name: 'Sweden' },
+  { code: 'CH', name: 'Switzerland' }, { code: 'SY', name: 'Syria' }, { code: 'TW', name: 'Taiwan' },
+  { code: 'TJ', name: 'Tajikistan' }, { code: 'TZ', name: 'Tanzania' }, { code: 'TH', name: 'Thailand' },
+  { code: 'TL', name: 'Timor-Leste' }, { code: 'TG', name: 'Togo' }, { code: 'TO', name: 'Tonga' },
+  { code: 'TT', name: 'Trinidad and Tobago' }, { code: 'TN', name: 'Tunisia' }, { code: 'TR', name: 'Turkey' },
+  { code: 'TM', name: 'Turkmenistan' }, { code: 'TV', name: 'Tuvalu' }, { code: 'UG', name: 'Uganda' },
+  { code: 'UA', name: 'Ukraine' }, { code: 'AE', name: 'United Arab Emirates' }, { code: 'GB', name: 'United Kingdom' },
+  { code: 'US', name: 'United States' }, { code: 'UY', name: 'Uruguay' }, { code: 'UZ', name: 'Uzbekistan' },
+  { code: 'VU', name: 'Vanuatu' }, { code: 'VE', name: 'Venezuela' }, { code: 'VN', name: 'Vietnam' },
+  { code: 'YE', name: 'Yemen' }, { code: 'ZM', name: 'Zambia' }, { code: 'ZW', name: 'Zimbabwe' },
+];
+
+const ZIP_RE = /^[a-zA-Z0-9\s-]{3,20}$/;
+
 function sanitize(value: string, max: number): string {
   return value.replace(/[<>]/g, '').trim().slice(0, max);
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Per-field address error state
+interface AddressFieldErrors {
+  street?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+}
 
 function ProfileSkeleton() {
   return (
@@ -35,17 +113,20 @@ export function ProfilePage() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [addresses, setAddresses] = useState<Address[]>([]);
+  // We keep the FULL address list (including soft-deleted ones) locally
+  // so the server can persist deletedAt. The UI only shows non-deleted ones.
+  const [allAddresses, setAllAddresses] = useState<Address[]>([]);
 
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
-  const [editingAddressIndex, setEditingAddressIndex] = useState<number | null>(null);
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
 
+  // Address form fields
   const [street, setStreet] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [zipCode, setZipCode] = useState('');
-  const [country, setCountry] = useState('');
-  const [addressError, setAddressError] = useState('');
+  const [country, setCountry] = useState('US');
+  const [addrErrors, setAddrErrors] = useState<AddressFieldErrors>({});
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -62,6 +143,9 @@ export function ProfilePage() {
 
   useScrollLock(isAddressModalOpen);
 
+  // Active (non-deleted) addresses for display
+  const activeAddresses = allAddresses.filter((a) => !a.deletedAt);
+
   const loadProfile = React.useCallback(async () => {
     try {
       setLoading(true);
@@ -69,7 +153,9 @@ export function ProfilePage() {
       setUser(profile);
       setName(profile.name || '');
       setEmail(profile.email || '');
-      setAddresses(profile.addresses || []);
+      // getProfile already filters deleted ones via backend,
+      // but we keep full list locally for soft-delete mutations.
+      setAllAddresses(profile.addresses || []);
       setError(null);
     } catch (err) {
       console.error(err);
@@ -95,7 +181,7 @@ export function ProfilePage() {
       setError(t.profile?.emailError || 'Please enter a valid email address.');
       return;
     }
-    await saveChanges({ name: cleanName, email: cleanEmail, addresses });
+    await saveChanges({ name: cleanName, email: cleanEmail, addresses: allAddresses });
   };
 
   const saveChanges = async (data: { name?: string; email?: string; addresses?: Address[] }) => {
@@ -106,82 +192,111 @@ export function ProfilePage() {
       setUser(updated);
       setName(updated.name || '');
       setEmail(updated.email || '');
-      setAddresses(updated.addresses || []);
+      setAllAddresses(updated.addresses || []);
       showToast({ message: t.profile?.updateSuccess || 'Profile updated', type: 'success' });
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError(t.profile?.updateError || 'Failed to update profile');
-      showToast({ message: t.profile?.updateError || 'Failed to update profile', type: 'error' });
+      const serverErrors = err?.response?.data?.errors;
+      const message = (serverErrors && Array.isArray(serverErrors) && serverErrors.length > 0)
+        ? serverErrors[0].message
+        : err?.response?.data?.message || t.profile?.updateError || 'Failed to update profile';
+      setError(message);
+      showToast({ message, type: 'error' });
     } finally {
       setSaving(false);
     }
   };
 
+  const validateAddressFields = (): boolean => {
+    const next: AddressFieldErrors = {};
+    const cleanStreet = sanitize(street, 200);
+    const cleanCity = sanitize(city, 100);
+    const cleanState = sanitize(state, 100);
+    const cleanZip = sanitize(zipCode, 20);
+    const cleanCountry = sanitize(country, 100);
+
+    if (cleanStreet.length < 5)
+      next.street = t?.profile?.errStreetLength || 'Street address must be at least 5 characters.';
+    if (cleanCity.length < 2)
+      next.city = t?.profile?.errCityLength || 'City must be at least 2 characters.';
+    else if (!/^[a-zA-Z\u00C0-\u024F\s\-']+$/.test(cleanCity))
+      next.city = t?.profile?.errCityInvalid || 'City should contain only letters, spaces, hyphens, or apostrophes.';
+    if (cleanState.length < 2)
+      next.state = t?.profile?.errStateLength || 'State / Province must be at least 2 characters.';
+    if (!ZIP_RE.test(cleanZip))
+      next.zipCode = t?.profile?.errZipInvalid || 'Enter a valid postal code (letters, digits, spaces, hyphens).';
+    if (!cleanCountry)
+      next.country = t?.profile?.errCountryReq || 'Country is required.';
+
+    setAddrErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
   const openAddAddressModal = () => {
-    if (addresses.length >= 10) {
-      setError(t.profile?.maxAddresses || 'You can only have up to 10 addresses.');
+    if (activeAddresses.length >= 10) {
+      showToast({ message: t?.profile?.maxAddressesReached || 'You have reached the maximum of 10 saved addresses. Remove one first.', type: 'error' });
       return;
     }
     setStreet('');
     setCity('');
     setState('');
     setZipCode('');
-    setCountry('');
-    setAddressError('');
-    setEditingAddressIndex(null);
+    setCountry('US');
+    setAddrErrors({});
+    setEditingAddressId(null);
     setIsAddressModalOpen(true);
   };
 
-  const openEditAddressModal = (index: number) => {
-    const addr = addresses[index];
+  const openEditAddressModal = (addr: Address) => {
     setStreet(addr.street);
     setCity(addr.city);
     setState(addr.state);
     setZipCode(addr.zipCode);
     setCountry(addr.country);
-    setAddressError('');
-    setEditingAddressIndex(index);
+    setAddrErrors({});
+    setEditingAddressId(addr._id || null);
     setIsAddressModalOpen(true);
   };
 
   const handleSaveAddress = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateAddressFields()) return;
+
     const newAddr: Address = {
-      street: sanitize(street, 120),
-      city: sanitize(city, 80),
-      state: sanitize(state, 80),
+      street: sanitize(street, 200),
+      city: sanitize(city, 100),
+      state: sanitize(state, 100),
       zipCode: sanitize(zipCode, 20),
-      country: sanitize(country, 80),
+      country: sanitize(country, 100),
     };
 
-    if (
-      newAddr.street.length < 3 ||
-      newAddr.city.length < 2 ||
-      newAddr.state.length < 2 ||
-      newAddr.zipCode.length < 2 ||
-      newAddr.country.length < 2
-    ) {
-      setAddressError(t.profile?.addressIncomplete || 'Please complete all address fields.');
-      return;
-    }
-
-    const newAddresses = [...addresses];
-    if (editingAddressIndex !== null) {
-      newAddresses[editingAddressIndex] = newAddr;
+    let updatedAddresses: Address[];
+    if (editingAddressId) {
+      // Replace the edited entry
+      updatedAddresses = allAddresses.map((a) =>
+        a._id === editingAddressId ? { ...a, ...newAddr } : a
+      );
     } else {
-      newAddresses.push(newAddr);
+      updatedAddresses = [...allAddresses, newAddr];
     }
 
     setIsAddressModalOpen(false);
-    await saveChanges({ name: sanitize(name, 80), email: sanitize(email, 254).toLowerCase(), addresses: newAddresses });
-  };
-
-  const handleDeleteAddress = async (index: number) => {
-    const newAddresses = addresses.filter((_, i) => i !== index);
     await saveChanges({
       name: sanitize(name, 80),
       email: sanitize(email, 254).toLowerCase(),
-      addresses: newAddresses,
+      addresses: updatedAddresses,
+    });
+  };
+
+  // Soft-delete: set deletedAt instead of removing from array
+  const handleDeleteAddress = async (addr: Address) => {
+    const updatedAddresses = allAddresses.map((a) =>
+      a._id === addr._id ? { ...a, deletedAt: new Date().toISOString() } : a
+    );
+    await saveChanges({
+      name: sanitize(name, 80),
+      email: sanitize(email, 254).toLowerCase(),
+      addresses: updatedAddresses,
     });
   };
 
@@ -192,15 +307,15 @@ export function ProfilePage() {
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    e.target.value = ''; // allow re-selecting the same file later
+    e.target.value = '';
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      showToast({ message: 'Please choose an image file.', type: 'error' });
+      showToast({ message: t?.profile?.imageRequired || 'Please choose an image file.', type: 'error' });
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      showToast({ message: 'Image must be smaller than 5MB.', type: 'error' });
+      showToast({ message: t?.profile?.imageSize || 'Image must be smaller than 5MB.', type: 'error' });
       return;
     }
 
@@ -209,10 +324,10 @@ export function ProfilePage() {
       const updated = await accountApi.uploadAvatar(file);
       setUser(updated);
       updateAuthUser({ avatarUrl: updated.avatarUrl });
-      showToast({ message: 'Profile picture updated', type: 'success' });
+      showToast({ message: t?.profile?.imageUploadSuccess || 'Profile picture updated', type: 'success' });
     } catch (err) {
       console.error(err);
-      showToast({ message: 'Failed to upload profile picture', type: 'error' });
+      showToast({ message: t?.profile?.imageUploadError || 'Failed to upload profile picture', type: 'error' });
     } finally {
       setAvatarUploading(false);
     }
@@ -222,29 +337,48 @@ export function ProfilePage() {
     e.preventDefault();
     setPasswordError('');
 
+    if (!currentPassword) {
+      setPasswordError(t?.profile?.currentPasswordReq || 'Please enter your current password.');
+      return;
+    }
     if (newPassword.length < 8) {
-      setPasswordError('New password must be at least 8 characters.');
+      setPasswordError(t?.profile?.newPasswordMin || 'New password must be at least 8 characters.');
+      return;
+    }
+    if (!/[a-z]/.test(newPassword)) {
+      setPasswordError(t?.profile?.newPasswordLow || 'New password must contain at least one lowercase letter.');
+      return;
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+      setPasswordError(t?.profile?.newPasswordUp || 'New password must contain at least one uppercase letter.');
+      return;
+    }
+    if (!/[^a-zA-Z0-9]/.test(newPassword)) {
+      setPasswordError(t?.profile?.newPasswordSpec || 'New password must contain at least one special character (e.g. !, @, #).');
       return;
     }
     if (newPassword !== confirmNewPassword) {
-      setPasswordError('New passwords do not match.');
+      setPasswordError(t?.profile?.newPasswordMatch || 'New passwords do not match.');
       return;
     }
     if (newPassword === currentPassword) {
-      setPasswordError('New password must be different from the current password.');
+      setPasswordError(t?.profile?.newPasswordDiff || 'New password must be different from the current password.');
       return;
     }
 
     setChangingPassword(true);
     try {
       await accountApi.changePassword({ currentPassword, newPassword });
-      showToast({ message: 'Password updated. Please sign in again.', type: 'success' });
-      // Changing the password revokes every existing token for this account —
-      // including the one this tab is using — so the session ends here too.
+      showToast({ message: t?.profile?.passwordSuccess || 'Password updated. Please sign in again.', type: 'success' });
       logout();
       navigate('/login', { replace: true });
     } catch (err: any) {
-      setPasswordError(err.response?.data?.message || 'Failed to change password.');
+      const serverErrors = err?.response?.data?.errors;
+      setPasswordError(
+        (serverErrors && Array.isArray(serverErrors) && serverErrors.length > 0)
+          ? serverErrors[0].message
+          : err.response?.data?.message || t?.profile?.passwordChangeFailed || 'Failed to change password.'
+      );
     } finally {
       setChangingPassword(false);
     }
@@ -253,6 +387,9 @@ export function ProfilePage() {
   if (loading) {
     return <ProfileSkeleton />;
   }
+
+  const fieldClass = (hasError?: boolean) =>
+    `w-full bg-surface-container border ${hasError ? 'border-error/60 ring-2 ring-error/20' : 'border-transparent'} rounded-lg px-space-md py-2.5 text-on-surface focus:outline-none focus:bg-surface-container-high focus:border-outline-variant/30 transition-colors`;
 
   return (
     <main className="w-full bg-surface min-h-[70vh] selection:bg-primary-container selection:text-on-primary-container">
@@ -278,7 +415,7 @@ export function ProfilePage() {
                 type="button"
                 onClick={handleAvatarPick}
                 disabled={avatarUploading}
-                aria-label="Change profile picture"
+                aria-label={t?.common?.changeProfilePicture || "Change profile picture"}
                 className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center border-2 border-surface shadow-sm hover:bg-primary transition-colors disabled:opacity-50"
               >
                 <Icon name="edit" size={14} />
@@ -326,11 +463,11 @@ export function ProfilePage() {
           </div>
 
           <div className="flex flex-col items-end gap-2 text-body-sm text-on-surface-variant">
-            {addresses.length > 0 && (
+            {activeAddresses.length > 0 && (
               <div className="flex items-center gap-1.5">
                 <Icon name="location_on" className="text-[16px] text-primary" />
                 <span>
-                  {addresses[0].city}, {addresses[0].country}
+                  {activeAddresses[0].city}, {activeAddresses[0].country}
                 </span>
               </div>
             )}
@@ -349,6 +486,7 @@ export function ProfilePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
           <div className="lg:col-span-4 flex flex-col gap-space-lg">
+            {/* Personal Details */}
             <section className="bg-surface-container-low border border-outline-variant/10 p-space-lg rounded-xl shadow-sm">
               <h2 className="text-on-surface font-title-editorial text-title-editorial border-b border-outline-variant/20 pb-space-sm mb-space-md flex items-center gap-2">
                 <Icon name="person" className="text-primary text-[20px]" />
@@ -393,10 +531,11 @@ export function ProfilePage() {
               </form>
             </section>
 
+            {/* Change Password */}
             <section className="bg-surface-container-low border border-outline-variant/10 p-space-lg rounded-xl shadow-sm">
               <h2 className="text-on-surface font-title-editorial text-title-editorial border-b border-outline-variant/20 pb-space-sm mb-space-md flex items-center gap-2">
                 <Icon name="lock" className="text-primary text-[20px]" />
-                Change Password
+                {t?.profile?.changePassword || 'Change Password'}
               </h2>
 
               <form onSubmit={handleChangePassword} className="space-y-space-md font-body-sm" noValidate>
@@ -407,7 +546,7 @@ export function ProfilePage() {
                 )}
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-md text-label-md text-on-surface-variant" htmlFor="current-password">
-                    Current Password
+                    {t?.profile?.currentPassword || 'Current Password'}
                   </label>
                   <input
                     id="current-password"
@@ -421,7 +560,7 @@ export function ProfilePage() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-md text-label-md text-on-surface-variant" htmlFor="new-password">
-                    New Password
+                    {t?.profile?.newPassword || 'New Password'}
                   </label>
                   <input
                     id="new-password"
@@ -435,7 +574,7 @@ export function ProfilePage() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-md text-label-md text-on-surface-variant" htmlFor="confirm-new-password">
-                    Confirm New Password
+                    {t?.profile?.confirmNewPassword || 'Confirm New Password'}
                   </label>
                   <input
                     id="confirm-new-password"
@@ -455,11 +594,12 @@ export function ProfilePage() {
                   icon="lock"
                   variant="secondary"
                 >
-                  Update Password
+                  {t?.profile?.updatePassword || 'Update Password'}
                 </Button>
               </form>
             </section>
 
+            {/* Quick Links */}
             <section className="bg-surface-container-low border border-outline-variant/10 p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
               <h2 className="text-on-surface font-title-editorial text-title-editorial border-b border-outline-variant/20 pb-space-sm flex items-center gap-2">
                 <Icon name="link" className="text-primary text-[20px]" />
@@ -484,6 +624,7 @@ export function ProfilePage() {
             </section>
           </div>
 
+          {/* Dispatch Destinations */}
           <div className="lg:col-span-8 flex flex-col gap-space-lg">
             <section className="bg-surface-container-low border border-outline-variant/10 p-space-lg rounded-xl shadow-sm">
               <div className="flex items-center justify-between border-b border-outline-variant/20 pb-space-sm mb-space-md">
@@ -492,11 +633,13 @@ export function ProfilePage() {
                   {t.profile?.dispatchDestinations || 'Dispatch Destinations'}
                 </h2>
                 <span className="font-label-caps text-label-caps text-outline uppercase tracking-wider">
-                  {t.profile?.ofTotal ? t.profile.ofTotal.replace('{{count}}', addresses.length.toString()) : `${addresses.length} of 10`}
+                  {t.profile?.ofTotal
+                    ? t.profile.ofTotal.replace('{{count}}', activeAddresses.length.toString())
+                    : `${activeAddresses.length} of 10`}
                 </span>
               </div>
 
-              {addresses.length >= 8 && addresses.length < 10 && (
+              {activeAddresses.length >= 8 && activeAddresses.length < 10 && (
                 <div className="bg-secondary-container/20 border border-secondary-container/30 text-secondary text-body-sm p-3 rounded-md flex items-center gap-2 mb-4">
                   <Icon name="warning" className="text-[18px] shrink-0" />
                   <span>{t.profile?.limitWarning || 'You are approaching the maximum limit of 10 saved addresses.'}</span>
@@ -504,15 +647,17 @@ export function ProfilePage() {
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">
-                {addresses.map((addr, idx) => (
+                {activeAddresses.map((addr, idx) => (
                   <div
-                    key={`${addr.street}-${idx}`}
+                    key={addr._id || `${addr.street}-${idx}`}
                     className="bg-surface-container border border-outline-variant/10 p-space-md rounded-lg flex flex-col justify-between hover:bg-surface-container-high transition-colors group"
                   >
                     <div className="flex flex-col gap-1 mb-4 font-body-sm text-body-sm text-on-surface-variant">
                       <div className="flex items-center justify-between mb-2">
                         <p className="text-on-surface font-label-md text-label-md uppercase tracking-wider">
-                          {t.profile?.destination ? t.profile.destination.replace('{{count}}', (idx + 1).toString()) : `Destination ${idx + 1}`}
+                          {t.profile?.destination
+                            ? t.profile.destination.replace('{{count}}', (idx + 1).toString())
+                            : `Destination ${idx + 1}`}
                         </p>
                         {idx === 0 && (
                           <span className="bg-primary/20 text-primary font-label-caps text-[10px] px-2 py-0.5 rounded uppercase tracking-wider">
@@ -528,7 +673,7 @@ export function ProfilePage() {
                     </div>
                     <div className="flex items-center gap-4 border-t border-outline-variant/20 pt-3 mt-auto">
                       <Button
-                        onClick={() => openEditAddressModal(idx)}
+                        onClick={() => openEditAddressModal(addr)}
                         variant="ghost"
                         size="sm"
                         icon="edit"
@@ -537,7 +682,7 @@ export function ProfilePage() {
                         {t.profile?.edit || 'Edit'}
                       </Button>
                       <Button
-                        onClick={() => handleDeleteAddress(idx)}
+                        onClick={() => handleDeleteAddress(addr)}
                         variant="ghost"
                         size="sm"
                         icon="delete"
@@ -550,7 +695,7 @@ export function ProfilePage() {
                   </div>
                 ))}
 
-                {addresses.length < 10 && (
+                {activeAddresses.length < 10 && (
                   <button
                     type="button"
                     onClick={openAddAddressModal}
@@ -568,6 +713,7 @@ export function ProfilePage() {
         </div>
       </div>
 
+      {/* Address Modal */}
       {isAddressModalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-surface-container-lowest/80 backdrop-blur-sm p-4 animate-fade-in"
@@ -583,7 +729,7 @@ export function ProfilePage() {
             <div className="flex items-center justify-between p-space-md border-b border-outline-variant/20">
               <div>
                 <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest">
-                  {editingAddressIndex !== null ? (t.profile?.update || 'Update') : (t.profile?.new || 'New')}
+                  {editingAddressId ? (t.profile?.update || 'Update') : (t.profile?.new || 'New')}
                 </span>
                 <h3 id="address-modal-title" className="font-headline-sm text-headline-sm text-on-surface">
                   {t.profile?.dispatchAddress || 'Dispatch Address'}
@@ -593,91 +739,98 @@ export function ProfilePage() {
                 onClick={() => setIsAddressModalOpen(false)}
                 variant="ghost"
                 icon="close"
-                aria-label="Close"
+                aria-label={t?.common?.closeModal || "Close"}
                 disabled={saving}
               />
             </div>
 
             <form onSubmit={handleSaveAddress} className="p-space-lg space-y-space-md font-body-sm" noValidate>
-              {addressError && (
-                <p className="text-sm text-error" role="alert">
-                  {addressError}
-                </p>
-              )}
+              {/* Street */}
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="street" className="font-label-md text-label-md text-on-surface-variant">
+                <label htmlFor="addr-street" className="font-label-md text-label-md text-on-surface-variant">
                   {t.profile?.streetAddress || 'Street Address'} <span className="text-primary">*</span>
                 </label>
                 <input
-                  id="street"
+                  id="addr-street"
                   type="text"
                   required
-                  maxLength={120}
+                  maxLength={200}
                   value={street}
-                  onChange={(e) => setStreet(e.target.value)}
-                  className="w-full bg-surface-container rounded-lg px-space-md py-2.5 text-on-surface focus:outline-none focus:bg-surface-container-high transition-colors"
+                  onChange={(e) => { setStreet(e.target.value); if (addrErrors.street) setAddrErrors((p) => ({ ...p, street: undefined })); }}
+                  className={fieldClass(Boolean(addrErrors.street))}
                 />
+                {addrErrors.street && <p className="text-[11px] text-error" role="alert">{addrErrors.street}</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-space-md">
+                {/* City */}
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="city" className="font-label-md text-label-md text-on-surface-variant">
+                  <label htmlFor="addr-city" className="font-label-md text-label-md text-on-surface-variant">
                     {t.profile?.city || 'City'} <span className="text-primary">*</span>
                   </label>
                   <input
-                    id="city"
+                    id="addr-city"
                     type="text"
                     required
-                    maxLength={80}
+                    maxLength={100}
                     value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className="w-full bg-surface-container rounded-lg px-space-md py-2.5 text-on-surface focus:outline-none focus:bg-surface-container-high transition-colors"
+                    onChange={(e) => { setCity(e.target.value); if (addrErrors.city) setAddrErrors((p) => ({ ...p, city: undefined })); }}
+                    className={fieldClass(Boolean(addrErrors.city))}
                   />
+                  {addrErrors.city && <p className="text-[11px] text-error" role="alert">{addrErrors.city}</p>}
                 </div>
+                {/* State */}
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="state" className="font-label-md text-label-md text-on-surface-variant">
+                  <label htmlFor="addr-state" className="font-label-md text-label-md text-on-surface-variant">
                     {t.profile?.stateProvince || 'State/Province'} <span className="text-primary">*</span>
                   </label>
                   <input
-                    id="state"
+                    id="addr-state"
                     type="text"
                     required
-                    maxLength={80}
+                    maxLength={100}
                     value={state}
-                    onChange={(e) => setState(e.target.value)}
-                    className="w-full bg-surface-container rounded-lg px-space-md py-2.5 text-on-surface focus:outline-none focus:bg-surface-container-high transition-colors"
+                    onChange={(e) => { setState(e.target.value); if (addrErrors.state) setAddrErrors((p) => ({ ...p, state: undefined })); }}
+                    className={fieldClass(Boolean(addrErrors.state))}
                   />
+                  {addrErrors.state && <p className="text-[11px] text-error" role="alert">{addrErrors.state}</p>}
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-space-md">
+                {/* Zip */}
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="zipCode" className="font-label-md text-label-md text-on-surface-variant">
+                  <label htmlFor="addr-zip" className="font-label-md text-label-md text-on-surface-variant">
                     {t.profile?.zipCode || 'Zip/Postal Code'} <span className="text-primary">*</span>
                   </label>
                   <input
-                    id="zipCode"
+                    id="addr-zip"
                     type="text"
                     required
                     maxLength={20}
                     value={zipCode}
-                    onChange={(e) => setZipCode(e.target.value)}
-                    className="w-full bg-surface-container rounded-lg px-space-md py-2.5 text-on-surface focus:outline-none focus:bg-surface-container-high transition-colors"
+                    onChange={(e) => { setZipCode(e.target.value); if (addrErrors.zipCode) setAddrErrors((p) => ({ ...p, zipCode: undefined })); }}
+                    className={fieldClass(Boolean(addrErrors.zipCode))}
                   />
+                  {addrErrors.zipCode && <p className="text-[11px] text-error" role="alert">{addrErrors.zipCode}</p>}
                 </div>
+                {/* Country */}
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="country" className="font-label-md text-label-md text-on-surface-variant">
+                  <label htmlFor="addr-country" className="font-label-md text-label-md text-on-surface-variant">
                     {t.profile?.country || 'Country'} <span className="text-primary">*</span>
                   </label>
-                  <input
-                    id="country"
-                    type="text"
+                  <select
+                    id="addr-country"
                     required
-                    maxLength={80}
                     value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                    className="w-full bg-surface-container rounded-lg px-space-md py-2.5 text-on-surface focus:outline-none focus:bg-surface-container-high transition-colors"
-                  />
+                    onChange={(e) => { setCountry(e.target.value); if (addrErrors.country) setAddrErrors((p) => ({ ...p, country: undefined })); }}
+                    className={fieldClass(Boolean(addrErrors.country))}
+                  >
+                    {COUNTRIES.map((c) => (
+                      <option key={c.code} value={c.name}>{c.name}</option>
+                    ))}
+                  </select>
+                  {addrErrors.country && <p className="text-[11px] text-error" role="alert">{addrErrors.country}</p>}
                 </div>
               </div>
 

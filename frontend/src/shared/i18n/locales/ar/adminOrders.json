@@ -12,5 +12,15 @@
   "process": "قيد التجهيز",
   "deliver": "تم التسليم",
   "noOrders": "لا توجد طلبات حتى الآن.",
-  "statusUpdated": "تم تحديث الحالة إلى"
+  "statusUpdated": "تم تحديث الحالة إلى",
+  "dispatchFulfillment": "الشحن والتنفيذ",
+  "orderManagement": "إدارة الطلبات",
+  "trackCommissions": "تتبع الطلبات الخاصة، ومعالجة الشحنات، وإدارة عمليات التسليم الفاخرة.",
+  "syncLedgers": "مزامنة السجلات",
+  "commissionId": "رقم الطلب",
+  "destination": "الوجهة",
+  "dispatchStatus": "حالة الشحن",
+  "unknown": "غير معروف",
+  "fetchError": "فشل تحميل الطلبات",
+  "updateError": "فشل تحديث الحالة"
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Icon } from './Icon';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface PaginationProps {
   currentPage: number;
@@ -14,6 +15,7 @@ export const Pagination: React.FC<PaginationProps> = ({
   onPageChange,
   className = '',
 }) => {
+  const { t } = useLanguage() as any;
   if (totalPages <= 1) return null;
 
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -26,12 +28,12 @@ export const Pagination: React.FC<PaginationProps> = ({
   });
 
   return (
-    <nav className={`flex items-center justify-center gap-1 mt-space-xl ${className}`} aria-label="Pagination">
+    <nav className={`flex items-center justify-center gap-1 mt-space-xl ${className}`} aria-label={t?.common?.pagination || "Pagination"}>
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
         className="w-10 h-10 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-        aria-label="Previous page"
+        aria-label={t?.common?.previousPage || "Previous page"}
       >
         <Icon name="chevron_left" size={20} />
       </button>
@@ -66,7 +68,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
         className="w-10 h-10 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-        aria-label="Next page"
+        aria-label={t?.common?.nextPage || "Next page"}
       >
         <Icon name="chevron_right" size={20} />
       </button>

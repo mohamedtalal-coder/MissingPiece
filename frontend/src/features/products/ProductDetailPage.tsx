@@ -166,7 +166,7 @@ export function ProductDetailPage() {
       <div className="flex flex-col w-full">
         <div className="w-full bg-surface-container-low/60 backdrop-blur-sm border-b border-outline-variant/30">
           <div className="max-w-[1360px] mx-auto px-margin-mobile md:px-margin py-3.5 flex flex-wrap items-center justify-between gap-4">
-            <nav aria-label="Breadcrumbs" className="flex items-center gap-2 font-label-caps text-label-caps uppercase tracking-[0.14em]">
+            <nav aria-label={t?.common?.breadcrumbs || "Breadcrumbs"} className="flex items-center gap-2 font-label-caps text-label-caps uppercase tracking-[0.14em]">
               <Link to="/products" className="text-on-surface-variant hover:text-primary transition-colors">
                 {t.productDetail?.catalog || 'Catalog'}
               </Link>
@@ -228,7 +228,7 @@ export function ProductDetailPage() {
                     type="button"
                     onClick={() => setZoomOpen(true)}
                     className="absolute top-4 end-4 z-20 p-2.5 rounded-full bg-surface-container-lowest/90 backdrop-blur-md text-on-surface-variant hover:text-on-surface border border-outline-variant/50 transition-all"
-                    aria-label="Zoom image"
+                    aria-label={t?.common?.zoomImage || "Zoom image"}
                   >
                     <Icon name="eye" size={18} />
                   </button>
@@ -236,7 +236,7 @@ export function ProductDetailPage() {
               </div>
 
               {images.length > 1 && (
-                <div className="grid grid-cols-4 gap-3 w-full" role="listbox" aria-label="Product images">
+                <div className="grid grid-cols-4 gap-3 w-full" role="listbox" aria-label={t?.common?.productImages || "Product images"}>
                   {images.map((img, idx) => {
                     const selected = selectedImage === img;
                     return (
@@ -322,7 +322,7 @@ export function ProductDetailPage() {
                       onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                       disabled={product.stock === 0 || quantity <= 1}
                       className="w-11 h-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors disabled:opacity-50"
-                      aria-label="Decrease quantity"
+                      aria-label={t?.common?.decreaseQty || "Decrease quantity"}
                     >
                       <Icon name="remove" size={18} />
                     </button>
@@ -334,7 +334,7 @@ export function ProductDetailPage() {
                       onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}
                       disabled={product.stock === 0 || quantity >= maxQty}
                       className="w-11 h-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors disabled:opacity-50"
-                      aria-label="Increase quantity"
+                      aria-label={t?.common?.increaseQty || "Increase quantity"}
                     >
                       <Icon name="add" size={18} />
                     </button>

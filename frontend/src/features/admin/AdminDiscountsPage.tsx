@@ -99,7 +99,7 @@ export function AdminDiscountsPage() {
 
   const handleSave = async () => {
     if (!form.code.trim() || !form.validFrom || !form.validTo || form.value <= 0) {
-      toast.showToast({ message: 'Code, dates, and a positive value are required.', type: 'error' });
+      toast.showToast({ message: dc.validationError || 'Code, dates, and a positive value are required.', type: 'error' });
       return;
     }
     try {
@@ -177,12 +177,12 @@ export function AdminDiscountsPage() {
                       <td className="py-4 px-4">{d.maxUses ?? '∞'} (used: {d.usedCount ?? 0})</td>
                       <td className="py-4 px-4">
                         <span className={`px-2 py-1 rounded text-xs ${d.isActive ? 'bg-primary-container text-on-primary-container' : 'bg-surface-variant text-on-surface-variant'}`}>
-                          {d.isActive ? 'Active' : 'Inactive'}
+                          {d.isActive ? dc.activeLabel || 'Active' : dc.inactiveLabel || 'Inactive'}
                         </span>
                       </td>
                       <td className="py-4 px-4 text-end">
                         <div className="flex justify-end gap-2">
-                          <Button size="sm" variant="secondary" onClick={() => openEdit(d)}>{dc.save === 'Save' ? 'Edit' : dc.save}</Button>
+                          <Button size="sm" variant="secondary" onClick={() => openEdit(d)}>{dc.edit || 'Edit'}</Button>
                           <Button size="sm" variant="secondary" onClick={() => handleDelete(d._id)}>{dc.delete}</Button>
                         </div>
                       </td>
@@ -195,11 +195,11 @@ export function AdminDiscountsPage() {
             {totalPages > 1 && (
               <div className="flex items-center justify-between gap-4 px-4 py-3 border-t border-outline-variant/20">
                 <Button size="sm" variant="secondary" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1 || loading}>
-                  Previous
+                  {dc.previous || 'Previous'}
                 </Button>
-                <span className="text-sm text-on-surface-variant">Page {page} of {totalPages}</span>
+                <span className="text-sm text-on-surface-variant">{dc.pageOf ? dc.pageOf.replace('{{page}}', page.toString()).replace('{{total}}', totalPages.toString()) : `Page ${page} of ${totalPages}`}</span>
                 <Button size="sm" variant="secondary" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages || loading}>
-                  Next
+                  {dc.next || 'Next'}
                 </Button>
               </div>
             )}
@@ -217,7 +217,7 @@ export function AdminDiscountsPage() {
         >
           <div className="bg-surface rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4">
             <div className="p-6 border-b border-outline-variant/20">
-              <h2 className="font-headline-md text-on-surface">{editingId ? 'Edit Discount' : dc.add}</h2>
+              <h2 className="font-headline-md text-on-surface">{editingId ? dc.editDiscount || 'Edit Discount' : dc.add}</h2>
             </div>
             <div className="p-6 space-y-4">
               <div>
@@ -278,7 +278,7 @@ export function AdminDiscountsPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-on-surface-variant mb-1">{dc.maxUses} (leave blank for unlimited)</label>
+                <label className="block text-sm font-medium text-on-surface-variant mb-1">{dc.maxUses} {dc.unlimitedHint || '(leave blank for unlimited)'}</label>
                 <input
                   type="number"
                   min={1}

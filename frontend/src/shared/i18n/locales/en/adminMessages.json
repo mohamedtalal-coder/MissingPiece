@@ -1,6 +1,24 @@
 {
-  "title": "Customer Messages",
-  "subtitle": "Review inquiries submitted through the contact form",
+  "clientRelations": "Client Relations",
+  "pageTitle": "Customer Messages & Missing Piece Claims",
+  "pageSubtitle": "Review and triage customer inquiries, commission requests, and heirloom replacement claims.",
+  "filterAll": "All",
+  "filterUnread": "Unread",
+  "filterRead": "Read",
+  "filterResolved": "Resolved",
+  "retry": "Retry",
+  "unspecifiedSubject": "Unspecified Subject",
+  "from": "From:",
+  "markRead": "Mark Read",
+  "archiveResolve": "Archive & Resolve",
+  "reopenDispatch": "Reopen Dispatch",
+  "markUnread": "Mark Unread",
+  "previous": "Previous",
+  "next": "Next",
+  "pageOf": "Page {{page}} of {{total}}",
   "noMessages": "No messages found",
-  "noMessagesDescription": "You have no new customer inquiries."
+  "noMessagesDescription": "You have no new customer inquiries.",
+  "fetchError": "Failed to load messages",
+  "updateError": "Failed to update message",
+  "statusUpdated": "Marked as {{status}}"
 }

@@ -1,3 +1,10 @@
+import { jest } from "@jest/globals";
+
+// Mock connectDB so the per-request middleware doesn't require a real MONGO_URI
+jest.mock("../config/db.js", () => ({
+  connectDB: jest.fn().mockResolvedValue(undefined),
+}));
+
 import request from "supertest";
 import app from "../app.js";
 

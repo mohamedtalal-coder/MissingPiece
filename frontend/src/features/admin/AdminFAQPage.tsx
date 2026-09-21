@@ -100,7 +100,7 @@ export function AdminFAQPage() {
 
   const handleSave = async () => {
     if (!form.questionEn.trim() || !form.questionAr.trim() || !form.answerEn.trim() || !form.answerAr.trim()) {
-      toast.showToast({ message: 'All question and answer fields are required.', type: 'error' });
+      toast.showToast({ message: fq.validationError || 'All question and answer fields are required.', type: 'error' });
       return;
     }
     try {
@@ -201,7 +201,7 @@ export function AdminFAQPage() {
                   value={form.questionEn}
                   onChange={(e) => handleFieldChange('questionEn', e.target.value)}
                   className="w-full border border-outline-variant rounded-lg px-3 py-2 bg-surface-container-low text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40"
-                  placeholder="Question in English"
+                  placeholder={t?.adminPanel?.faq?.questionEn || "Question in English"}
                 />
               </div>
               <div>
@@ -211,7 +211,7 @@ export function AdminFAQPage() {
                   onChange={(e) => handleFieldChange('answerEn', e.target.value)}
                   rows={4}
                   className="w-full border border-outline-variant rounded-lg px-3 py-2 bg-surface-container-low text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y"
-                  placeholder="Answer in English"
+                  placeholder={t?.adminPanel?.faq?.answerEn || "Answer in English"}
                 />
               </div>
               {/* Arabic fields */}
@@ -223,7 +223,7 @@ export function AdminFAQPage() {
                   value={form.questionAr}
                   onChange={(e) => handleFieldChange('questionAr', e.target.value)}
                   className="w-full border border-outline-variant rounded-lg px-3 py-2 bg-surface-container-low text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40"
-                  placeholder="السؤال بالعربية"
+                  placeholder={t?.adminPanel?.faq?.questionAr || "السؤال بالعربية"}
                 />
               </div>
               <div>
@@ -234,7 +234,7 @@ export function AdminFAQPage() {
                   onChange={(e) => handleFieldChange('answerAr', e.target.value)}
                   rows={4}
                   className="w-full border border-outline-variant rounded-lg px-3 py-2 bg-surface-container-low text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y"
-                  placeholder="الإجابة بالعربية"
+                  placeholder={t?.adminPanel?.faq?.answerAr || "الإجابة بالعربية"}
                 />
               </div>
               {/* Meta fields */}

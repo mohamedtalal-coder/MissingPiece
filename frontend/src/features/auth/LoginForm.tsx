@@ -79,9 +79,10 @@ export const LoginForm: React.FC = () => {
           type="email"
           label={t.auth?.email || 'Email Address'}
           icon="mail"
+          inputSize="lg"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="name@example.com"
+          placeholder={t.auth?.emailPlaceholder || "name@example.com"}
           required
           maxLength={254}
           autoComplete="email"
@@ -93,6 +94,7 @@ export const LoginForm: React.FC = () => {
             type={showPassword ? 'text' : 'password'}
             label={t.auth?.password || 'Password'}
             icon="lock"
+            inputSize="lg"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
@@ -106,7 +108,7 @@ export const LoginForm: React.FC = () => {
             className={`absolute right-space-md top-[34px] text-on-surface-variant hover:text-on-surface focus:outline-none ${
               language === 'ar' ? 'left-space-md end-auto' : ''
             }`}
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            aria-label={showPassword ? (t.auth?.hidePassword || 'Hide password') : (t.auth?.showPassword || 'Show password')}
           >
             <Icon name={showPassword ? 'eye_off' : 'eye'} size={18} />
           </button>

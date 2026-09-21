@@ -15,6 +15,11 @@ import adminProductsEn from './locales/en/adminProducts.json';
 import cartEn from './locales/en/cart.json';
 import adminPanelEn from './locales/en/adminPanel.json';
 import faqEn from './locales/en/faq.json';
+import staticEn from './locales/en/static.json';
+import profileEn from './locales/en/profile.json';
+import authEn from './locales/en/auth.json';
+import productCardEn from './locales/en/productCard.json';
+import productFiltersEn from './locales/en/productFilters.json';
 
 import navAr from './locales/ar/nav.json';
 import footerAr from './locales/ar/footer.json';
@@ -33,6 +38,11 @@ import adminProductsAr from './locales/ar/adminProducts.json';
 import cartAr from './locales/ar/cart.json';
 import adminPanelAr from './locales/ar/adminPanel.json';
 import faqAr from './locales/ar/faq.json';
+import staticAr from './locales/ar/static.json';
+import profileAr from './locales/ar/profile.json';
+import authAr from './locales/ar/auth.json';
+import productCardAr from './locales/ar/productCard.json';
+import productFiltersAr from './locales/ar/productFilters.json';
 
 export const en = {
   nav: navEn,
@@ -52,6 +62,11 @@ export const en = {
   cart: cartEn,
   adminPanel: adminPanelEn,
   faq: faqEn,
+  static: staticEn,
+  profile: profileEn,
+  auth: authEn,
+  productCard: productCardEn,
+  productFilters: productFiltersEn,
 };
 
 const arRaw = {
@@ -72,6 +87,11 @@ const arRaw = {
   cart: cartAr,
   adminPanel: adminPanelAr,
   faq: faqAr,
+  static: staticAr,
+  profile: profileAr,
+  auth: authAr,
+  productCard: productCardAr,
+  productFilters: productFiltersAr,
 };
 
 function deepMerge<T>(target: any, source: any): T {

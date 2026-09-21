@@ -49,7 +49,16 @@
     "markedAs": "تم وضع علامة على التقييم كـ {{status}}",
     "previous": "السابق",
     "next": "التالي",
-    "pageOf": "صفحة {{page}} من {{total}}"
+    "pageOf": "صفحة {{page}} من {{total}}",
+    "filterAll": "جميع الحالات",
+    "filterPending": "قيد الانتظار",
+    "filterApproved": "مقبول",
+    "filterRejected": "مرفوض",
+    "filterFlagged": "مُبلَّغ عنه",
+    "statusPending": "قيد الانتظار",
+    "statusApproved": "مقبول",
+    "statusRejected": "مرفوض",
+    "statusFlagged": "مُبلَّغ عنه"
   },
   "faq": {
     "title": "إدارة الأسئلة الشائعة",
@@ -80,7 +89,8 @@
     "deleteError": "فشل في حذف السؤال الشائع",
     "saveError": "فشل حفظ السؤال",
     "deleted": "تم حذف السؤال الشائع",
-    "saved": "تم حفظ السؤال"
+    "saved": "تم حفظ السؤال",
+    "validationError": "جميع حقول السؤال والجواب مطلوبة."
   },
   "users": {
     "title": "إدارة المستخدمين",
@@ -114,7 +124,12 @@
     "roleUpdated": "تم تحديث دور المستخدم",
     "previous": "السابق",
     "next": "التالي",
-    "pageOf": "صفحة {{page}} من {{total}}"
+    "pageOf": "صفحة {{page}} من {{total}}",
+    "exportError": "فشل تصدير البيانات",
+    "passwordPlaceholder": "أدخل كلمة المرور",
+    "stepUpDesc": "يتطلب هذا الإجراء إعادة إدخال كلمة مرور المسؤول لأسباب أمنية.",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد"
   },
   "discounts": {
     "title": "أكواد الخصم",
@@ -138,9 +153,21 @@
     "fetchError": "فشل جلب أكواد الخصم",
     "saveError": "فشل حفظ كود الخصم",
     "saved": "تم حفظ كود الخصم",
-    "deleted": "تم إلغاء تفعيل الكود"
+    "deleted": "تم إلغاء تفعيل الكود",
+    "activeLabel": "نشط",
+    "inactiveLabel": "غير نشط",
+    "editDiscount": "تعديل كود الخصم",
+    "edit": "تعديل",
+    "validationError": "الكود والتواريخ وقيمة موجبة مطلوبة.",
+    "unlimitedHint": "(اتركه فارغًا للاستخدام الغير محدود)",
+    "previous": "السابق",
+    "next": "التالي",
+    "pageOf": "صفحة {{page}} من {{total}}"
   },
   "nav": {
+    "vaultTitle": "خزينة الأتيليه",
+    "vaultDesc": "عمليات الإدارة",
+    "ariaLabel": "أقسام الإدارة",
     "dashboard": "لوحة التحكم",
     "inventory": "المخزون",
     "fulfillment": "التنفيذ",
@@ -150,5 +177,61 @@
     "faqs": "الأسئلة الشائعة",
     "discounts": "الخصومات",
     "audit": "سجلات التدقيق"
+  },
+  "products": {
+    "vaultTitle": "خزينة الأتيليه والمخزون",
+    "pageTitle": "إدارة المنتجات والمخزون",
+    "pageDesc": "إدارة إصدارات الألغاز الحرفية ومخزون الورشة.",
+    "addNew": "إضافة إصدار لغز جديد",
+    "searchPlaceholder": "البحث بالعنوان، الفئة، أو المعرف...",
+    "statTotal": "إجمالي الإصدارات",
+    "statUnits": "الوحدات في الخزينة",
+    "statLowStock": "مخزون منخفض",
+    "statOutStock": "نفد المخزون",
+    "deletedSuccess": "تمت إزالة الإصدار",
+    "deleteFailed": "فشل في حذف المنتج",
+    "outOfStock": "نفد المخزون",
+    "title": "مخزون المنتجات",
+    "subtitle": "إدارة الكتالوج والتسعير ومستويات المخزون.",
+    "addEdition": "إصدار جديد",
+    "colEdition": "إصدار اللغز",
+    "colCategory": "الفئة",
+    "colPrice": "السعر",
+    "colStock": "المخزون",
+    "colState": "الحالة",
+    "colActions": "إجراءات",
+    "statusActive": "نشط",
+    "statusDraft": "مسودة",
+    "catJigsaw": "ألغاز جيغسو",
+    "cat3D": "معمارية ثلاثية الأبعاد",
+    "catWooden": "ألغاز خشبية",
+    "catMystery": "أتيليه الغموض",
+    "visibleStorefront": "مرئي في واجهة المتجر العامة",
+    "imgLabel": "صور المنتج (الحد الأقصى 10)",
+    "imgOptional": "(اختياري - يستبدل الحالي)",
+    "imgSelected": "تم تحديد {{count}} صورة/صور",
+    "cancel": "إلغاء",
+    "saveChanges": "حفظ التغييرات",
+    "createEdition": "إنشاء إصدار",
+    "editEdition": "تعديل الإصدار",
+    "deleteConfirm": "هل أنت متأكد أنك تريد حذف هذا الإصدار؟",
+    "formTitle": "العنوان *",
+    "formDesc": "الوصف *",
+    "formPrice": "السعر *",
+    "formStock": "مستوى المخزون *",
+    "editionUpdated": "تم تحديث الإصدار",
+    "editionCreated": "تم إنشاء الإصدار",
+    "editionUpdateError": "فشل تحديث المنتج",
+    "editionCreateError": "فشل إنشاء المنتج",
+    "imgTooMany": "يمكنك رفع 10 صور كحد أقصى.",
+    "imgTypeError": "يرجى اختيار ملفات صور فقط."
+  },
+  "inquiries": {
+    "empty": "لا توجد رسائل",
+    "emptyDesc": "لا توجد رسائل من العملاء تطابق العرض الحالي."
+  },
+  "orders": {
+    "empty": "لا توجد طلبات في السجل",
+    "emptyDesc": "في انتظار طلبات فنية جديدة."
   }
 }

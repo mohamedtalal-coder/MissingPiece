@@ -48,5 +48,6 @@
   "couldNotAddEdition": "Could not add edition",
   "signInToComplete": "Sign in to complete checkout",
   "codeNoLongerApplies": "Code no longer applies to this bag.",
-  "couldNotRecheckStock": "Could not re-check stock. Showing saved bag."
+  "couldNotRecheckStock": "Could not re-check stock. Showing saved bag.",
+  "codePlaceholder": "CODE"
 }

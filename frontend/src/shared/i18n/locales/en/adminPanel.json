@@ -49,7 +49,16 @@
     "markedAs": "Review marked as {{status}}",
     "previous": "Previous",
     "next": "Next",
-    "pageOf": "Page {{page}} of {{total}}"
+    "pageOf": "Page {{page}} of {{total}}",
+    "filterAll": "All statuses",
+    "filterPending": "Pending",
+    "filterApproved": "Approved",
+    "filterRejected": "Rejected",
+    "filterFlagged": "Flagged",
+    "statusPending": "Pending",
+    "statusApproved": "Approved",
+    "statusRejected": "Rejected",
+    "statusFlagged": "Flagged"
   },
   "faq": {
     "title": "FAQ Management",
@@ -80,7 +89,8 @@
     "deleteError": "Failed to delete FAQ",
     "saveError": "Failed to save FAQ",
     "deleted": "FAQ deleted",
-    "saved": "FAQ saved"
+    "saved": "FAQ saved",
+    "validationError": "All question and answer fields are required."
   },
   "users": {
     "title": "User Management",
@@ -114,7 +124,12 @@
     "roleUpdated": "User role updated",
     "previous": "Previous",
     "next": "Next",
-    "pageOf": "Page {{page}} of {{total}}"
+    "pageOf": "Page {{page}} of {{total}}",
+    "exportError": "Export failed",
+    "passwordPlaceholder": "Enter your password",
+    "stepUpDesc": "This action requires re-entering your admin password for security.",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
   },
   "discounts": {
     "title": "Discount Codes",
@@ -138,9 +153,21 @@
     "fetchError": "Failed to fetch discounts",
     "saveError": "Failed to save discount",
     "saved": "Discount saved",
-    "deleted": "Discount deactivated"
+    "deleted": "Discount deactivated",
+    "activeLabel": "Active",
+    "inactiveLabel": "Inactive",
+    "editDiscount": "Edit Discount",
+    "edit": "Edit",
+    "validationError": "Code, dates, and a positive value are required.",
+    "unlimitedHint": "(leave blank for unlimited)",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {{page}} of {{total}}"
   },
   "nav": {
+    "vaultTitle": "Atelier Vault",
+    "vaultDesc": "Admin operations",
+    "ariaLabel": "Admin sections",
     "dashboard": "Dashboard",
     "inventory": "Inventory",
     "fulfillment": "Fulfillment",
@@ -150,5 +177,61 @@
     "faqs": "FAQs",
     "discounts": "Discounts",
     "audit": "Audit Logs"
+  },
+  "products": {
+    "vaultTitle": "Atelier Vault & Stock",
+    "pageTitle": "Product Management & Inventory",
+    "pageDesc": "Manage artisan puzzle editions and workshop inventory.",
+    "addNew": "Add New Puzzle Edition",
+    "searchPlaceholder": "Search by title, category, or id…",
+    "statTotal": "Total Editions",
+    "statUnits": "Units in Vault",
+    "statLowStock": "Low Stock",
+    "statOutStock": "Out of Stock",
+    "deletedSuccess": "Edition removed",
+    "deleteFailed": "Failed to delete product",
+    "outOfStock": "Out of stock",
+    "title": "Product Inventory",
+    "subtitle": "Manage catalog, pricing, and stock levels.",
+    "addEdition": "New Edition",
+    "colEdition": "Puzzle Edition",
+    "colCategory": "Category",
+    "colPrice": "Price",
+    "colStock": "Stock",
+    "colState": "State",
+    "colActions": "Actions",
+    "statusActive": "Active",
+    "statusDraft": "Draft",
+    "catJigsaw": "Jigsaw Puzzles",
+    "cat3D": "3D Architectural",
+    "catWooden": "Wooden Puzzles",
+    "catMystery": "Mystery Atelier",
+    "visibleStorefront": "Visible in public storefront",
+    "imgLabel": "Product Images (Max 10)",
+    "imgOptional": "(Optional - overrides existing)",
+    "imgSelected": "{{count}} image(s) selected",
+    "cancel": "Cancel",
+    "saveChanges": "Save Changes",
+    "createEdition": "Create Edition",
+    "editEdition": "Edit Edition",
+    "deleteConfirm": "Are you sure you want to delete this edition?",
+    "formTitle": "Title *",
+    "formDesc": "Description *",
+    "formPrice": "Price *",
+    "formStock": "Stock Level *",
+    "editionUpdated": "Edition updated",
+    "editionCreated": "Edition created",
+    "editionUpdateError": "Failed to update product",
+    "editionCreateError": "Failed to create product",
+    "imgTooMany": "You can upload up to 10 images.",
+    "imgTypeError": "Please select image files only."
+  },
+  "inquiries": {
+    "empty": "No Correspondence",
+    "emptyDesc": "No customer dispatches match the current ledger view."
+  },
+  "orders": {
+    "empty": "No commissions in the ledger",
+    "emptyDesc": "Waiting for new masterworks to be commissioned."
   }
 }

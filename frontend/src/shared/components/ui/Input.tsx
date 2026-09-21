@@ -7,11 +7,20 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement |
   label?: string;
   multiline?: boolean;
   rows?: number;
+  inputSize?: 'sm' | 'md' | 'lg';
 }
 
 export const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
-  ({ icon, error, label, multiline, rows = 3, className = '', id, ...props }, ref) => {
+  ({ icon, error, label, multiline, rows = 3, inputSize = 'sm', className = '', id, ...props }, ref) => {
     const inputId = id || React.useId();
+    
+    const sizeClasses = {
+      sm: 'py-space-xs font-body-sm text-body-sm',
+      md: 'py-2 font-body-md text-body-md',
+      lg: 'py-3 text-base',
+    };
+    
+    const currentSize = sizeClasses[inputSize] || sizeClasses.sm;
     
     return (
       <div className="w-full flex flex-col gap-1 text-left">
@@ -37,7 +46,8 @@ export const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputPro
               rows={rows}
               className={`
                 w-full bg-surface-container-lowest 
-                py-space-xs rounded font-body-sm text-body-sm text-on-surface 
+                rounded text-on-surface 
+                ${currentSize}
                 placeholder:text-on-surface-variant 
                 focus:outline-none focus:bg-surface-bright focus:ring-1 focus:ring-primary shadow-sm
                 px-space-md custom-scrollbar resize-y
@@ -52,7 +62,8 @@ export const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputPro
               ref={ref as React.ForwardedRef<HTMLInputElement>}
               className={`
                 w-full bg-surface-container-lowest 
-                py-space-xs rounded font-body-sm text-body-sm text-on-surface 
+                rounded text-on-surface 
+                ${currentSize}
                 placeholder:text-on-surface-variant 
                 focus:outline-none focus:bg-surface-bright focus:ring-1 focus:ring-primary shadow-sm
                 ${icon ? 'ps-10 pe-space-md' : 'px-space-md'}

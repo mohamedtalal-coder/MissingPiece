@@ -123,7 +123,7 @@ export function AdminUsersPage() {
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      toast.showToast({ message: 'Export failed', type: 'error' });
+      toast.showToast({ message: us.exportError || 'Export failed', type: 'error' });
     }
   };
 
@@ -248,23 +248,23 @@ export function AdminUsersPage() {
           <div className="bg-surface rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6 space-y-4">
             <h2 className="font-headline-md text-on-surface">{us.confirmPassword}</h2>
             <p className="text-sm text-on-surface-variant">
-              This action requires re-entering your admin password for security.
+              {us.stepUpDesc || 'This action requires re-entering your admin password for security.'}
             </p>
             <input
               type="password"
               value={stepUpPassword}
               onChange={(e) => setStepUpPassword(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && stepUpPassword) executeStepUp(); }}
-              placeholder="Enter your password"
+              placeholder={us.passwordPlaceholder || 'Enter your password'}
               className="w-full border border-outline-variant rounded-lg px-3 py-2 bg-surface-container-low text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40"
               autoFocus
             />
             <div className="flex justify-end gap-3">
               <Button variant="secondary" onClick={() => setStepUpOpen(false)} disabled={stepUpLoading}>
-                {us.all === 'All' ? 'Cancel' : 'إلغاء'}
+                {us.cancel || 'Cancel'}
               </Button>
               <Button onClick={executeStepUp} disabled={!stepUpPassword || stepUpLoading}>
-                {stepUpLoading ? '…' : 'Confirm'}
+                {stepUpLoading ? '…' : us.confirm || 'Confirm'}
               </Button>
             </div>
           </div>

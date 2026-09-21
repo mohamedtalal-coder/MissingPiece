@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { useLanguage } from '../../context/LanguageContext';
+
 interface SpinnerProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
   color?: 'primary' | 'secondary' | 'surface' | 'current';
@@ -11,6 +13,7 @@ export const Spinner: React.FC<SpinnerProps> = ({
   color = 'primary',
   className = ''
 }) => {
+  const { t } = useLanguage() as any;
   const sizeClasses = {
     sm: 'w-4 h-4 border-2',
     md: 'w-6 h-6 border-2',
@@ -29,9 +32,9 @@ export const Spinner: React.FC<SpinnerProps> = ({
     <div 
       className={`inline-block rounded-full animate-spin ${sizeClasses[size]} ${colorClasses[color]} ${className}`}
       role="status"
-      aria-label="loading"
+      aria-label={t?.common?.loadingDesc || "loading"}
     >
-      <span className="sr-only">Loading...</span>
+      <span className="sr-only">{t?.common?.loading || "Loading..."}</span>
     </div>
   );
 };

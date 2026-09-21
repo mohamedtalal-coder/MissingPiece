@@ -52,7 +52,7 @@ export const AdminProductsPage: React.FC = () => {
       setProducts(result.items);
       setError(null);
     } catch {
-      setError('Failed to fetch products');
+      setError(t?.adminProducts?.fetchError || 'Failed to fetch products');
     } finally {
       setIsLoading(false);
     }
@@ -110,7 +110,7 @@ export const AdminProductsPage: React.FC = () => {
     const selectedFiles = Array.from(e.target.files || []);
 
     if (selectedFiles.length > 10) {
-      setFormError('You can upload up to 10 images.');
+      setFormError(t?.adminPanel?.products?.imgTooMany || 'You can upload up to 10 images.');
       setImages([]);
       return;
     }
@@ -120,7 +120,7 @@ export const AdminProductsPage: React.FC = () => {
     );
 
     if (invalidFile) {
-      setFormError('Please select image files only.');
+      setFormError(t?.adminPanel?.products?.imgTypeError || 'Please select image files only.');
       setImages([]);
       return;
     }
@@ -141,17 +141,19 @@ export const AdminProductsPage: React.FC = () => {
       if (editingProductId) {
         const updated = await productsApi.update(editingProductId, input);
         setProducts((prev) => prev.map((p) => (p._id === editingProductId ? updated : p)));
-        showToast({ message: 'Edition updated', type: 'success' });
+        showToast({ message: t?.adminPanel?.products?.editionUpdated || 'Edition updated', type: 'success' });
       } else {
         const created = await productsApi.create(input);
         setProducts((prev) => [created, ...prev]);
-        showToast({ message: 'Edition created', type: 'success' });
+        showToast({ message: t?.adminPanel?.products?.editionCreated || 'Edition created', type: 'success' });
       }
       setShowModal(false);
       resetForm();
     } catch {
       showToast({
-        message: `Failed to ${editingProductId ? 'update' : 'create'} product`,
+        message: editingProductId
+          ? (t?.adminPanel?.products?.editionUpdateError || 'Failed to update product')
+          : (t?.adminPanel?.products?.editionCreateError || 'Failed to create product'),
         type: 'error',
       });
     } finally {
@@ -190,14 +192,14 @@ export const AdminProductsPage: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm(t.adminProducts?.deleteConfirm || 'Delete this product?')) return;
+    if (!window.confirm(t.adminPanel?.products?.deleteConfirm || 'Delete this product?')) return;
     setPendingDeleteId(id);
     try {
       await productsApi.delete(id);
       setProducts((prev) => prev.filter((p) => p._id !== id));
-      showToast({ message: 'Edition removed', type: 'info' });
+      showToast({ message: t.adminPanel?.products?.deletedSuccess || 'Edition removed', type: 'info' });
     } catch {
-      showToast({ message: 'Failed to delete product', type: 'error' });
+      showToast({ message: t.adminPanel?.products?.deleteFailed || 'Failed to delete product', type: 'error' });
     } finally {
       setPendingDeleteId(null);
     }
@@ -220,17 +222,17 @@ export const AdminProductsPage: React.FC = () => {
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8">
         <div>
           <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest">
-            Atelier Vault &amp; Stock
+            {t.adminPanel?.products?.vaultTitle || 'Atelier Vault & Stock'}
           </span>
           <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight mt-1">
-            Product Management &amp; Inventory
+            {t.adminPanel?.products?.pageTitle || 'Product Management & Inventory'}
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-1.5 max-w-2xl">
-            Manage artisan puzzle editions and workshop inventory.
+            {t.adminPanel?.products?.pageDesc || 'Manage artisan puzzle editions and workshop inventory.'}
           </p>
         </div>
         <Button onClick={handleAddNewClick} icon="add">
-          Add New Puzzle Edition
+          {t.adminPanel?.products?.addNew || 'Add New Puzzle Edition'}
         </Button>
       </div>
 
@@ -245,10 +247,10 @@ export const AdminProductsPage: React.FC = () => {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
-          { label: 'Total Editions', value: products.length },
-          { label: 'Units in Vault', value: totalStock },
-          { label: 'Low Stock', value: lowStock, danger: true },
-          { label: 'Out of Stock', value: outOfStock },
+          { label: t.adminPanel?.products?.statTotal || 'Total Editions', value: products.length },
+          { label: t.adminPanel?.products?.statUnits || 'Units in Vault', value: totalStock },
+          { label: t.adminPanel?.products?.statLowStock || 'Low Stock', value: lowStock, danger: true },
+          { label: t.adminPanel?.products?.statOutStock || 'Out of Stock', value: outOfStock },
         ].map((stat) => (
           <div
             key={stat.label}
@@ -268,14 +270,14 @@ export const AdminProductsPage: React.FC = () => {
         <div className="relative max-w-md">
           <Icon name="search" className="absolute start-3.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none" size={18} />
           <label htmlFor="admin-product-search" className="sr-only">
-            Search products
+            {t.adminPanel?.products?.searchPlaceholder || 'Search products'}
           </label>
           <input
             id="admin-product-search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-surface-container text-on-surface placeholder:text-outline text-sm ps-10 pe-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-primary/40"
-            placeholder="Search by title, category, or id…"
+            placeholder={t.adminPanel?.products?.searchPlaceholder || 'Search by title, category, or id…'}
             type="search"
           />
         </div>
@@ -289,12 +291,12 @@ export const AdminProductsPage: React.FC = () => {
             <table className="w-full text-left text-sm border-collapse">
               <thead>
                 <tr className="bg-surface-container text-on-surface-variant font-label-caps text-label-caps uppercase tracking-wider border-b border-outline-variant/20">
-                  <th className="py-3.5 px-4">Puzzle Edition</th>
-                  <th className="py-3.5 px-4">Category</th>
-                  <th className="py-3.5 px-4">Price</th>
-                  <th className="py-3.5 px-4">Stock</th>
-                  <th className="py-3.5 px-4">State</th>
-                  <th className="py-3.5 pe-6 ps-4 text-right">Actions</th>
+                  <th className="py-3.5 px-4">{t.adminPanel?.products?.colEdition || 'Puzzle Edition'}</th>
+                  <th className="py-3.5 px-4">{t.adminPanel?.products?.colCategory || 'Category'}</th>
+                  <th className="py-3.5 px-4">{t.adminPanel?.products?.colPrice || 'Price'}</th>
+                  <th className="py-3.5 px-4">{t.adminPanel?.products?.colStock || 'Stock'}</th>
+                  <th className="py-3.5 px-4">{t.adminPanel?.products?.colState || 'State'}</th>
+                  <th className="py-3.5 pe-6 ps-4 text-right">{t.adminPanel?.products?.colActions || 'Actions'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant/20">
@@ -354,7 +356,7 @@ export const AdminProductsPage: React.FC = () => {
                             variant="ghost"
                             size="sm"
                             icon="edit"
-                            aria-label="Edit"
+                            aria-label={t?.common?.editAction || "Edit"}
                           />
                           <Button
                             onClick={() => handleDelete(product._id)}
@@ -363,7 +365,7 @@ export const AdminProductsPage: React.FC = () => {
                             icon="delete"
                             isLoading={pendingDeleteId === product._id}
                             className="text-error"
-                            aria-label="Delete"
+                            aria-label={t?.common?.deleteAction || "Delete"}
                           />
                         </div>
                       </td>
@@ -477,7 +479,7 @@ export const AdminProductsPage: React.FC = () => {
               </div>
               <div>
                 <label className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5" htmlFor="ap-cat">
-                  Category *
+                  {t.adminPanel?.products?.colCategory || 'Category'} *
                 </label>
                 <select
                   id="ap-cat"
@@ -485,15 +487,15 @@ export const AdminProductsPage: React.FC = () => {
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full bg-surface-container text-on-surface text-sm px-3.5 py-2.5 rounded focus:outline-none focus:ring-2 focus:ring-primary/40"
                 >
-                  <option value="Jigsaw Puzzles">Jigsaw Puzzles</option>
-                  <option value="3D Puzzles">3D Architectural</option>
-                  <option value="Wooden Puzzles">Wooden Puzzles</option>
-                  <option value="Mystery Puzzles">Mystery Atelier</option>
+                  <option value="Jigsaw Puzzles">{t.adminPanel?.products?.catJigsaw || 'Jigsaw Puzzles'}</option>
+                  <option value="3D Puzzles">{t.adminPanel?.products?.cat3D || '3D Architectural'}</option>
+                  <option value="Wooden Puzzles">{t.adminPanel?.products?.catWooden || 'Wooden Puzzles'}</option>
+                  <option value="Mystery Puzzles">{t.adminPanel?.products?.catMystery || 'Mystery Atelier'}</option>
                 </select>
               </div>
               <div>
                 <label className="block font-label-caps text-label-caps uppercase text-on-surface-variant mb-1.5" htmlFor="ap-img">
-                  Product Images (Max 10) {editingProductId ? '(Optional - overrides existing)' : '*'}
+                  {t.adminPanel?.products?.imgLabel || 'Product Images (Max 10)'} {editingProductId ? (t.adminPanel?.products?.imgOptional || '(Optional - overrides existing)') : '*'}
                 </label>
                 <input
                   id="ap-img"
@@ -505,7 +507,7 @@ export const AdminProductsPage: React.FC = () => {
                 />
                 {images.length > 0 && (
                   <p className="text-xs text-on-surface-variant mt-2">
-                    {images.length} image(s) selected
+                    {(t.adminPanel?.products?.imgSelected || '{{count}} image(s) selected').replace('{{count}}', images.length.toString())}
                   </p>
                 )}
               </div>
@@ -516,7 +518,7 @@ export const AdminProductsPage: React.FC = () => {
                   onChange={(e) => setIsActive(e.target.checked)}
                   className="w-5 h-5 rounded accent-primary"
                 />
-                <span className="text-sm text-on-surface-variant">Visible in public storefront</span>
+                <span className="text-sm text-on-surface-variant">{t.adminPanel?.products?.visibleStorefront || 'Visible in public storefront'}</span>
               </label>
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-outline-variant/20">
                 <Button
@@ -528,10 +530,10 @@ export const AdminProductsPage: React.FC = () => {
                   variant="ghost"
                   disabled={isSubmitting}
                 >
-                  Cancel
+                  {t.adminPanel?.products?.cancel || 'Cancel'}
                 </Button>
                 <Button type="submit" disabled={isSubmitting} isLoading={isSubmitting}>
-                  {editingProductId ? 'Save Changes' : 'Create Edition'}
+                  {editingProductId ? (t.adminPanel?.products?.saveChanges || 'Save Changes') : (t.adminPanel?.products?.createEdition || 'Create Edition')}
                 </Button>
               </div>
             </form>

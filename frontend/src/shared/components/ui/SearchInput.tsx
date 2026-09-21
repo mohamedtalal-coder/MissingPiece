@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Icon } from './Icon';
+import { useLanguage } from '../../context/LanguageContext';
 import { useDebounce } from '../../hooks/useDebounce';
 
 interface SearchInputProps {
@@ -19,6 +20,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   className = '',
   autoFocus = false,
 }) => {
+  const { t } = useLanguage() as any;
   const [localValue, setLocalValue] = useState(value);
   const debouncedValue = useDebounce(localValue, debounceMs);
   const initialMount = useRef(true);
@@ -64,7 +66,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
         <button
           onClick={handleClear}
           className="absolute end-space-sm top-1/2 -translate-y-1/2 p-1.5 text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
-          aria-label="Clear search"
+          aria-label={t?.common?.clearSearch || "Clear search"}
         >
           <Icon name="close" size={16} />
         </button>

@@ -33,13 +33,17 @@ export function errorHandler(
   void _next;
   // Zod validation errors -> 400, with field-level detail
   if (err instanceof ZodError) {
+    const fieldErrors = err.issues.map((issue) => ({
+      path: issue.path.join("."),
+      message: issue.message,
+    }));
+    // Use the first field error as the top-level message so any component
+    // that reads err.response.data.message still gets a useful string.
+    const firstMessage = fieldErrors[0]?.message ?? "Validation failed";
     res.status(400).json({
       success: false,
-      message: "Validation failed",
-      errors: err.issues.map((issue) => ({
-        path: issue.path.join("."),
-        message: issue.message,
-      })),
+      message: firstMessage,
+      errors: fieldErrors,
     });
     return;
   }

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Icon } from './Icon';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface ModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export const Modal: React.FC<ModalProps> = ({
   maxWidth = 'md',
   hideCloseButton = false,
 }) => {
+  const { t } = useLanguage() as any;
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -80,7 +82,7 @@ export const Modal: React.FC<ModalProps> = ({
               <button
                 onClick={onClose}
                 className="p-2 -me-2 text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container transition-colors"
-                aria-label="Close modal"
+                aria-label={t?.common?.closeModal || "Close modal"}
               >
                 <Icon name="close" size={20} />
               </button>
@@ -92,7 +94,7 @@ export const Modal: React.FC<ModalProps> = ({
           <button
             onClick={onClose}
             className="absolute top-4 end-4 z-10 p-2 text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container bg-surface/50 backdrop-blur transition-colors"
-            aria-label="Close modal"
+            aria-label={t?.common?.closeModal || "Close modal"}
           >
             <Icon name="close" size={20} />
           </button>

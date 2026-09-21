@@ -62,11 +62,11 @@ export function AdminReviewsPage() {
           onChange={(e) => { setStatusFilter(e.target.value as StatusFilter); setPage(1); }}
           className="border border-outline-variant rounded-lg px-3 py-2 bg-surface-container-low text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40 text-sm"
         >
-          <option value="">All statuses</option>
-          <option value="pending">Pending</option>
-          <option value="approved">Approved</option>
-          <option value="rejected">Rejected</option>
-          <option value="flagged">Flagged</option>
+          <option value="">{rv.filterAll}</option>
+          <option value="pending">{rv.filterPending}</option>
+          <option value="approved">{rv.filterApproved}</option>
+          <option value="rejected">{rv.filterRejected}</option>
+          <option value="flagged">{rv.filterFlagged}</option>
         </select>
       </div>
 
@@ -101,7 +101,7 @@ export function AdminReviewsPage() {
                           review.status === 'flagged' ? 'bg-tertiary-container text-on-tertiary-container' :
                           'bg-surface-variant text-on-surface-variant'
                         }`}>
-                          {review.status}
+                        {rv[`status${review.status.charAt(0).toUpperCase()}${review.status.slice(1)}` as keyof typeof rv] as string || review.status}
                         </span>
                       </td>
                       <td className="py-4 px-4 text-end">

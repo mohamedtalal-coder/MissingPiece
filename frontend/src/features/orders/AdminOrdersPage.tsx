@@ -20,7 +20,7 @@ function TableSkeleton() {
 
 export function AdminOrdersPage() {
   const toast = useToast();
-  const { formatDate } = useLanguage();
+  const { t, formatDate } = useLanguage() as any;
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,7 +38,7 @@ export function AdminOrdersPage() {
         setTotalPages(data.totalPages);
       } catch (err) {
         console.error('Failed to fetch orders', err);
-        toast.showToast({ message: 'Failed to fetch orders', type: 'error' });
+        toast.showToast({ message: t?.adminOrders?.fetchError || 'Failed to fetch orders', type: 'error' });
       } finally {
         setLoading(false);
       }
@@ -55,7 +55,7 @@ export function AdminOrdersPage() {
     setPendingId(orderId);
     try {
       await ordersApi.updateOrderStatus(orderId, newStatus);
-      toast.showToast({ message: `Order updated to ${newStatus}`, type: 'success' });
+      toast.showToast({ message: `${t?.adminOrders?.statusUpdated || 'Order status updated to'} ${newStatus}`, type: 'success' });
       setOrders((prev) =>
         prev.map((order) =>
           order._id === orderId ? { ...order, status: newStatus as Order['status'] } : order,
@@ -63,7 +63,7 @@ export function AdminOrdersPage() {
       );
     } catch (err) {
       console.error('Failed to update status', err);
-      toast.showToast({ message: 'Failed to update status', type: 'error' });
+      toast.showToast({ message: t?.adminOrders?.updateError || 'Failed to update status', type: 'error' });
     } finally {
       setPendingId(null);
     }
@@ -76,17 +76,17 @@ export function AdminOrdersPage() {
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8">
         <div>
           <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest">
-            Dispatch &amp; Fulfillment
+            {t?.adminOrders?.dispatchFulfillment || 'Dispatch & Fulfillment'}
           </span>
           <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight mt-1">
-            Order Management
+            {t?.adminOrders?.orderManagement || 'Order Management'}
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-1.5 max-w-2xl">
-            Track commissions, process shipments, and manage white-glove deliveries.
+            {t?.adminOrders?.trackCommissions || 'Track commissions, process shipments, and manage white-glove deliveries.'}
           </p>
         </div>
         <Button onClick={() => fetchOrders(page)} variant="secondary" icon="refresh" disabled={loading}>
-          Sync Ledgers
+          {t?.adminOrders?.syncLedgers || 'Sync Ledgers'}
         </Button>
       </div>
 
@@ -99,25 +99,25 @@ export function AdminOrdersPage() {
               <thead>
                 <tr className="bg-surface-container text-on-surface-variant font-label-caps text-label-caps uppercase tracking-wider border-b border-outline-variant/20">
                   <th className="py-3.5 px-4" scope="col">
-                    Commission ID
+                    {t?.adminOrders?.commissionId || 'Commission ID'}
                   </th>
                   <th className="py-3.5 px-4" scope="col">
-                    Collector
+                    {t?.adminOrders?.customer || 'Collector'}
                   </th>
                   <th className="py-3.5 px-4" scope="col">
-                    Date
+                    {t?.adminOrders?.date || 'Date'}
                   </th>
                   <th className="py-3.5 px-4" scope="col">
-                    Destination
+                    {t?.adminOrders?.destination || 'Destination'}
                   </th>
                   <th className="py-3.5 px-4" scope="col">
-                    Total Value
+                    {t?.adminOrders?.total || 'Total Value'}
                   </th>
                   <th className="py-3.5 px-4" scope="col">
-                    Dispatch Status
+                    {t?.adminOrders?.dispatchStatus || 'Dispatch Status'}
                   </th>
                   <th className="py-3.5 pe-6 ps-4 text-right" scope="col">
-                    Actions
+                    {t?.adminOrders?.actions || 'Actions'}
                   </th>
                 </tr>
               </thead>
@@ -128,7 +128,7 @@ export function AdminOrdersPage() {
                       {order._id.substring(order._id.length - 8).toUpperCase()}
                     </td>
                     <td className="py-4 px-4 font-medium text-on-surface">
-                      {(order as Order & { user?: { name?: string } }).user?.name || 'Unknown'}
+                      {(order as Order & { user?: { name?: string } }).user?.name || t?.adminOrders?.unknown || 'Unknown'}
                     </td>
                     <td className="py-4 px-4 text-on-surface-variant">
                       {formatDate(order.createdAt)}
@@ -152,7 +152,7 @@ export function AdminOrdersPage() {
                             isLoading={pendingId === order._id}
                             disabled={!!pendingId}
                           >
-                            Process
+                            {t?.adminOrders?.process || 'Process'}
                           </Button>
                         )}
                         {order.status === 'shipped' && (
@@ -162,7 +162,7 @@ export function AdminOrdersPage() {
                             isLoading={pendingId === order._id}
                             disabled={!!pendingId}
                           >
-                            Deliver
+                            {t?.adminOrders?.deliver || 'Deliver'}
                           </Button>
                         )}
                       </div>
@@ -175,8 +175,8 @@ export function AdminOrdersPage() {
             <div className="py-20 text-center bg-surface-container-lowest/30">
               <EmptyState
                 icon="package_2"
-                title="No commissions in the ledger"
-                description="There are currently no orders to display."
+                title={t?.adminPanel?.orders?.empty || "No commissions in the ledger"}
+                description={t?.adminPanel?.orders?.emptyDesc || "There are currently no orders to display."}
               />
             </div>
           )}

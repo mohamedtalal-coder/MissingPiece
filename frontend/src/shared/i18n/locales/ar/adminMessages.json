@@ -1,6 +1,24 @@
 {
-  "title": "رسائل العملاء",
-  "subtitle": "راجع الاستفسارات المرسلة من خلال نموذج التواصل",
+  "clientRelations": "علاقات العملاء",
+  "pageTitle": "رسائل العملاء وطلبات القطع المفقودة",
+  "pageSubtitle": "مراجعة استفسارات العملاء وطلبات التصميم الخاص ومطالبات استبدال القطع.",
+  "filterAll": "الكل",
+  "filterUnread": "غير مقروءة",
+  "filterRead": "مقروءة",
+  "filterResolved": "محلولة",
+  "retry": "إعادة المحاولة",
+  "unspecifiedSubject": "بدون عنوان",
+  "from": "من:",
+  "markRead": "تحديد كمقروءة",
+  "archiveResolve": "أرشفة وحل",
+  "reopenDispatch": "إعادة فتح الطلب",
+  "markUnread": "تحديد كغير مقروءة",
+  "previous": "السابق",
+  "next": "التالي",
+  "pageOf": "صفحة {{page}} من {{total}}",
   "noMessages": "لا توجد رسائل",
-  "noMessagesDescription": "لا توجد استفسارات جديدة من العملاء."
+  "noMessagesDescription": "ليس لديك أي استفسارات جديدة من العملاء.",
+  "fetchError": "فشل تحميل الرسائل",
+  "updateError": "فشل تحديث الرسالة",
+  "statusUpdated": "تم وضع علامة كـ {{status}}"
 }

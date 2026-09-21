@@ -54,6 +54,7 @@ const userSchema = new Schema(
         state: { type: String, required: true, trim: true },
         zipCode: { type: String, required: true, trim: true },
         country: { type: String, required: true, trim: true },
+        deletedAt: { type: Date, default: null },
       },
     ],
 

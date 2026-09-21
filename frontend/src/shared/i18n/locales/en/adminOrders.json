@@ -12,5 +12,15 @@
   "process": "Process",
   "deliver": "Deliver",
   "noOrders": "No orders placed yet.",
-  "statusUpdated": "status updated to"
+  "statusUpdated": "status updated to",
+  "dispatchFulfillment": "Dispatch & Fulfillment",
+  "orderManagement": "Order Management",
+  "trackCommissions": "Track commissions, process shipments, and manage white-glove deliveries.",
+  "syncLedgers": "Sync Ledgers",
+  "commissionId": "Commission ID",
+  "destination": "Destination",
+  "dispatchStatus": "Dispatch Status",
+  "unknown": "Unknown",
+  "fetchError": "Failed to fetch orders",
+  "updateError": "Failed to update status"
 }

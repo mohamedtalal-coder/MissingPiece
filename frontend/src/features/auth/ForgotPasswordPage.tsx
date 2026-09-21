@@ -45,7 +45,7 @@ export function ForgotPasswordPage() {
     setLoading(true);
 
     if (otp.length !== 6) {
-      setError('Please enter the 6-digit verification code.');
+      setError(t.auth?.verify?.errorLength || 'Please enter the 6-digit verification code.');
       setLoading(false);
       return;
     }
@@ -100,7 +100,7 @@ export function ForgotPasswordPage() {
           <p className="font-body-sm text-body-sm text-on-surface-variant mt-1.5">
             {step === 1
               ? (t.auth?.resetSubtitle1 || 'Enter your email to recover your account')
-              : 'Enter the code sent to your email and your new password'}
+              : (t.auth?.resetSubtitle2Code || 'Enter the code sent to your email and your new password')}
           </p>
         </div>
 
@@ -129,14 +129,15 @@ export function ForgotPasswordPage() {
                 type="email"
                 label={t.auth?.email || "Email Address"}
                 icon="mail"
+                inputSize="lg"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder={t.auth?.emailPlaceholder || "you@example.com"}
                 autoComplete="email"
               />
               <Button type="submit" fullWidth disabled={loading}>
-                {loading ? 'Sending Code...' : (t.auth?.verifyEmail || 'Verify Email')}
+                {loading ? (t.auth?.sendingCode || 'Sending Code...') : (t.auth?.verifyEmail || 'Verify Email')}
               </Button>
             </form>
           ) : (
@@ -145,17 +146,19 @@ export function ForgotPasswordPage() {
                 type="text"
                 inputMode="numeric"
                 maxLength={6}
-                label="Verification Code"
+                label={t.auth?.verify?.inputLabel || "Verification Code"}
                 icon="password"
+                inputSize="lg"
                 required
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                placeholder="Enter 6-digit code"
+                placeholder={t.auth?.verify?.inputPlaceholder || "Enter 6-digit code"}
               />
               <Input
                 type="password"
                 label={t.auth?.newPassword || "New Password"}
                 icon="lock"
+                inputSize="lg"
                 required
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
@@ -163,7 +166,7 @@ export function ForgotPasswordPage() {
                 autoComplete="new-password"
               />
               <Button type="submit" fullWidth disabled={loading}>
-                {loading ? 'Updating...' : (t.auth?.updatePassword || 'Update Password')}
+                {loading ? (t.auth?.updating || 'Updating...') : (t.auth?.updatePassword || 'Update Password')}
               </Button>
             </form>
           )}
