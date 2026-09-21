@@ -42,8 +42,10 @@ export async function registerUser(
 
   // Registration should still succeed even if the email provider hiccups —
   // the user can always request a new code via resend-verification.
+  let emailSent = false;
   try {
     await sendEmailVerificationCode(user.email, otp);
+    emailSent = true;
   } catch (err) {
     console.error("Failed to send verification email:", err);
   }
@@ -59,6 +61,7 @@ export async function registerUser(
       isEmailVerified: user.isEmailVerified,
     },
     token,
+    emailSent,
   };
 }
 

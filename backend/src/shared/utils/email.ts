@@ -1,19 +1,20 @@
 import nodemailer from "nodemailer";
 
-// ---------------------------------------------------------------------------
-// Transporter — Gmail SMTP with App Password (no domain needed)
-// ---------------------------------------------------------------------------
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env["GMAIL_USER"],
-    pass: process.env["GMAIL_APP_PASSWORD"],
-  },
-});
+function getGmailCredentials(): { user: string; pass: string } | null {
+  const user = process.env["GMAIL_USER"]?.trim();
+  // App passwords are often pasted with spaces — strip them.
+  const pass = process.env["GMAIL_APP_PASSWORD"]?.replace(/\s+/g, "");
+  if (!user || !pass) return null;
+  return { user, pass };
+}
 
-// ---------------------------------------------------------------------------
-// Dev fallback: if credentials are missing, log OTP to console
-// ---------------------------------------------------------------------------
+function createTransporter(user: string, pass: string) {
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: { user, pass },
+  });
+}
+
 function logDevFallback(to: string, subject: string, otp: string) {
   console.warn(`
 ╔══════════════════════════════════════════════════════════╗
@@ -35,12 +36,13 @@ async function sendEmail({
   to: string;
   subject: string;
   otp: string;
-}) {
-  const gmailUser = process.env["GMAIL_USER"];
-  const gmailPass = process.env["GMAIL_APP_PASSWORD"];
+}): Promise<void> {
+  const creds = getGmailCredentials();
 
-  // No credentials configured — use console fallback in dev, throw in prod
-  if (!gmailUser || !gmailPass) {
+  if (!creds) {
+    console.error(
+      `[email] Missing GMAIL_USER / GMAIL_APP_PASSWORD (NODE_ENV=${process.env["NODE_ENV"] ?? "undefined"})`
+    );
     if (process.env["NODE_ENV"] === "production") {
       throw new Error("Email credentials not configured");
     }
@@ -48,11 +50,12 @@ async function sendEmail({
     return;
   }
 
-  await transporter.sendMail({
-    from: `"MissingPiece" <${gmailUser}>`,
-    to,
-    subject,
-    html: `
+  try {
+    const info = await createTransporter(creds.user, creds.pass).sendMail({
+      from: `"MissingPiece" <${creds.user}>`,
+      to,
+      subject,
+      html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: auto; padding: 32px;">
         <h2 style="color: #1a1a1a;">${subject}</h2>
         <p style="color: #555;">Use the code below. It expires in <strong>10 minutes</strong>.</p>
@@ -70,7 +73,16 @@ async function sendEmail({
         <p style="color: #999; font-size: 12px;">If you didn't request this, ignore this email.</p>
       </div>
     `,
-  });
+    });
+
+    console.log(
+      `[email] Sent "${subject}" to ${to} (messageId=${info.messageId ?? "n/a"}, response=${info.response ?? "n/a"})`
+    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`[email] Failed to send "${subject}" to ${to}: ${message}`);
+    throw err;
+  }
 }
 
 export async function sendPasswordResetEmail(email: string, otp: string) {
